@@ -1,8 +1,7 @@
 import RPi.GPIO as GPIO
 from time import sleep
 import math
-import pygame
-from pygame.locals import *
+
 import threading
 
 
@@ -177,40 +176,11 @@ if __name__ == "__main__":
     spinner = MotorSpinner([motor1, motor2])
     spinner.rpm = 20
 
-    spinner.startSpinnerThread()
+    # spinner.startSpinnerThread()
 
-    pygame.init()
-    screen = pygame.display.set_mode((100, 100))
-
-    done = False
-    up = False
-    down = False
-    left = False
-    right = False
-
-    while not done:
-        for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_UP:
-                    up = True
-                elif event.key == pygame.K_DOWN:
-                    down = True
-                elif event.key == pygame.K_LEFT:
-                    left = True
-                elif event.key == pygame.K_RIGHT:
-                    right = True
-                elif event.key == pygame.K_q:
-                    done = True
-            elif event.type == pygame.KEYUP:
-                if event.key == pygame.K_UP:
-                    up = False
-                elif event.key == pygame.K_DOWN:
-                    down = False
-                elif event.key == pygame.K_LEFT:
-                    left = False
-                elif event.key == pygame.K_RIGHT:
-                    right = False
-
-        spinner.makeMove(up, down, left, right)
+    spinner.moveForward(100)
+    spinner.moveBackwards(100)
+    spinner.turnLeft(90)
+    spinner.turnRight(90)
 
     GPIO.cleanup()

@@ -8,15 +8,15 @@
 
 $(document).ready(function() {
     $("#inputControl").keydown(function(event) {
+        event.preventDefault();
+
     });
 
     $("#inputControl").keyup(function(event) {
+        event.preventDefault();
     });
 });
 
-function onInput() {
-    document.getElementById("demo").innerHTML = "Paragraph changed.";
-}
 </script>
 </head>
 
