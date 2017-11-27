@@ -5,17 +5,102 @@
     <title>Watney-1 Rover</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script>
+        var up = false;
+        var down = false;
+        var left = false;
+        var right = false;
+        
+        var lastBearing = -1;
+        
+        function sendKeys() {
+            var bearing = -1;
+            
+            if (up) {
+                if (left) {
+                    bearing = 135;
+                }
+                else if (right) {
+                    bearing = 45;
+                }
+                else {
+                    bearing = 90;
+                }
+            }
+            else if (down) {
+                if (left) {
+                    bearing = 225;
+                }
+                else if (right) {
+                    bearing = 315;
+                }
+                else {
+                    bearing = 270;
+                }
+            }
+            else if (left) {
+                bearing = 180;
+            }
+            else if (right) {
+                bearing = 0;
+            }
+            
+            if (lastBearing != bearing) {
+                lastBearing = bearing;
+                var bearingObj = {
+                    'bearing': bearing
+                };
+            
+                $.ajax({
+                      url:'/sendBearing',
+                      type:"POST",
+                      data:JSON.stringify(bearingObj),
+                      contentType:"application/json; charset=utf-8",
+                      dataType:"json"
+                });
+            }
+            
+            
+        }
+        
+        $(document).ready(function() {
+            $("#inputControl").keydown(function(event) {
+                event.preventDefault();
 
-$(document).ready(function() {
-    $("#inputControl").keydown(function(event) {
-        event.preventDefault();
+                if (event.keyCode == 38) {
+                    up = true;
+                }
+                else if (event.keyCode == 40) {
+                    down = true;
+                }
+                else if(event.keyCode == 37) {
+                    left = true;
+                }
+                else if(event.keyCode == 39) {
+                    right = true;
+                }
+                
+                sendKeys();
+            });
 
-    });
-
-    $("#inputControl").keyup(function(event) {
-        event.preventDefault();
-    });
-});
+            $("#inputControl").keyup(function(event) {
+                event.preventDefault();
+                
+                if (event.keyCode == 38) {
+                    up = false;
+                }
+                else if (event.keyCode == 40) {
+                    down = false;
+                }
+                else if(event.keyCode == 37) {
+                    left = false;
+                }
+                else if(event.keyCode == 39) {
+                    right = false;
+                }
+                
+                sendKeys();
+            });
+        });
 
 </script>
 </head>

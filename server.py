@@ -1,6 +1,9 @@
-from flask import Flask, send_file
+from flask import Flask, send_file, request
+import json
+from rover import Driver
 
 app = Flask(__name__)
+roverDriver = None
 
 
 @app.route("/")
@@ -8,5 +11,20 @@ def getPageHTML():
     return send_file("index.html")
 
 
+@app.route("/sendBearing", methods = ['POST'])
+def setBearing():
+    bearingObj = json.loads(request.data.decode("utf-8"))
+    newBearing = bearingObj['bearing']
+
+    if newBearing == -1:
+        roverDriver.stop()
+    else:
+        roverDriver.setBearing(newBearing)
+
+    return "OK"
+
+
 if __name__ == "__main__":
-    app.run(port=5000)
+    global roverDriver
+    roverDriver = Driver()
+    app.run(host='0.0.0.0', port=5000, debug=False)
