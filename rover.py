@@ -1,5 +1,3 @@
-import json
-import json
 import time
 from threading import Thread
 from time import sleep
@@ -9,17 +7,16 @@ import RPi.GPIO as GPIO
 
 class Motor:
 
-    def __init__(self, pins, reverse, timeRes, rpms):
+    def __init__(self, pins, reverse, timeRes, rpms, rampUpTimeMS):
         self.pins = pins
-        self.reverse = reverse
-
-        self.__setSequence()
+        self.runInReverse = reverse
 
         self.maxRPM = rpms
-        self.__set_rpm(self.maxRPM)
         self.bearing = -1
         self.timeRes = timeRes
-
+        self.currentBearing = -1
+        self.bearingSetTime = -1
+        self.rampUpTimeMS = rampUpTimeMS
         self.__initMotor()
 
     def __setSequence(self):
@@ -43,21 +40,15 @@ class Motor:
         realDegreePerStep = degreePerStep * gearRatio
         self.steps_per_rev = int(360 / realDegreePerStep)
 
-        if self.reverse:
+        if self.runInReverse:
             seq.reverse()
 
         self.sequence = seq
+        reverseSequence = list(seq)
+        reverseSequence.reverse()
+        self.reverseSequence = reverseSequence
 
         return seq
-
-    def __set_rpm(self, rpm):
-        """Set the turn speed in RPM."""
-        self._rpm = rpm
-        if rpm > 0:
-            # T is the amount of time to stop between signals
-            self._T = (60.0 / rpm) / self.steps_per_rev
-        else:
-            self._T = -1
 
     def __initMotor(self):
         for pin in self.pins:
@@ -69,6 +60,10 @@ class Motor:
             GPIO.output(pin, 0)
 
     def setBearing(self, bearing):
+        if self.currentBearing != bearing:
+            self.bearingSetTime = time.time()
+
+        self.currentBearing = bearing
         self.bearing = bearing
 
     def doDrive(self):
@@ -79,39 +74,69 @@ class Motor:
                 sleep(self.timeRes)
 
             else:
-                if self.bearing > 90:
-                    if self.reverse:
-                        self.__set_rpm((float(180 - self.bearing) / 90) * self.maxRPM)
-                    else:
-                        self.__set_rpm(self.maxRPM)
-                else:
-                    if self.reverse:
-                        self.__set_rpm(self.maxRPM)
-                    else:
-                        self.__set_rpm((float(self.bearing) / 90) * self.maxRPM)
+                reversing = self.bearing > 180
 
-                if self._rpm == 0:
+                '''
+                0: left full forward, right stop
+                45: left full forward, right half forward
+                90: left full forward, right full forward
+                135: left half forward, right full forward
+                180: left stop, right full forward
+                225: left half backward, right full backward
+                270: left full backward, right full backward
+                315: left full backward, right half backward 
+                '''
+
+                if self.bearing <= 90:
+                    if self.runInReverse:
+                        rpmFactor = 1
+                    else:
+                        rpmFactor = float(self.bearing) / 90
+                elif self.bearing <= 180:
+                    if self.runInReverse:
+                        rpmFactor = float(180 - self.bearing) / 90
+                    else:
+                        rpmFactor = 1
+                elif self.bearing <= 270:
+                    if self.runInReverse:
+                        rpmFactor = float(self.bearing - 180) / 90
+                    else:
+                        rpmFactor = 1
+                else:
+                    if self.runInReverse:
+                        rpmFactor = 1
+                    else:
+                        rpmFactor = float(360 - self.bearing) / 90
+
+                baseRPM = self.maxRPM * rpmFactor
+
+                if baseRPM == 0:
                     self.bearing = -1
                 else:
                     startTime = time.time()
+                    seq = self.reverseSequence if reversing else self.sequence
                     while (time.time() - startTime) < self.timeRes:
-                        for step in self.sequence:
+                        for step in seq:
                             for pinIx in range(0, 4):
                                 GPIO.output(self.pins[pinIx], step[pinIx] % 2)
 
-                            sleep(self._T)
+                            rampUpFactor = min((time.time() - self.bearingSetTime) / self.rampUpTimeMS, 1)
+                            effectiveRPM = max(baseRPM * rampUpFactor, 1)
+                            currentSleep = (60 / effectiveRPM) / self.steps_per_rev
+                            sleep(currentSleep)
 
 
 class Driver:
 
     timeResUnit = 0.2
     rpms = 18
+    rampUpTimeMS = 500
 
     def __init__(self):
         GPIO.setmode(GPIO.BOARD)
         print("Creating motors...")
-        self.motor1 = Motor([8, 10, 12, 11], False, self.timeResUnit, self.rpms)
-        self.motor2 = Motor([36, 38, 40, 37], True, self.timeResUnit, self.rpms)
+        self.motor1 = Motor([8, 10, 12, 11], False, self.timeResUnit, self.rpms, self.rampUpTimeMS)
+        self.motor2 = Motor([36, 38, 40, 37], True, self.timeResUnit, self.rpms, self.rampUpTimeMS)
         self.__startDriverThreads()
 
     def __startDriverThreads(self):
@@ -122,7 +147,7 @@ class Driver:
         self.motor2Thread.start()
 
     def setBearing(self, bearing):
-        if bearing < 0 or bearing > 180:
+        if bearing < 0 or bearing > 359:
             raise ValueError("Invalid bearing: " + bearing)
 
         self.motor1.setBearing(bearing)
@@ -131,11 +156,4 @@ class Driver:
     def stop(self):
         self.motor1.setBearing(-1)
         self.motor2.setBearing(-1)
-
-
-def onBearingReceived(channel, method, properties, body):
-    messageStr = body.decode("utf-8")
-    message = json.loads(messageStr)
-    newBearing = int(message["bearing"])
-    print("New Bearing: " + str(newBearing))
 
