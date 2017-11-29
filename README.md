@@ -12,5 +12,6 @@ screws, the rest of the components are 3D-printable. All parts are fairly small
 and should be printable on even cheapest 3D printers.
 
 The software part of Watney is written in Python and provides webcam-on-wheels
-functionality. The camera feed is hardware-encoded into an HD stream, which is served
-on a web page that also provides keyboard control of the rover.
+functionality. The camera feed is hardware-encoded to allow low-latency streaming in 720p.
+A web page containing keyboard controls and the camera stream can be accessed by navigating
+to Watney's IP in a browser.
