@@ -1,22 +1,19 @@
 import time
 from threading import Thread
-from time import sleep
+
 
 import RPi.GPIO as GPIO
 
 
 class Motor:
 
-    def __init__(self, pins, reverse, timeRes, rpms, rampUpTimeMS):
+    def __init__(self, pins, reverse, rpms, rampUpTime):
         self.pins = pins
         self.runInReverse = reverse
-
+        self.__setSequence()
         self.maxRPM = rpms
         self.bearing = -1
-        self.timeRes = timeRes
-        self.currentBearing = -1
-        self.bearingSetTime = -1
-        self.rampUpTimeMS = rampUpTimeMS
+        self.rampUpTime = rampUpTime
         self.__initMotor()
 
     def __setSequence(self):
@@ -44,10 +41,6 @@ class Motor:
             seq.reverse()
 
         self.sequence = seq
-        reverseSequence = list(seq)
-        reverseSequence.reverse()
-        self.reverseSequence = reverseSequence
-
         return seq
 
     def __initMotor(self):
@@ -60,83 +53,105 @@ class Motor:
             GPIO.output(pin, 0)
 
     def setBearing(self, bearing):
-        if self.currentBearing != bearing:
-            self.bearingSetTime = time.time()
-
-        self.currentBearing = bearing
         self.bearing = bearing
 
     def doDrive(self):
         print("Starting motor...")
+        currentRPMs = 0
+        # track last time actual speed change occured
+        lastSpeedChange = -1
+        # how much time to wait between each speed change, in seconds
+        speedChangeTimeStep = self.rampUpTime / (self.maxRPM * 2)
+        # Current step in sequence if rotating clockwise
+        stepInSequence = 0
+        lastMoveTime = -1
+        currentSleep = -1
         while True:
-            if self.bearing == -1:
-                self.__clear()
-                sleep(self.timeRes)
-
+            currentBearing = self.bearing
+            '''
+            0: left full forward, right stop
+            45: left full forward, right half forward
+            90: left full forward, right full forward
+            135: left half forward, right full forward
+            180: left stop, right full forward
+            225: left half backward, right full backward
+            270: left full backward, right full backward
+            315: left full backward, right half backward 
+            '''
+            if currentBearing == -1:
+                rpmFactor = 0
+            elif currentBearing <= 90:
+                if self.runInReverse:
+                    rpmFactor = 1
+                else:
+                    rpmFactor = float(currentBearing) / 90
+            elif currentBearing <= 180:
+                if self.runInReverse:
+                    rpmFactor = float(180 - currentBearing) / 90
+                else:
+                    rpmFactor = 1
+            elif currentBearing <= 270:
+                if self.runInReverse:
+                    rpmFactor = float(currentBearing - 180) / 90
+                else:
+                    rpmFactor = 1
             else:
-                reversing = self.bearing > 180
-
-                '''
-                0: left full forward, right stop
-                45: left full forward, right half forward
-                90: left full forward, right full forward
-                135: left half forward, right full forward
-                180: left stop, right full forward
-                225: left half backward, right full backward
-                270: left full backward, right full backward
-                315: left full backward, right half backward 
-                '''
-
-                if self.bearing <= 90:
-                    if self.runInReverse:
-                        rpmFactor = 1
-                    else:
-                        rpmFactor = float(self.bearing) / 90
-                elif self.bearing <= 180:
-                    if self.runInReverse:
-                        rpmFactor = float(180 - self.bearing) / 90
-                    else:
-                        rpmFactor = 1
-                elif self.bearing <= 270:
-                    if self.runInReverse:
-                        rpmFactor = float(self.bearing - 180) / 90
-                    else:
-                        rpmFactor = 1
+                if self.runInReverse:
+                    rpmFactor = 1
                 else:
-                    if self.runInReverse:
-                        rpmFactor = 1
+                    rpmFactor = float(360 - self.bearing) / 90
+
+            targetRPM = self.maxRPM * rpmFactor
+            reversing = self.bearing > 180
+            if reversing:
+                targetRPM = targetRPM * -1
+
+            if currentRPMs != targetRPM:
+                if (time.time() - lastSpeedChange) > speedChangeTimeStep:
+                    if currentRPMs < targetRPM:
+                        currentRPMs = currentRPMs + 1
                     else:
-                        rpmFactor = float(360 - self.bearing) / 90
+                        currentRPMs = currentRPMs - 1
+                    lastSpeedChange = time.time()
+                    print("Current speed " + str(currentRPMs))
 
-                baseRPM = self.maxRPM * rpmFactor
+            if lastMoveTime != -1:
+                sleepRemainder = currentSleep - (time.time() - lastMoveTime)
+                if sleepRemainder > 0:
+                    time.sleep(sleepRemainder)
 
-                if baseRPM == 0:
-                    self.bearing = -1
-                else:
-                    startTime = time.time()
-                    seq = self.reverseSequence if reversing else self.sequence
-                    while (time.time() - startTime) < self.timeRes:
-                        for step in seq:
-                            for pinIx in range(0, 4):
-                                GPIO.output(self.pins[pinIx], step[pinIx] % 2)
+            if currentRPMs == 0:
+                currentSleep = 60 / self.steps_per_rev
+                lastMoveTime = -1
+                time.sleep(currentSleep)
+            else:
+                currentSleep = (60 / abs(currentRPMs)) / self.steps_per_rev
+                step = self.sequence[stepInSequence]
 
-                            rampUpFactor = min((time.time() - self.bearingSetTime) / self.rampUpTimeMS, 1)
-                            effectiveRPM = max(baseRPM * rampUpFactor, 1)
-                            currentSleep = (60 / effectiveRPM) / self.steps_per_rev
-                            sleep(currentSleep)
+                for pinIx in range(0, 4):
+                    GPIO.output(self.pins[pinIx], step[pinIx] % 2)
+
+                lastMoveTime = time.time()
+
+                if currentRPMs < 0:
+                    stepInSequence = stepInSequence - 1
+                    if stepInSequence < 0:
+                        stepInSequence = len(self.sequence) - 1
+                elif currentRPMs > 0:
+                    stepInSequence = stepInSequence + 1
+                    if stepInSequence > 3:
+                        stepInSequence = 0
 
 
 class Driver:
-
-    timeResUnit = 0.2
     rpms = 18
-    rampUpTimeMS = 500
+    rampUpTime = 0.5
 
     def __init__(self):
         GPIO.setmode(GPIO.BOARD)
         print("Creating motors...")
-        self.motor1 = Motor([8, 10, 12, 11], False, self.timeResUnit, self.rpms, self.rampUpTimeMS)
-        self.motor2 = Motor([36, 38, 40, 37], True, self.timeResUnit, self.rpms, self.rampUpTimeMS)
+        self.motor1 = Motor([8, 10, 12, 11], False, self.rpms, self.rampUpTime)
+        self.motor2 = Motor([36, 38, 40, 37], True, self.rpms, self.rampUpTime)
         self.__startDriverThreads()
 
     def __startDriverThreads(self):
@@ -156,4 +171,7 @@ class Driver:
     def stop(self):
         self.motor1.setBearing(-1)
         self.motor2.setBearing(-1)
+
+    def cleanup(self):
+        GPIO.cleanup()
 

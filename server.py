@@ -1,6 +1,9 @@
 from flask import Flask, send_file, request
 import json
 from rover import Driver
+import signal
+import sys
+
 
 app = Flask(__name__)
 roverDriver = None
@@ -23,8 +26,12 @@ def setBearing():
 
     return "OK"
 
+def signal_handler(signal, frame):
+    roverDriver.cleanup()
+    sys.exit(0)
+
 
 if __name__ == "__main__":
-    global roverDriver
+    signal.signal(signal.SIGINT, signal_handler)
     roverDriver = Driver()
     app.run(host='0.0.0.0', port=5000, debug=False)
