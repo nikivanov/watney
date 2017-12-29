@@ -39,7 +39,7 @@ def signal_handler(signal, frame):
 
 def startVideo():
     print("Starting video feed...")
-    # os.system("pkill uv4l")
+    os.system("sudo service rws restart")
     # os.system('./startVideo.sh')
 
 

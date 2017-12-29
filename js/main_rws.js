@@ -276,7 +276,7 @@ function ConnectWebSocket() {
     else if( isPrivateIP( location.host ) )
         websocket_url = "ws://" + location.hostname + ":8889/rws/ws";
     else
-        websocket_url = "wss://" + location.host + "/rws/ws";
+        websocket_url = "ws://" + location.hostname + ":8889/rws/ws";
     trace("WebSocket URL : " + websocket_url);
     websocket = new WebSocket(websocket_url);
     websocket.onopen = function(event) { onOpen(event) };

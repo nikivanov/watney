@@ -66,6 +66,7 @@ class Motor:
         stepInSequence = 0
         lastMoveTime = -1
         currentSleep = -1
+
         while True:
             currentBearing = self.bearing
             '''
@@ -123,6 +124,7 @@ class Motor:
             if currentRPMs == 0:
                 currentSleep = 60 / self.steps_per_rev
                 lastMoveTime = -1
+                self.__clear()
                 time.sleep(currentSleep)
             else:
                 currentSleep = (60 / abs(currentRPMs)) / self.steps_per_rev
