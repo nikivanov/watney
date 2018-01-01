@@ -3,7 +3,6 @@ import json
 from rover import Driver
 import signal
 import sys
-import os
 
 
 app = Flask(__name__)
@@ -20,7 +19,7 @@ def send_js(path):
     return send_from_directory('js', path)
 
 
-@app.route("/sendBearing", methods = ['POST'])
+@app.route("/sendBearing", methods=['POST'])
 def setBearing():
     bearingObj = json.loads(request.data.decode("utf-8"))
     newBearing = bearingObj['bearing']
@@ -32,19 +31,13 @@ def setBearing():
 
     return "OK"
 
+
 def signal_handler(signal, frame):
-    os.system("pkill uv4l")
     roverDriver.cleanup()
     sys.exit(0)
-
-def startVideo():
-    print("Starting video feed...")
-    os.system("sudo service rws restart")
-    # os.system('./startVideo.sh')
 
 
 if __name__ == "__main__":
     signal.signal(signal.SIGINT, signal_handler)
-    startVideo()
     roverDriver = Driver()
     app.run(host='0.0.0.0', port=5000, debug=False)
