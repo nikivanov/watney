@@ -16,6 +16,7 @@ class Motor:
         self.maxDC = maxDC
         self.minDC = minDC
         self.targetBearing = -1
+        self.targetSetTime = -1
         self.rampUpTime = rampUpTime
         self.pwmControl = None
         self.drivingThread = None
@@ -38,6 +39,7 @@ class Motor:
     def setBearing(self, bearing):
         with self.drivingThreadSync:
             self.targetBearing = bearing
+            self.targetSetTime = time.time()
             self.drivingThreadSync.notify()
 
     def startDrivingThread(self):
@@ -46,40 +48,43 @@ class Motor:
 
     def doDrive(self):
         currentDC = 0
-        lastDCChangeTime = -1
-
-        # go from 0 to maxDC in rampUpTime seconds
-        # determines how fast we're changing duty cycles as we're ramping up to maxDC
-        # need to multiply maxDC by 2 to account for going full forward to full reverse
-        dcChangeSpeed = float((self.maxDC * 2)) / self.rampUpTime
-
+        originalDC = 0
         sleepInterval = 0.1
-
-        # if we're just starting to move, what's the first duty cycle?
-        startDC = dcChangeSpeed * sleepInterval
-        # print("Max DC: {}, Ramp Up Time: {}, Change speed: {}, Start DC: {}".format(self.maxDC, self.rampUpTime, dcChangeSpeed, startDC))
 
         while True:
             with self.drivingThreadSync:
                 targetDC = self.getTargetDC()
 
                 if targetDC == currentDC:
-                    lastDCChangeTime = -1
-                    print("Going on standby")
+                    # print("Going on standby")
                     self.drivingThreadSync.wait()
-                    print("Woke up")
+                    # print("Woke up")
+                    originalDC = currentDC
                     targetDC = self.getTargetDC()
 
-            if lastDCChangeTime == -1:
-                dcDelta = startDC
-            else:
-                sinceLastChange = time.time() - lastDCChangeTime
-                dcDelta = dcChangeSpeed * sinceLastChange
+                targetSetTime = self.targetSetTime
 
-            if currentDC > targetDC:
-                currentDC = max(currentDC - dcDelta, targetDC)
+            deltaTime = time.time() - targetSetTime
+            timeFraction = min(deltaTime / self.rampUpTime, 1)
+
+            totalDCDelta = targetDC - originalDC
+            dcDeltaFraction = totalDCDelta * timeFraction
+
+            previousDC = currentDC
+            currentDC = currentDC + dcDeltaFraction
+
+            if (previousDC < 0 and currentDC > 0) or (previousDC > 0 and currentDC < 0):
+                currentDC = 0
+
+            # clamp the speed around the target so we don't overshoot
+            if originalDC < targetDC:
+                # going up
+                currentDC = min(currentDC, targetDC)
             else:
-                currentDC = min(currentDC + dcDelta, targetDC)
+                # going down
+                currentDC = max(currentDC, targetDC)
+
+            # print("Current DC: {}".format(currentDC))
 
             if currentDC == 0:
                 self.__clear()
@@ -90,7 +95,6 @@ class Motor:
                 else:
                     GPIO.output(self.forwardPin, 1)
 
-            lastDCChangeTime = time.time()
             time.sleep(sleepInterval)
 
     def getTargetDC(self):
@@ -138,7 +142,7 @@ class Motor:
 class Driver:
     maxDC = 100
     minDC = 0
-    rampUpTime = 1
+    rampUpTime = 0.5
 
     def __init__(self):
         GPIO.setmode(GPIO.BOARD)
