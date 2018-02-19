@@ -3,7 +3,7 @@ Watney Rover
 ![Watney](https://i.imgur.com/DMUFARL.png)
 
 
-[Sample Video](https://i.imgur.com/ZHjlQ2Y.gifv)
+[Sample Video](https://i.imgur.com/vydmPej.gifv)
 
 Watney is a low-cost Raspberry Pi-enabled rover made of readily available parts. At the heart of it is
 Raspberry Pi Zero W powered by a small phone battery bank. Two geared DC motors and an H-bridge controller
