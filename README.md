@@ -7,7 +7,7 @@ Outside             |  Inside
 
 
 
-[Sample Video](https://i.imgur.com/vydmPej.gifv)
+<a href="https://imgur.com/vydmPej"><img src="https://i.imgur.com/vydmPej.mp4" title="source: imgur.com" /></a>
 
 Watney is a low-cost Raspberry Pi-enabled rover made of readily available parts. At the heart of it is
 Raspberry Pi Zero W powered by a small phone battery bank. Two geared DC motors and an H-bridge controller
@@ -25,10 +25,8 @@ Ingredients
 ------------
 
 
-* Raspberry Pi Zero W
-* 40 pin header (either regular or solderless)
-* Raspberry Pi Camera V2
-* RPi Zero-compatible camera ribbon cable
+* Raspberry Pi Zero W with headers
+* Raspberry Pi Camera V2 with Rpi Zero cable
 * USB power bank that provides at least 800ma
 * 2x Arduino geared DC motors
 * L298N H-bridge controller
