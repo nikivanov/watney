@@ -14,8 +14,7 @@ Very little to no soldering required.
 Besides the components listed above, some breadboard jumper wires and M3
 screws, the rest of the components are 3D-printable.
 
-The software part of Watney is written in Python and provides webcam-on-wheels
-functionality. The camera feed is low-latency 720p and you control the rover from the browser.
+The software part of Watney provides webcam-on-wheels functionality. The camera feed is low-latency 720p and you control the rover from the browser.
 
 
 Ingredients
