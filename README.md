@@ -1,6 +1,7 @@
 Watney Rover
 ------------
-![Watney](https://i.imgur.com/DMUFARL.png)
+![Watney](watney/images/watney.png)
+![Inside Watney](watney/images/watney - inside.png)
 
 
 [Sample Video](https://i.imgur.com/vydmPej.gifv)
