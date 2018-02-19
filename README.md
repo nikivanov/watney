@@ -5,6 +5,11 @@ Watney Rover
 :-------------------------:|:-------------------------:
 ![Watney](images/watney.png?raw=true)  |  ![Inside Watney](images/watney-nocover.png?raw=true)
 
+<p align="center">
+  <img width="45%" height="auto" src="images/watney.png?raw=true">
+  <img width="45%" height="auto" src="images/watney-nocover.png?raw=true">
+</p>
+
 
 [Video](https://i.imgur.com/vydmPej.gifv)
 
