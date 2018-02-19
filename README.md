@@ -32,3 +32,8 @@ Ingredients
 * L298N H-bridge controller ([Amazon](http://a.co/1fvKKte) | [AliExpress](https://www.aliexpress.com/item/Free-Shipping-New-Dual-H-Bridge-DC-Stepper-Motor-Drive-Controller-Board-Module-L298N-MOTOR-DRIVER/32769190826.html))
 * Jumper wire 10cm or longer
 * M3 screws
+
+
+Assembly
+--------
+![Wiring](images/Wiring.jpg?raw=true)
