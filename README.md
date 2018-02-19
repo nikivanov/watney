@@ -3,7 +3,7 @@ Watney Rover
 ![Watney](images/watney.png?raw=true)
 
 
-![Inside Watney](images/watney - inside.png?raw=true)
+![Inside Watney](images/watney-inside.png?raw=true)
 
 
 [Sample Video](https://i.imgur.com/vydmPej.gifv)
