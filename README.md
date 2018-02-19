@@ -1,9 +1,10 @@
 Watney Rover
 ------------
-![Watney](images/watney.png?raw=true)
 
+Outside             |  Inside
+:-------------------------:|:-------------------------:
+![Watney](images/watney.png?raw=true)  |  ![Inside Watney](images/watney-nocover.png?raw=true)
 
-![Inside Watney](images/watney-nocover.png?raw=true)
 
 
 [Sample Video](https://i.imgur.com/vydmPej.gifv)
