@@ -23,17 +23,22 @@ screws, the rest of the components are 3D-printable.
 The software part of Watney provides webcam-on-wheels functionality. The camera feed is low-latency 720p and you control the rover from the browser.
 
 
-Ingredients
+Components
 ------------
 
 
-* Raspberry Pi Zero W
-* Raspberry Pi Camera V2 with Zero-compatible cable
-* USB power bank that provides at least 800ma
-* 2x Arduino geared DC motors ([Amazon](http://a.co/7sPakWM) | [AliExpress](https://www.aliexpress.com/item/TT-Motor-Smart-Car-Robot-Gear-Motor-for-Arduino-Free-Shipping/32529098435.html))
-* L298N H-bridge controller ([Amazon](http://a.co/1fvKKte) | [AliExpress](https://www.aliexpress.com/item/Free-Shipping-New-Dual-H-Bridge-DC-Stepper-Motor-Drive-Controller-Board-Module-L298N-MOTOR-DRIVER/32769190826.html))
-* Jumper wire 10cm or longer
-* M3 screws
+* **Raspberry Pi Zero W**
+If you live near a MicroCenter in the US, you could get one of these for $5. You also obviously need an SD card.
+* **Raspberry Pi Camera with Zero-compatible cable**
+I used a Raspberry Pi Camera v2, but you can get a cheap cameras on ebay for about $9 if you search for "raspberry pi zero camera"
+* **USB power bank that provides at least 800ma**
+Bigger is better as long as it fits on the roof
+* **2x Arduino geared DC motors** ([Amazon](http://a.co/7sPakWM) | [AliExpress](https://www.aliexpress.com/item/TT-Motor-Smart-Car-Robot-Gear-Motor-for-Arduino-Free-Shipping/32529098435.html))
+* **L298N H-bridge controller** ([Amazon](http://a.co/1fvKKte) | [AliExpress](https://www.aliexpress.com/item/Free-Shipping-New-Dual-H-Bridge-DC-Stepper-Motor-Drive-Controller-Board-Module-L298N-MOTOR-DRIVER/32769190826.html))
+* **Jumper wire 10cm or longer**
+* **M3 screws**
+
+The major components (minus wire and screws) can be bought for about $33 depending on where you live.
 
 
 Assembly
