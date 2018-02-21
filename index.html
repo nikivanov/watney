@@ -12,11 +12,21 @@
         var down = false;
         var left = false;
         var right = false;
+        var turbo = false;
         
         var lastBearing = -1;
+        var lastSpeed = -1;
         
         function sendKeys() {
             var bearing = -1;
+            var speed = 0;
+
+            if (turbo) {
+                speed = 1;
+            }
+            else {
+                speed = 0.5;
+            }
             
             if (up) {
                 if (left) {
@@ -46,11 +56,15 @@
             else if (right) {
                 bearing = 0;
             }
+
+
             
-            if (lastBearing != bearing) {
+            if (lastBearing != bearing ||  lastSpeed != speed) {
                 lastBearing = bearing;
+                lastSpeed = speed;
                 var bearingObj = {
-                    'bearing': bearing
+                    'bearing': bearing,
+                    'speed': speed
                 };
             
                 $.ajax({
@@ -68,6 +82,10 @@
         $(document).ready(function() {
             $("#inputControl").keydown(function(event) {
                 event.preventDefault();
+
+                if (event.shiftKey) {
+                    turbo = true;
+                }
 
                 if (event.keyCode == 38) {
                     up = true;
@@ -87,6 +105,10 @@
 
             $("#inputControl").keyup(function(event) {
                 event.preventDefault();
+
+                if (!event.shiftKey) {
+                    turbo = false;
+                }
                 
                 if (event.keyCode == 38) {
                     up = false;

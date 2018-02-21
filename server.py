@@ -23,13 +23,18 @@ def send_js(path):
 def setBearing():
     bearingObj = json.loads(request.data.decode("utf-8"))
     newBearing = bearingObj['bearing']
+    newSpeed = bearingObj['speed']
 
-    if newBearing == -1:
-        roverDriver.stop()
+    if (360 > newBearing >= 0 or newBearing == -1) and 1 >= newSpeed >= 0:
+        if newBearing == -1:
+            roverDriver.stop()
+        else:
+            roverDriver.setBearing(newBearing, newSpeed)
+
+        return "OK"
     else:
-        roverDriver.setBearing(newBearing)
-
-    return "OK"
+        print("Invalid bearing {} at speed {}".format(newBearing, newSpeed))
+        return "Invalid", 400
 
 
 def signal_handler(signal, frame):

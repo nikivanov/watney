@@ -10,6 +10,7 @@ class Motor:
         self.forwardPin = forwardPin
         self.reversePin = reversePin
         self.targetBearing = -1
+        self.targetSpeed = 0
         self.rampUpTime = rampUpTime
         self.pwmControl = None
         self.trim = trim
@@ -27,8 +28,9 @@ class Motor:
         GPIO.output(self.forwardPin, 0)
         GPIO.output(self.reversePin, 0)
 
-    def setBearing(self, bearing):
+    def setBearing(self, bearing, speed):
         self.targetBearing = bearing
+        self.targetSpeed = speed
         self.__clear()
 
         currentBearing = bearing
@@ -59,10 +61,14 @@ class Motor:
             else:
                 rpmFactor = float(360 - currentBearing) / 90
 
-        if rpmFactor < 1:
+        if rpmFactor < 1 and speed == 1:
             rpmFactor = rpmFactor * understeer
 
-        targetDC = 100 * rpmFactor * self.trim
+        targetDC = 100 * speed * rpmFactor * self.trim
+        if self.isLeft:
+            print("Left motor dc: {}".format(targetDC))
+        else:
+            print("Right motor dc: {}".format(targetDC))
 
         if targetDC > 20:
             self.pwmControl.ChangeDutyCycle(targetDC)
@@ -80,18 +86,21 @@ class Driver:
         GPIO.setmode(GPIO.BOARD)
         print("Creating motors...")
         self.motor1 = Motor(True, 16, 18, 22, self.rampUpTime, 1)
-        self.motor2 = Motor(False, 15, 13, 11, self.rampUpTime, 0.85)
+        self.motor2 = Motor(False, 15, 13, 11, self.rampUpTime, 0.9)
 
-    def setBearing(self, bearing):
+    def setBearing(self, bearing, speed):
         if bearing < 0 or bearing > 359:
             raise ValueError("Invalid bearing: " + bearing)
 
-        self.motor1.setBearing(bearing)
-        self.motor2.setBearing(bearing)
+        if speed < 0 or speed > 1:
+            raise ValueError("Invalid speed: " + speed)
+
+        self.motor1.setBearing(bearing, speed)
+        self.motor2.setBearing(bearing, speed)
 
     def stop(self):
-        self.motor1.setBearing(-1)
-        self.motor2.setBearing(-1)
+        self.motor1.setBearing(-1, 0)
+        self.motor2.setBearing(-1, 0)
 
     def cleanup(self):
         GPIO.cleanup()
