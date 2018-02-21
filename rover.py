@@ -65,10 +65,6 @@ class Motor:
             rpmFactor = rpmFactor * understeer
 
         targetDC = 100 * speed * rpmFactor * self.trim
-        if self.isLeft:
-            print("Left motor dc: {}".format(targetDC))
-        else:
-            print("Right motor dc: {}".format(targetDC))
 
         if targetDC > 20:
             self.pwmControl.ChangeDutyCycle(targetDC)
