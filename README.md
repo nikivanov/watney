@@ -22,7 +22,7 @@ Very little to no soldering required.
 Besides the components listed above, some breadboard jumper wires and M3
 screws, the rest of the components are 3D-printable.
 
-The software part of Watney provides webcam-on-wheels functionality. The camera feed is low-latency 720p and you control the rover from the browser.
+The software part of Watney provides webcam-on-wheels functionality. The camera feed is low-latency HD and you control the rover from the browser.
 
 
 Components
@@ -40,7 +40,7 @@ Bigger is better as long as it fits on the roof
 * **Jumper wire 10cm or longer**
 * **M3 screws**
 
-The major components (minus wire and screws) can be bought for about $33 depending on where you live.
+The major components (minus wire and screws) can be bought for around $40 depending on where you live.
 
 
 Assembly
