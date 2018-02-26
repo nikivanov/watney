@@ -6,7 +6,7 @@ Watney Rover
   <img width="45%" height="auto" src="images/watney.png?raw=true">
   <img width="45%" height="auto" src="images/watney-nocover.png?raw=true">
   <br />
-  <img width="90%" height="auto" src="images/watney-photo.jpg?raw=true">
+  <img width="90%" height="auto" src="images/watneys.jpg?raw=true">
 </p>
 
 
