@@ -46,3 +46,8 @@ The major components (minus wire and screws) can be bought for around $40 depend
 Assembly
 --------
 ![Wiring](images/Wiring.jpg?raw=true)
+
+1. Print out all of the parts found in the STLs folder (See instructions on Thingiverse)
+2. Install the GPIO header on the Raspberry Pi. Set up Raspbian and get it connected to your WiFi network.
+3. Attach the parts as shown in the picture. [The pinout is as follows]():
+⋅⋅* 12V - 
