@@ -36,8 +36,8 @@ I used a Raspberry Pi Camera v2, but you can get a cheap camera on ebay for abou
 Bigger is better as long as it fits on the roof
 * **2x Arduino geared DC motors** ([Amazon](http://a.co/7sPakWM) | [AliExpress](https://www.aliexpress.com/item/TT-Motor-Smart-Car-Robot-Gear-Motor-for-Arduino-Free-Shipping/32529098435.html))
 * **L298N H-bridge controller** ([Amazon](http://a.co/1fvKKte) | [AliExpress](https://www.aliexpress.com/item/Free-Shipping-New-Dual-H-Bridge-DC-Stepper-Motor-Drive-Controller-Board-Module-L298N-MOTOR-DRIVER/32769190826.html))
-* **Jumper wire 10cm or longer**
-* **M3 screws**
+* **Jumper wire 10cm or longer** ([Amazon]http://a.co/e25UqlS or any other set of 10mm jumper wires)
+* **M3 screws** ([Amazon](http://a.co/bRE14nB or any other M3 set)
 
 The major components (minus wire and screws) can be bought for around $40 depending on where you live.
 
