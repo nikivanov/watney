@@ -48,5 +48,16 @@ Assembly
 
 1. Print out all of the parts found in the STLs folder (See instructions on Thingiverse)
 2. Install the GPIO header on the Raspberry Pi. Set up Raspbian and get it connected to your WiFi network.
-3. Attach the parts as shown in the picture. [The pinout is as follows]():
-⋅⋅* 12V - 
+3. Attach the parts as shown in the picture. Motors should face leads out. Match [Raspberry Pi BOARD GPIO](images/pi-gpio.png) with the controller as follows:
+  * 12V - Pin 4
+  * Gnd - Pin 6
+  * ENA - Pin 16
+  * IN1 - Pin 18
+  * IN2 - Pin 22
+  * IN3 - Pin 11
+  * IN4 - Pin 13
+  * ENB - Pin 15
+4. Route the USB cable so it matches the notch on the cover, close the cover and secure it with a screw
+5. Attach the caster mount using screws on left and right. Attach the caster articulator and secure it with the cap. Put a screw through the center of the cap. Secure the caster wheel with a screw and a nut - use superglue or thread locker to make sure the nut stays in place without overtightening
+6. Attach the camera mount, arm and the housing
+7. Affix the battery pack to the roof, making sure the USB cable is long enough to reach the port
