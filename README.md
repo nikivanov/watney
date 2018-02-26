@@ -28,6 +28,8 @@ Components
 ------------
 
 
+All of these components can be found on Amazon, Ebay, AliExpress, Banggood and others.
+
 * **Raspberry Pi Zero W**
 If you live near a MicroCenter in the US, you could get one of these for $5. You also obviously need an SD card.
 * **Raspberry Pi Camera with Zero-compatible cable**
@@ -46,7 +48,7 @@ Assembly
 --------
 ![Wiring](images/Wiring.jpg?raw=true)
 
-1. Print out all of the parts found in the STLs folder (See instructions on Thingiverse)
+1. Print out all of the parts found in the STLs folder (See printing instructions on Thingiverse)
 2. Install the GPIO header on the Raspberry Pi. Set up Raspbian and get it connected to your WiFi network.
 3. Attach the parts as shown in the picture. Motors should face leads out. Match [Raspberry Pi BOARD GPIO](images/pi-gpio.png) with the controller as follows:
   * 12V - Pin 4
