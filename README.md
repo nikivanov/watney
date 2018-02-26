@@ -64,4 +64,4 @@ Assembly
 5. Attach the caster mount using screws on the left and right. Attach the caster articulator and secure it with the cap. Put a screw through the center of the cap. Secure the caster wheel with a screw and a nut - use superglue or thread locker to make sure the nut stays in place without overtightening
 6. Attach the camera mount, arm and the housing
 7. Attach the wheels
-8. Affix the battery pack to the roof, making sure the USB cable is long enough to reach the port
+8. Affix the battery pack to the roof using hotglue, double-side tape or something of that sort. Make sure the USB cable is long enough to reach the port
