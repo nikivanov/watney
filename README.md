@@ -14,15 +14,15 @@ Watney Rover
 
 
 Watney is a low-cost Raspberry Pi-enabled rover made of readily available parts. At the heart of it is
-Raspberry Pi Zero W powered by a small phone battery bank. Two geared DC motors and an H-bridge controller
+Raspberry Pi Zero W powered by a small phone battery bank. Two motors and a controller
 provide direct drive to rear wheels and an RPi camera is mounted in the front.
-Very little to no soldering required.
+Very little to no soldering required. The driving library is written in Python.
 
 
 Besides the components listed above, some breadboard jumper wires and M3
 screws, the rest of the components are 3D-printable.
 
-The software part of Watney provides webcam-on-wheels functionality. The camera feed is low-latency HD and you control the rover from the browser.
+The software part of Watney provides webcam-on-wheels functionality. The camera feed is low-latency HD and you control the rover from your browser.
 
 
 Components
