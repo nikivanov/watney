@@ -82,5 +82,16 @@ Assembly
 Software
 --------
 
-* Clone the repo or download the repo zip and place it in the home directory of your Watney
-* 
+1. Clone the repo or download the repo zip and unpack it into the home directory of your Watney. SSH into Watney.
+2. Install RWS: sudo dpkg -i rws_0.72.0_RaspiZeroW_armhf.deb
+3. Modify media_config.conf if needed, though the default settings should be sufficient
+4. Copy media_config.conf: sudo cp media_config.conf /opt/rws/etc/
+5. Restart RWS to pick up the changes:
+  * sudo systemctl stop rws
+  * sudo systemctl start rws
+6. Make sure Python 3 PIP is installed: sudo apt-get install python3-pip
+7. Make sure Python 3 Rpi GPIO is installed: sudo apt-get install python3-rpi.gpio
+8. Install Flask: pip3 install flask
+9. Run Watney web server: python3 server.py
+
+At this point, you should be able to access and control Watney on your computer by going to http://[Your Watney IP]:5000
