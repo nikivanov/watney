@@ -87,8 +87,8 @@ Software
 3. Modify media_config.conf if needed, though the default settings should be sufficient
 4. Copy media_config.conf: sudo cp media_config.conf /opt/rws/etc/
 5. Restart RWS to pick up the changes:
-  * sudo systemctl stop rws
-  * sudo systemctl start rws
+   * sudo systemctl stop rws
+   * sudo systemctl start rws
 6. Make sure Python 3 PIP is installed: sudo apt-get install python3-pip
 7. Make sure Python 3 Rpi GPIO is installed: sudo apt-get install python3-rpi.gpio
 8. Install Flask: pip3 install flask
