@@ -9,9 +9,9 @@ Watney Rover
   <img width="96%" height="auto" src="images/watneys.jpg?raw=true">
 </p>
 
-
-[Video](https://i.imgur.com/vydmPej.gifv)
-
+<h1>
+<a href="https://i.imgur.com/vydmPej.gifv" target="_blank">Video</a>
+</h1>
 
 Watney is a low-cost Raspberry Pi-enabled rover made of readily available parts. At the heart of it is
 Raspberry Pi Zero W powered by a small phone battery bank. Two motors and a controller
@@ -60,7 +60,7 @@ Assembly
 --------
 ![Wiring](images/Wiring.jpg?raw=true)
 
-1. Print out all of the parts found in the STLs folder (See printing instructions on Thingiverse)
+1. Print out all of the parts found in the STLs folder (See printing instructions on [Thingiverse](https://www.thingiverse.com/thing:2810420))
 2. Install the GPIO header on the Raspberry Pi. Set up Raspbian and get it connected to your WiFi network
 3. M3 screws are a bit too big for Raspberry Pi mounting holes. Run a 1/8" drill bit through them, file them, or just put an M3 screw through them carefully to expand them a bit.
 4. Attach the parts as shown in the picture. Motors should face leads out with about 130mm of wire coming out of them. Match [Raspberry Pi BOARD GPIO](images/pi-gpio.png) with the controller as follows:
