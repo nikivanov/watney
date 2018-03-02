@@ -98,3 +98,12 @@ Software
 At this point, you should be able to access and control Watney on your computer by going to http://[Your Watney IP]:5000. Click on the input field at the bottom of the page and control your rover with arrow keys. Press Shift to sprint. Some geared DC motors don't like going at low speeds, so if your rover has trouble turning gradually (as when you press Up and Right, for instance), edit your index.html and change the non-turbo speed from 0.5 to 0.7.
 
 You should shut down the rover gracefully before unplugging it from the power supply by executing "sudo halt" via SSH and waiting about 10 seconds for Linux to shut down.
+
+
+Configuration
+-------------
+
+Rover configuration can be found in rover.conf:
+* If you want to use different GPIO pins, you can specify them here
+* If you find a motor running in reverse (backwards when it's supposed to be rotating forward) simply swap ForwardPin and ReversePin
+* If you find the rover veering off to a side when it's supposed to be going straight, set the trim value appropriately. See the configuration file for an explanation
