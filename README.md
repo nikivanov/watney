@@ -46,7 +46,7 @@ All of these components can be found on Amazon, Ebay, AliExpress, Banggood and o
 * **Raspberry Pi Zero W**
 If you live near a MicroCenter in the US, you could get one of these for $5. You also obviously need an SD card.
 * **Raspberry Pi Camera with Zero-compatible cable**
-I used a Raspberry Pi Camera v2, but you can get a cheap camera on ebay for about $9 if you search for "raspberry pi zero camera". You can also use the [fish-eye version](https://www.ebay.com/sch/i.html?_nkw=raspberry+pi+fisheye) to get a better field of view or the [IR version](https://www.ebay.com/sch/i.html?_nkw=raspberry+pi+night+vision) to have night vision.
+I highly recommend the fish-eye camera for better FOV, but you can get a cheap camera on ebay for about $9 if you search for "raspberry pi zero camera". You can also give the night-vision camera a go, but you'd need to modify the housing.
 * **USB power bank that provides at least 1A**
 Bigger is better as long as it fits on the roof
 * **2x Arduino geared DC motors** ([Amazon](http://a.co/7sPakWM) | [AliExpress](https://www.aliexpress.com/item/TT-Motor-Smart-Car-Robot-Gear-Motor-for-Arduino-Free-Shipping/32529098435.html))
