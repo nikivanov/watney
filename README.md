@@ -25,15 +25,6 @@ screws, the rest of the components are 3D-printable.
 The software part of Watney provides webcam-on-wheels functionality. The camera feed is low-latency HD and you control the rover from your browser. The HD camera feed is provided using the excellent [rpi-webrtc-streamer](https://github.com/kclyu/rpi-webrtc-streamer).
 
 
-Work in Progress
-----------------
-
-
-Watney is a work in progress. Please report any issues you're having!
-
-* Software installation can be streamlined
-
-
 Components
 ------------
 
