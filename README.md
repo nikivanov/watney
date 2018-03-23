@@ -32,9 +32,6 @@ Work in Progress
 Watney is a work in progress. Please report any issues you're having!
 
 * Software installation can be streamlined
-* Different camera housings for different type cameras
-* Caster wheel should be a bit bigger so Watney can clear small obstacles
-* Tires could be improved for more grip
 
 
 Components
