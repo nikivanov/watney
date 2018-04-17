@@ -19,23 +19,33 @@ def send_js(path):
     return send_from_directory('js', path)
 
 
-@app.route("/sendBearing", methods=['POST'])
-def setBearing():
-    bearingObj = json.loads(request.data.decode("utf-8"))
-    newBearing = bearingObj['bearing']
-    newSpeed = bearingObj['speed']
+@app.route("/sendCommand", methods=['POST'])
+def setCommand():
+    commandObj = json.loads(request.data.decode("utf-8"))
+    newBearing = commandObj['bearing']
+    newSpeed = commandObj['speed']
+    newLook = commandObj['look']
 
     if (360 > newBearing >= 0 or newBearing == -1) and 1 >= newSpeed >= 0:
         if newBearing == -1:
             roverDriver.stop()
         else:
             roverDriver.setBearing(newBearing, newSpeed)
-
-        return "OK"
     else:
         print("Invalid bearing {} at speed {}".format(newBearing, newSpeed))
         return "Invalid", 400
 
+    if newLook == 0:
+        roverDriver.lookStop()
+    elif newLook == -1:
+        roverDriver.lookUp()
+    elif newLook == 1:
+        roverDriver.lookDown()
+    else:
+        print("Invalid look at {}".format(newLook))
+        return "Invalid", 400
+
+    return "OK"
 
 def signal_handler(signal, frame):
     roverDriver.cleanup()

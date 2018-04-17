@@ -1,5 +1,8 @@
 import RPi.GPIO as GPIO
 import configparser
+import pigpio
+from threading import Thread, Condition
+import time
 
 
 class Motor:
@@ -97,6 +100,102 @@ class MotorController:
         for rightMotor in self.rightMotors:
             rightMotor.setMotion(rightDC)
 
+class ServoController:
+
+    def __init__(self, pwmPin):
+        self.pwmPin = pwmPin
+        self.neutral = 75000
+        self.amplitude = 35000
+        self.frequency = 50
+        self.speed_per_sec = 30000
+        self.resolution = 0.01
+        self.stopping = False
+
+        # 1 is forward, -1 is backward, 0 is stop
+        self.direction = 0
+
+        self.pi = pigpio.pi()
+
+        self.timingLock = Condition()
+        self.timingThread = Thread(daemon=True, target=self.timingLoop)
+        self.timingThread.start()
+
+    def forward(self):
+        with self.timingLock:
+            self.direction = 1
+            self.timingLock.notify()
+
+    def backward(self):
+        with self.timingLock:
+            self.direction = -1
+            self.timingLock.notify()
+
+    def lookStop(self):
+        with self.timingLock:
+            self.direction = 0
+            self.timingLock.notify()
+
+    def stop(self):
+        with self.timingLock:
+            print("Waiting for servo to stop...")
+            self.stopping = True
+            self.timingLock.notify()
+
+        print("Joining the timing thread")
+        self.timingThread.join()
+        print("Servo thread stopped")
+
+    def timingLoop(self):
+        print("Servo starting...")
+
+        # go neutral first
+        self.pi.hardware_PWM(self.pwmPin, self.frequency, self.neutral)
+        time.sleep(2)
+
+        currentPosition = self.neutral
+        lastChangeTime = -1
+
+        while True:
+            with self.timingLock:
+                if not self.__shouldBeMoving(currentPosition):
+                    print("Servo idling...")
+                    self.timingLock.wait()
+                    print("Servo woke up...")
+
+                if self.stopping:
+                    break
+
+                if lastChangeTime == -1:
+                    changeDelta = self.speed_per_sec * self.resolution
+                else:
+                    timeDelta = time.time() - lastChangeTime
+                    changeDelta = self.speed_per_sec * timeDelta
+
+                if self.direction == 1:
+                    currentPosition = int(min(currentPosition + changeDelta, self.neutral + self.amplitude))
+                elif self.direction == -1:
+                    currentPosition = int(max(currentPosition - changeDelta, self.neutral - self.amplitude))
+
+            # print("Pin {} frequency {} position {}".format(self.pwmPin, self.frequency, currentPosition))
+            self.pi.hardware_PWM(self.pwmPin, self.frequency, currentPosition)
+            time.sleep(self.resolution)
+
+        print("Servo stopping...")
+        self.pi.hardware_PWM(self.pwmPin, self.frequency, 0)
+        self.pi.stop()
+
+    def __shouldBeMoving(self, currentPosition):
+        if self.direction == 0:
+            return False
+        elif self.direction == 1 and currentPosition >= self.neutral + self.amplitude:
+            return False
+        elif self.direction == -1 and currentPosition <= self.neutral - self.amplitude:
+            return False
+
+        return True
+
+
+
 
 
 class Driver:
@@ -111,6 +210,7 @@ class Driver:
 
         leftMotorConfig = config["LEFTMOTOR"]
         rightMotorConfig = config["RIGHTMOTOR"]
+        servoConfig = config["SERVO"]
 
         leftMotors = [Motor(int(leftMotorConfig["PWMPin"]),
                             int(leftMotorConfig["ForwardPin"]),
@@ -122,14 +222,26 @@ class Driver:
                             int(rightMotorConfig["ReversePin"]),
                             float(rightMotorConfig["Trim"]))]
 
-        self.controller = MotorController(leftMotors, rightMotors)
+        self.motorController = MotorController(leftMotors, rightMotors)
+        self.servoController = ServoController(int(servoConfig["PWMPin_BCM"]))
 
     def setBearing(self, bearing, speed):
-        self.controller.setBearing(bearing, speed)
+        self.motorController.setBearing(bearing, speed)
 
     def stop(self):
-        self.controller.setBearing(-1, 0)
+        self.motorController.setBearing(-1, 0)
+
+    def lookUp(self):
+        self.servoController.backward()
+
+    def lookDown(self):
+        self.servoController.forward()
+
+    def lookStop(self):
+        self.servoController.lookStop()
 
     def cleanup(self):
         GPIO.cleanup()
+        self.servoController.stop()
+
 

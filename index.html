@@ -13,13 +13,17 @@
         var left = false;
         var right = false;
         var turbo = false;
+        var lookUp = false;
+        var lookDown = false;
         
         var lastBearing = -1;
         var lastSpeed = -1;
+        var lastLook = 0;
         
         function sendKeys() {
             var bearing = -1;
             var speed = 0;
+            var look = 0
 
             if (turbo) {
                 speed = 1;
@@ -57,20 +61,27 @@
                 bearing = 0;
             }
 
+            if (lookUp) {
+                look = 1;
+            }
+            else if (lookDown) {
+                look = -1;
+            }
 
-            
-            if (lastBearing != bearing ||  lastSpeed != speed) {
+            if (lastBearing != bearing ||  lastSpeed != speed || lastLook != look) {
                 lastBearing = bearing;
                 lastSpeed = speed;
-                var bearingObj = {
+                lastLook = look;
+                var commandObj = {
                     'bearing': bearing,
-                    'speed': speed
+                    'speed': speed,
+                    'look': look
                 };
             
                 $.ajax({
-                      url:'/sendBearing',
+                      url:'/sendCommand',
                       type:"POST",
-                      data:JSON.stringify(bearingObj),
+                      data:JSON.stringify(commandObj),
                       contentType:"application/json; charset=utf-8",
                       dataType:"json"
                 });
@@ -99,6 +110,12 @@
                 else if(event.keyCode == 39) {
                     right = true;
                 }
+                else if (event.keyCode == 65) {
+                    lookDown = true;
+                }
+                else if(event.keyCode == 90) {
+                    lookUp = true;
+                }
                 
                 sendKeys();
             });
@@ -122,7 +139,13 @@
                 else if(event.keyCode == 39) {
                     right = false;
                 }
-                
+                else if (event.keyCode == 65) {
+                    lookDown = false;
+                }
+                else if(event.keyCode == 90) {
+                    lookUp = false;
+                }
+
                 sendKeys();
             });
 
