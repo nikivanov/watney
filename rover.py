@@ -1,11 +1,9 @@
 import RPi.GPIO as GPIO
 import configparser
-from threading import Thread, Condition
-import time
 
 
 class Motor:
-    PWM_FREQUENCY = 100
+    PWM_FREQUENCY = 30
 
     def __init__(self, pwmPin, forwardPin, reversePin, trim):
         self.pwmPin = pwmPin
@@ -47,68 +45,9 @@ class Motor:
 
 class MotorController:
 
-    def __init__(self, leftMotors, rightMotors, fullCycleRampUp):
+    def __init__(self, leftMotors, rightMotors):
         self.leftMotors = leftMotors
         self.rightMotors = rightMotors
-
-        self.speedChangeInterval = 0.1
-        self.dcChangePerInterval = (200 * self.speedChangeInterval) / fullCycleRampUp
-
-        self.speedThreadSync = Condition()
-        self.targetSpeed = 0
-        self.targetBearing = -1
-        self.speedChangeThread = Thread(target=self.speedChangeLoop, daemon=True)
-        self.speedChangeThread.start()
-
-    def speedChangeLoop(self):
-        currentLeftDC = 0
-        currentRightDC = 0
-
-        while True:
-            with self.speedThreadSync:
-                targetDCs = self.getTargetMotorDCs(self.targetBearing, self.targetSpeed)
-                if currentLeftDC == targetDCs[0] and currentRightDC == targetDCs[1]:
-                    print("Target speeds reached, sleeping...")
-                    self.speedThreadSync.wait()
-                targetDCs = self.getTargetMotorDCs(self.targetBearing, self.targetSpeed)
-
-            changesPerCycle = self.getDCChangePerCycle(targetDCs, currentLeftDC, currentRightDC)
-
-            if currentLeftDC > targetDCs[0]:
-                currentLeftDC = max(currentLeftDC - changesPerCycle[0], targetDCs[0])
-            elif currentLeftDC < targetDCs[0]:
-                currentLeftDC = min(currentLeftDC + changesPerCycle[0], targetDCs[0])
-
-            if currentRightDC > targetDCs[1]:
-                currentRightDC = max(currentRightDC - changesPerCycle[1], targetDCs[1])
-            elif currentRightDC < targetDCs[1]:
-                currentRightDC = min(currentRightDC + changesPerCycle[1], targetDCs[1])
-
-            print("New left DC: {}".format(currentLeftDC))
-            for motor in self.leftMotors:
-                motor.setMotion(int(currentLeftDC))
-
-            print("New right DC: {}".format(currentRightDC))
-            for motor in self.rightMotors:
-                motor.setMotion(int(currentRightDC))
-
-            time.sleep(self.speedChangeInterval)
-
-    def getDCChangePerCycle(self, targetDCs, currentLeftDC, currentRightDC):
-        deltaLeftDC = abs(targetDCs[0] - currentLeftDC)
-        deltaRightDC = abs(targetDCs[1] - currentRightDC)
-        maxDelta = max(deltaLeftDC, deltaRightDC)
-
-        steps = maxDelta / self.dcChangePerInterval
-
-        if steps > 0:
-            leftDCChangePerCycle = deltaLeftDC / steps
-            rightDCChangePerCycle = deltaRightDC / steps
-        else:
-            leftDCChangePerCycle = 0
-            rightDCChangePerCycle = 0
-
-        return leftDCChangePerCycle, rightDCChangePerCycle
 
     def getTargetMotorDCs(self, targetBearing, targetSpeed):
         if targetBearing == -1:
@@ -151,10 +90,13 @@ class MotorController:
         if speed < 0 or speed > 1:
             raise ValueError("Invalid speed: {}".format(speed))
 
-        with self.speedThreadSync:
-            self.targetBearing = bearing
-            self.targetSpeed = speed
-            self.speedThreadSync.notify()
+        leftDC, rightDC = self.getTargetMotorDCs(bearing, speed)
+        for leftMotor in self.leftMotors:
+            leftMotor.setMotion(leftDC)
+
+        for rightMotor in self.rightMotors:
+            rightMotor.setMotion(rightDC)
+
 
 
 class Driver:
@@ -167,7 +109,6 @@ class Driver:
         config = configparser.ConfigParser()
         config.read("rover.conf")
 
-        generalConfig = config["GENERAL"]
         leftMotorConfig = config["LEFTMOTOR"]
         rightMotorConfig = config["RIGHTMOTOR"]
 
@@ -181,9 +122,7 @@ class Driver:
                             int(rightMotorConfig["ReversePin"]),
                             float(rightMotorConfig["Trim"]))]
 
-        fullCycleRampUp = float(generalConfig["FullCycleRampUp"])
-
-        self.controller = MotorController(leftMotors, rightMotors, fullCycleRampUp)
+        self.controller = MotorController(leftMotors, rightMotors)
 
     def setBearing(self, bearing, speed):
         self.controller.setBearing(bearing, speed)
