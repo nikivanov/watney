@@ -107,8 +107,8 @@ class ServoController:
         self.neutral = 75000
         self.amplitude = 35000
         self.frequency = 50
-        self.speed_per_sec = 30000
-        self.resolution = 0.01
+        self.speed_per_sec = 50000
+        self.resolution = 0.03
         self.stopping = False
 
         # 1 is forward, -1 is backward, 0 is stop
