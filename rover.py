@@ -1,4 +1,3 @@
-import RPi.GPIO as GPIO
 import configparser
 import pigpio
 from threading import Thread, Condition
@@ -6,9 +5,10 @@ import time
 
 
 class Motor:
-    PWM_FREQUENCY = 30
+    PWM_FREQUENCY = 200
 
-    def __init__(self, pwmPin, forwardPin, reversePin, trim):
+    def __init__(self, pi, pwmPin, forwardPin, reversePin, trim):
+        self.pi = pi
         self.pwmPin = pwmPin
         self.forwardPin = forwardPin
         self.reversePin = reversePin
@@ -17,33 +17,31 @@ class Motor:
         self.__initMotor()
 
     def __initMotor(self):
-        GPIO.setup(self.pwmPin, GPIO.OUT)
-        GPIO.setup(self.forwardPin, GPIO.OUT)
-        GPIO.setup(self.reversePin, GPIO.OUT)
-        self.pwmControl = GPIO.PWM(self.pwmPin, self.PWM_FREQUENCY)
-        self.pwmControl.start(100)
+        self.pi.set_mode(self.forwardPin, pigpio.OUTPUT)
+        self.pi.set_mode(self.reversePin, pigpio.OUTPUT)
+        self.pi.set_PWM_frequency(self.pwmPin, self.PWM_FREQUENCY)
         self.stop()
 
     def stop(self):
-        GPIO.output(self.forwardPin, 0)
-        GPIO.output(self.reversePin, 0)
+        self.pi.write(self.forwardPin, 0)
+        self.pi.write(self.reversePin, 0)
 
     def setMotion(self, dutyCycle):
         self.stop()
 
         if dutyCycle != 0:
             if dutyCycle >= 0:
-                GPIO.output(self.forwardPin, 1)
+                self.pi.write(self.forwardPin, 1)
             else:
-                GPIO.output(self.reversePin, 1)
+                self.pi.write(self.reversePin, 1)
 
             targetDC = abs(dutyCycle * self.trim)
 
             # below 20 DC, the motor will stall, which isn't good for anybody
             if targetDC > 20:
-                self.pwmControl.ChangeDutyCycle(targetDC)
+                self.pi.set_PWM_dutycycle(self.pwmPin, int(targetDC / 100 * 255))
             else:
-                self.pwmControl.ChangeDutyCycle(0)
+                self.pi.set_PWM_dutycycle(self.pwmPin, 0)
 
 
 class MotorController:
@@ -182,7 +180,6 @@ class ServoController:
 
         print("Servo stopping...")
         self.pi.hardware_PWM(self.pwmPin, self.frequency, 0)
-        self.pi.stop()
 
     def __shouldBeMoving(self, currentPosition):
         if self.direction == 0:
@@ -201,8 +198,7 @@ class ServoController:
 class Driver:
 
     def __init__(self):
-        GPIO.setmode(GPIO.BOARD)
-
+        self.pi = pigpio.pi()
         print("Creating motor controller...")
 
         config = configparser.ConfigParser()
@@ -212,18 +208,18 @@ class Driver:
         rightMotorConfig = config["RIGHTMOTOR"]
         servoConfig = config["SERVO"]
 
-        leftMotors = [Motor(int(leftMotorConfig["PWMPin"]),
+        leftMotors = [Motor(self.pi, int(leftMotorConfig["PWMPin"]),
                             int(leftMotorConfig["ForwardPin"]),
                             int(leftMotorConfig["ReversePin"]),
                             float(leftMotorConfig["Trim"]))]
 
-        rightMotors = [Motor(int(rightMotorConfig["PWMPin"]),
+        rightMotors = [Motor(self.pi, int(rightMotorConfig["PWMPin"]),
                             int(rightMotorConfig["ForwardPin"]),
                             int(rightMotorConfig["ReversePin"]),
                             float(rightMotorConfig["Trim"]))]
 
         self.motorController = MotorController(leftMotors, rightMotors)
-        self.servoController = ServoController(int(servoConfig["PWMPin_BCM"]))
+        self.servoController = ServoController(int(servoConfig["PWMPin"]))
 
     def setBearing(self, bearing, speed):
         self.motorController.setBearing(bearing, speed)
@@ -241,7 +237,7 @@ class Driver:
         self.servoController.lookStop()
 
     def cleanup(self):
-        GPIO.cleanup()
         self.servoController.stop()
+        self.pi.stop()
 
 
