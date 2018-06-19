@@ -3,7 +3,7 @@ import json
 from rover import Driver
 import signal
 import sys
-
+from rover import MotorController
 
 app = Flask(__name__)
 roverDriver = None
@@ -16,6 +16,7 @@ def getPageHTML():
 
 @app.route('/js/<path:path>')
 def send_js(path):
+
     return send_from_directory('js', path)
 
 
@@ -23,16 +24,15 @@ def send_js(path):
 def setCommand():
     commandObj = json.loads(request.data.decode("utf-8"))
     newBearing = commandObj['bearing']
-    newSpeed = commandObj['speed']
     newLook = commandObj['look']
 
-    if (360 > newBearing >= 0 or newBearing == -1) and 1 >= newSpeed >= 0:
-        if newBearing == -1:
+    if newBearing in MotorController.validBearings:
+        if newBearing == "0":
             roverDriver.stop()
         else:
-            roverDriver.setBearing(newBearing, newSpeed)
+            roverDriver.setBearing(newBearing)
     else:
-        print("Invalid bearing {} at speed {}".format(newBearing, newSpeed))
+        print("Invalid bearing {}".format(newBearing))
         return "Invalid", 400
 
     if newLook == 0:

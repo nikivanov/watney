@@ -12,53 +12,43 @@
         var down = false;
         var left = false;
         var right = false;
-        var turbo = false;
         var lookUp = false;
         var lookDown = false;
         
         var lastBearing = -1;
-        var lastSpeed = -1;
         var lastLook = 0;
         
         function sendKeys() {
-            var bearing = -1;
-            var speed = 0;
+            var bearing = "0";
             var look = 0
-
-            if (turbo) {
-                speed = 1;
-            }
-            else {
-                speed = 0.5;
-            }
             
             if (up) {
                 if (left) {
-                    bearing = 135;
+                    bearing = "nw";
                 }
                 else if (right) {
-                    bearing = 45;
+                    bearing = "ne";
                 }
                 else {
-                    bearing = 90;
+                    bearing = "n";
                 }
             }
             else if (down) {
                 if (left) {
-                    bearing = 225;
+                    bearing = "sw";
                 }
                 else if (right) {
-                    bearing = 315;
+                    bearing = "se";
                 }
                 else {
-                    bearing = 270;
+                    bearing = "s";
                 }
             }
             else if (left) {
-                bearing = 180;
+                bearing = "w";
             }
             else if (right) {
-                bearing = 0;
+                bearing = "e";
             }
 
             if (lookUp) {
@@ -68,13 +58,11 @@
                 look = -1;
             }
 
-            if (lastBearing != bearing ||  lastSpeed != speed || lastLook != look) {
+            if (lastBearing != bearing || lastLook != look) {
                 lastBearing = bearing;
-                lastSpeed = speed;
                 lastLook = look;
                 var commandObj = {
                     'bearing': bearing,
-                    'speed': speed,
                     'look': look
                 };
             
@@ -93,10 +81,6 @@
         $(document).ready(function() {
             $("#inputControl").keydown(function(event) {
                 event.preventDefault();
-
-                if (event.shiftKey) {
-                    turbo = true;
-                }
 
                 if (event.keyCode == 38) {
                     up = true;
@@ -123,10 +107,6 @@
             $("#inputControl").keyup(function(event) {
                 event.preventDefault();
 
-                if (!event.shiftKey) {
-                    turbo = false;
-                }
-                
                 if (event.keyCode == 38) {
                     up = false;
                 }

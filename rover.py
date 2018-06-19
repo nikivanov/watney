@@ -45,67 +45,66 @@ class Motor:
 
 
 class MotorController:
+    halfSteerOffset = 0.3
+    validBearings = ["n", "ne", "e", "se", "s", "sw", "w", "nw", "0"]
 
     def __init__(self, leftMotors, rightMotors):
         self.leftMotors = leftMotors
         self.rightMotors = rightMotors
 
-    def getTargetMotorDCs(self, targetBearing, targetSpeed):
+    def getTargetMotorDCs(self, targetBearing):
         if targetBearing == -1:
             leftDC = 0
             rightDC = 0
-        elif targetBearing <= 90:
+        elif targetBearing == "n":
             leftDC = 100
-            rightDC = float(targetBearing) / 90 * 100
-        elif targetBearing <= 180:
-            leftDC = float(180 - targetBearing) / 90 * 100
             rightDC = 100
-        elif targetBearing <= 270:
-            leftDC = float(targetBearing - 180) / 90 * 100
+        elif targetBearing == "ne":
+            leftDC = 100
+            rightDC = 100 * self.halfSteerOffset
+        elif targetBearing == "e":
+            leftDC = 100
+            rightDC = -100
+        elif targetBearing == "se":
+            leftDC = -100
+            rightDC = -100 * self.halfSteerOffset
+        elif targetBearing == "s":
+            leftDC = -100
+            rightDC = -100
+        elif targetBearing == "sw":
+            leftDC = -100 * self.halfSteerOffset
+            rightDC = -100
+        elif targetBearing == "w":
+            leftDC = -100
+            rightDC = 100
+        elif targetBearing == "nw":
+            leftDC = 100 * self.halfSteerOffset
             rightDC = 100
         else:
-            leftDC = 100
-            rightDC = float(360 - targetBearing) / 90 * 100
-
-        if targetSpeed == 1:
-            understeer = 0.8
-            if leftDC < 100:
-                leftDC = leftDC * understeer
-            if rightDC < 100:
-                rightDC = rightDC * understeer
-
-        leftDC = leftDC * targetSpeed
-        rightDC = rightDC * targetSpeed
-
-        reversing = targetBearing > 180
-        if reversing:
-            leftDC = leftDC * -1
-            rightDC = rightDC * -1
+            raise Exception("Bad bearing: " + targetBearing)
 
         return int(leftDC), int(rightDC)
 
-    def setBearing(self, bearing, speed):
-        if (bearing < 0 or bearing > 359) and bearing != -1:
+    def setBearing(self, bearing):
+        if bearing not in self.validBearings and bearing != -1:
             raise ValueError("Invalid bearing: {}".format(bearing))
 
-        if speed < 0 or speed > 1:
-            raise ValueError("Invalid speed: {}".format(speed))
-
-        leftDC, rightDC = self.getTargetMotorDCs(bearing, speed)
+        leftDC, rightDC = self.getTargetMotorDCs(bearing)
         for leftMotor in self.leftMotors:
             leftMotor.setMotion(leftDC)
 
         for rightMotor in self.rightMotors:
             rightMotor.setMotion(rightDC)
 
+
 class ServoController:
 
     def __init__(self, pwmPin):
         self.pwmPin = pwmPin
-        self.neutral = 75000
-        self.amplitude = 35000
+        self.neutral = 750
+        self.amplitude = 350
         self.frequency = 50
-        self.speed_per_sec = 50000
+        self.speed_per_sec = 500
         self.resolution = 0.03
         self.stopping = False
 
@@ -145,9 +144,11 @@ class ServoController:
 
     def timingLoop(self):
         print("Servo starting...")
+        self.pi.set_PWM_range(self.pwmPin, 10000)
 
         # go neutral first
-        self.pi.hardware_PWM(self.pwmPin, self.frequency, self.neutral)
+        self.pi.set_PWM_frequency(self.pwmPin, self.frequency)
+        self.pi.set_PWM_dutycycle(self.pwmPin, self.neutral)
         time.sleep(2)
 
         currentPosition = self.neutral
@@ -175,11 +176,11 @@ class ServoController:
                     currentPosition = int(max(currentPosition - changeDelta, self.neutral - self.amplitude))
 
             # print("Pin {} frequency {} position {}".format(self.pwmPin, self.frequency, currentPosition))
-            self.pi.hardware_PWM(self.pwmPin, self.frequency, currentPosition)
+            self.pi.set_PWM_dutycycle(self.pwmPin, currentPosition)
             time.sleep(self.resolution)
 
         print("Servo stopping...")
-        self.pi.hardware_PWM(self.pwmPin, self.frequency, 0)
+        self.pi.set_PWM_dutycycle(self.pwmPin, 0)
 
     def __shouldBeMoving(self, currentPosition):
         if self.direction == 0:
@@ -190,9 +191,6 @@ class ServoController:
             return False
 
         return True
-
-
-
 
 
 class Driver:
@@ -214,18 +212,18 @@ class Driver:
                             float(leftMotorConfig["Trim"]))]
 
         rightMotors = [Motor(self.pi, int(rightMotorConfig["PWMPin"]),
-                            int(rightMotorConfig["ForwardPin"]),
-                            int(rightMotorConfig["ReversePin"]),
-                            float(rightMotorConfig["Trim"]))]
+                             int(rightMotorConfig["ForwardPin"]),
+                             int(rightMotorConfig["ReversePin"]),
+                             float(rightMotorConfig["Trim"]))]
 
         self.motorController = MotorController(leftMotors, rightMotors)
         self.servoController = ServoController(int(servoConfig["PWMPin"]))
 
-    def setBearing(self, bearing, speed):
-        self.motorController.setBearing(bearing, speed)
+    def setBearing(self, bearing):
+        self.motorController.setBearing(bearing)
 
     def stop(self):
-        self.motorController.setBearing(-1, 0)
+        self.motorController.setBearing(-1)
 
     def lookUp(self):
         self.servoController.backward()
@@ -239,5 +237,3 @@ class Driver:
     def cleanup(self):
         self.servoController.stop()
         self.pi.stop()
-
-
