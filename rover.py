@@ -99,19 +99,19 @@ class MotorController:
 
 class ServoController:
 
-    def __init__(self, pwmPin):
+    def __init__(self, pi, pwmPin):
         self.pwmPin = pwmPin
-        self.neutral = 750
-        self.amplitude = 350
+        self.neutral = 75000
+        self.amplitude = 25000
         self.frequency = 50
-        self.speed_per_sec = 500
+        self.speed_per_sec = 30000
         self.resolution = 0.03
         self.stopping = False
 
         # 1 is forward, -1 is backward, 0 is stop
         self.direction = 0
 
-        self.pi = pigpio.pi()
+        self.pi = pi
 
         self.timingLock = Condition()
         self.timingThread = Thread(daemon=True, target=self.timingLoop)
@@ -144,12 +144,11 @@ class ServoController:
 
     def timingLoop(self):
         print("Servo starting...")
-        self.pi.set_PWM_range(self.pwmPin, 10000)
 
         # go neutral first
-        self.pi.set_PWM_frequency(self.pwmPin, self.frequency)
-        self.pi.set_PWM_dutycycle(self.pwmPin, self.neutral)
+        self.pi.hardware_PWM(self.pwmPin, self.frequency, self.neutral)
         time.sleep(2)
+        self.pi.hardware_PWM(self.pwmPin, self.frequency, 0)
 
         currentPosition = self.neutral
         lastChangeTime = -1
@@ -157,6 +156,7 @@ class ServoController:
         while True:
             with self.timingLock:
                 if not self.__shouldBeMoving(currentPosition):
+                    self.pi.hardware_PWM(self.pwmPin, self.frequency, 0)
                     print("Servo idling...")
                     self.timingLock.wait()
                     print("Servo woke up...")
@@ -176,11 +176,11 @@ class ServoController:
                     currentPosition = int(max(currentPosition - changeDelta, self.neutral - self.amplitude))
 
             # print("Pin {} frequency {} position {}".format(self.pwmPin, self.frequency, currentPosition))
-            self.pi.set_PWM_dutycycle(self.pwmPin, currentPosition)
+            self.pi.hardware_PWM(self.pwmPin, self.frequency, currentPosition)
             time.sleep(self.resolution)
 
         print("Servo stopping...")
-        self.pi.set_PWM_dutycycle(self.pwmPin, 0)
+        self.pi.hardware_PWM(self.pwmPin, self.frequency, 0)
 
     def __shouldBeMoving(self, currentPosition):
         if self.direction == 0:
@@ -217,7 +217,7 @@ class Driver:
                              float(rightMotorConfig["Trim"]))]
 
         self.motorController = MotorController(leftMotors, rightMotors)
-        self.servoController = ServoController(int(servoConfig["PWMPin"]))
+        self.servoController = ServoController(self.pi, int(servoConfig["PWMPin"]))
 
     def setBearing(self, bearing):
         self.motorController.setBearing(bearing)
