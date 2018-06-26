@@ -2,6 +2,8 @@ import configparser
 import pigpio
 from threading import Thread, Condition
 import time
+import os
+import sys
 
 
 class Motor:
@@ -196,6 +198,7 @@ class ServoController:
 class Driver:
 
     def __init__(self):
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
         self.pi = pigpio.pi()
         print("Creating motor controller...")
 

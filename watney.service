@@ -1,0 +1,10 @@
+[Unit]
+Description=Watney Service
+After=multi-user.target
+
+[Service]
+Type=idle
+ExecStart=/usr/bin/python3 -u /home/pi/watney/server.py
+
+[Install]
+WantedBy=multi-user.target
