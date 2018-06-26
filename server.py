@@ -4,6 +4,7 @@ from rover import Driver
 import signal
 import sys
 from rover import MotorController
+from subprocess import call
 
 app = Flask(__name__)
 roverDriver = None
@@ -16,7 +17,6 @@ def getPageHTML():
 
 @app.route('/js/<path:path>')
 def send_js(path):
-
     return send_from_directory('js', path)
 
 
@@ -46,6 +46,10 @@ def setCommand():
         return "Invalid", 400
 
     return "OK"
+
+@app.route("/shutDown", methods=['POST'])
+def shutdown():
+    call("sudo halt", shell=True)
 
 def signal_handler(signal, frame):
     roverDriver.cleanup()
