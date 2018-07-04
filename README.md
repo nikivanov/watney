@@ -3,7 +3,8 @@ Watney Rover
 
 
 <p align="center">
-  <img width="40%" height="auto" src="images/main_photo.png?raw=true" onmouseover="this.src='images/main_render.png?raw=true'" onmouseout="this.src='images/main_photo.png?raw=true'">
+  <img width="45%" height="auto" src="images/main_photo.png?raw=true">
+  <img width="45%" height="auto" src="images/main-render.png?raw=true">
 </p>
 
 <h1>
