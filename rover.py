@@ -47,56 +47,123 @@ class Motor:
 
 
 class MotorController:
-    halfSteerOffset = 0.3
     validBearings = ["n", "ne", "e", "se", "s", "sw", "w", "nw", "0"]
 
-    def __init__(self, leftMotors, rightMotors):
-        self.leftMotors = leftMotors
-        self.rightMotors = rightMotors
+    def __init__(self, leftMotor, rightMotor, halfTurnSpeed, softTurnForwardRatio, softTurnPeriod):
+        self.leftMotor = leftMotor
+        self.rightMotor = rightMotor
+        self.halfTurnSpeed = halfTurnSpeed
 
-    def getTargetMotorDCs(self, targetBearing):
-        if targetBearing == -1:
-            leftDC = 0
-            rightDC = 0
-        elif targetBearing == "n":
-            leftDC = 100
-            rightDC = 100
-        elif targetBearing == "ne":
-            leftDC = 100
-            rightDC = 100 * self.halfSteerOffset
-        elif targetBearing == "e":
-            leftDC = 100
-            rightDC = -100
-        elif targetBearing == "se":
-            leftDC = -100
-            rightDC = -100 * self.halfSteerOffset
-        elif targetBearing == "s":
-            leftDC = -100
-            rightDC = -100
-        elif targetBearing == "sw":
-            leftDC = -100 * self.halfSteerOffset
-            rightDC = -100
-        elif targetBearing == "w":
-            leftDC = -100
-            rightDC = 100
-        elif targetBearing == "nw":
-            leftDC = 100 * self.halfSteerOffset
-            rightDC = 100
-        else:
-            raise Exception("Bad bearing: " + targetBearing)
+        self.softTurnForwardSec = softTurnPeriod * softTurnForwardRatio
+        self.softTurnBackwardsSec = softTurnPeriod * (1 - softTurnForwardRatio)
 
-        return int(leftDC), int(rightDC)
+        self.newBearing = None
+        self.newSoft = False
 
-    def setBearing(self, bearing):
+        self.shuttingDown = False
+        self.motorsLock = Condition()
+        self.motorsThread = Thread(daemon=True, target=self.motorsLoop)
+        self.motorsThread.start()
+
+    def motorsLoop(self):
+        bearing = None
+        soft = False
+
+        while True:
+            with self.motorsLock:
+                if self.shuttingDown:
+                    break
+
+                if self.newBearing == bearing and self.newSoft == soft:
+                    print("Motors going to sleep")
+                    self.motorsLock.wait()
+
+                if self.newBearing != bearing or self.newSoft != soft:
+                    print("Motors woke up")
+
+                    bearing = self.newBearing
+                    soft = self.newSoft
+
+                    leftDC = None
+                    rightDC = None
+
+                    if bearing == -1:
+                        leftDC = 0
+                        rightDC = 0
+                    elif bearing == "n":
+                        leftDC = 100
+                        rightDC = 100
+                    elif bearing == "ne":
+                        leftDC = 100
+                        rightDC = 100 * self.halfTurnSpeed
+                    elif bearing == "e" and not soft:
+                        leftDC = 100
+                        rightDC = -100
+                    elif bearing == "se":
+                        leftDC = -100
+                        rightDC = -100 * self.halfTurnSpeed
+                    elif bearing == "s":
+                        leftDC = -100
+                        rightDC = -100
+                    elif bearing == "sw":
+                        leftDC = -100 * self.halfTurnSpeed
+                        rightDC = -100
+                    elif bearing == "w" and not soft:
+                        leftDC = -100
+                        rightDC = 100
+                    elif bearing == "nw":
+                        leftDC = 100 * self.halfTurnSpeed
+                        rightDC = 100
+
+                    if leftDC is not None and rightDC is not None:
+                        self.leftMotor.setMotion(int(leftDC))
+                        self.rightMotor.setMotion(int(rightDC))
+                        self.motorsLock.wait()
+                    elif (bearing == "e" or bearing == "w") and soft:
+                        if bearing == "e":
+                            forwardMotor = self.leftMotor
+                            backwardsMotor = self.rightMotor
+                        else:
+                            forwardMotor = self.rightMotor
+                            backwardsMotor = self.leftMotor
+
+                        forwardMotor.setMotion(100)
+                        while True:
+                            backwardsMotor.setMotion(100)
+
+                            changed = self.motorsLock.wait(self.softTurnForwardSec)
+                            if changed:
+                                break
+
+                            backwardsMotor.setMotion(-100)
+                            changed = self.motorsLock.wait(self.softTurnBackwardsSec)
+                            if changed:
+                                break
+                    else:
+                        # this code path should never be reached
+                        raise Exception("Unable to determine bearing")
+
+    def stop(self):
+        with self.motorsLock:
+            print("Waiting for motor thread to stop...")
+            self.shuttingDown = True
+            self.motorsLock.notify()
+
+        print("Joining the timing thread")
+        self.motorsThread.join()
+        print("Motor thread stopped")
+
+    def setBearing(self, bearing, soft):
         if bearing not in self.validBearings and bearing != -1:
             raise ValueError("Invalid bearing: {}".format(bearing))
 
-        leftDC, rightDC = self.getTargetMotorDCs(bearing)
-        for leftMotor in self.leftMotors:
-            leftMotor.setMotion(leftDC)
+        self.newBearing = bearing
+        self.newSoft = soft
 
-        for rightMotor in self.rightMotors:
-            rightMotor.setMotion(rightDC)
+        with self.motorsLock:
+            self.motorsLock.notify()
+
+
 
 
 class ServoController:
@@ -108,7 +175,7 @@ class ServoController:
         self.frequency = 50
         self.speed_per_sec = 30000
         self.resolution = 0.03
-        self.stopping = False
+        self.shuttingDown = False
 
         # 1 is forward, -1 is backward, 0 is stop
         self.direction = 0
@@ -163,7 +230,7 @@ class ServoController:
                     self.timingLock.wait()
                     print("Servo woke up...")
 
-                if self.stopping:
+                if self.shuttingDown:
                     break
 
                 if lastChangeTime == -1:
@@ -205,28 +272,34 @@ class Driver:
         config = configparser.ConfigParser()
         config.read("rover.conf")
 
+        driverConfig = config["DRIVER"]
         leftMotorConfig = config["LEFTMOTOR"]
         rightMotorConfig = config["RIGHTMOTOR"]
         servoConfig = config["SERVO"]
 
-        leftMotors = [Motor(self.pi, int(leftMotorConfig["PWMPin"]),
+        leftMotor = Motor(self.pi, int(leftMotorConfig["PWMPin"]),
                             int(leftMotorConfig["ForwardPin"]),
                             int(leftMotorConfig["ReversePin"]),
-                            float(leftMotorConfig["Trim"]))]
+                            float(leftMotorConfig["Trim"]))
 
-        rightMotors = [Motor(self.pi, int(rightMotorConfig["PWMPin"]),
+        rightMotor = Motor(self.pi, int(rightMotorConfig["PWMPin"]),
                              int(rightMotorConfig["ForwardPin"]),
                              int(rightMotorConfig["ReversePin"]),
-                             float(rightMotorConfig["Trim"]))]
+                             float(rightMotorConfig["Trim"]))
 
-        self.motorController = MotorController(leftMotors, rightMotors)
+        self.motorController = MotorController(leftMotor,
+                                               rightMotor,
+                                               float(driverConfig["HalfTurnSpeed"]),
+                                               float(driverConfig["SoftTurnForwardAssistRatio"]),
+                                               float(driverConfig["SoftTurnPeriod"]))
+
         self.servoController = ServoController(self.pi, int(servoConfig["PWMPin"]))
 
-    def setBearing(self, bearing):
-        self.motorController.setBearing(bearing)
+    def setBearing(self, bearing, soft):
+        self.motorController.setBearing(bearing, soft)
 
     def stop(self):
-        self.motorController.setBearing(-1)
+        self.motorController.setBearing(-1, False)
 
     def lookUp(self):
         self.servoController.backward()
@@ -238,5 +311,6 @@ class Driver:
         self.servoController.lookStop()
 
     def cleanup(self):
+        self.motorController.stop()
         self.servoController.stop()
         self.pi.stop()

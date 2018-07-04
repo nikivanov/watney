@@ -24,13 +24,14 @@ def send_js(path):
 def setCommand():
     commandObj = json.loads(request.data.decode("utf-8"))
     newBearing = commandObj['bearing']
+    soft = commandObj['soft']
     newLook = commandObj['look']
 
     if newBearing in MotorController.validBearings:
         if newBearing == "0":
             roverDriver.stop()
         else:
-            roverDriver.setBearing(newBearing)
+            roverDriver.setBearing(newBearing, soft)
     else:
         print("Invalid bearing {}".format(newBearing))
         return "Invalid", 400
