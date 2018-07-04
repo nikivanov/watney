@@ -3,10 +3,7 @@ Watney Rover
 
 
 <p align="center">
-  <img width="32%" height="auto" src="images/watney.png?raw=true">
-  <img width="32%" height="auto" src="images/watney-nocover.png?raw=true">
-  <img width="32%" height="auto" src="images/watney-new.png?raw=true">
-  <img width="96%" height="auto" src="images/watneys.jpg?raw=true">
+  <img width="40%" height="auto" src="images/main_photo.png?raw=true" onmouseover="this.src='images/main_render.png?raw=true'" onmouseout="this.src='images/main_photo.png?raw=true'">
 </p>
 
 <h1>
