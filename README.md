@@ -4,7 +4,7 @@ Watney Rover
 
 <p align="center">
   <img width="45%" height="auto" src="images/main_photo.png?raw=true">
-  <img width="45%" height="auto" src="images/main-render.png?raw=true">
+  <img width="45%" height="auto" src="images/main_render.png?raw=true">
 </p>
 
 <h1>
