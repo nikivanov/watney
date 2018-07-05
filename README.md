@@ -9,19 +9,27 @@ Watney Rover
 </p>
 
 <h1>
-<a href="https://i.imgur.com/vydmPej.gifv" target="_blank">Video</a>
+<a href="https://i.imgur.com/pWdW8e0.gifv" target="_blank">Demo Video</a>
 </h1>
 
-Watney is a low-cost Raspberry Pi-enabled rover made of readily available parts. At the heart of it is
-Raspberry Pi Zero W powered by a small phone battery bank. Two motors and a controller
-provide direct drive to rear wheels and an RPi camera is mounted in the front.
-Very little to no soldering required. The driving library is written in Python.
+Watney is a low-cost Raspberry Pi-enabled rover made of readily available parts. It has a Python and a REST APIs.
+Watney is all-wheel drive, with each side powered by a geared motor. Because of that, it turns like a tank by spinning
+each side in opposite directions. It drives best on smooth surfaces, like hardwood, linoleum and tile. For carpeted
+surfaces, Watney can do "soft turns", by spinning one side forward and the other alternating backwards and forwards.
 
+The software part of Watney makes it a webcam on wheels. The camera feed is low-latency HD and rover 
+control is accessible via a browser.
 
-Besides the components listed above, some breadboard jumper wires and M3
-screws, the rest of the components are 3D-printable.
+The HD camera feed is provided by [rpi-webrtc-streamer](https://github.com/kclyu/rpi-webrtc-streamer).
 
-The software part of Watney provides webcam-on-wheels functionality. The camera feed is low-latency HD and you control the rover from your browser. The HD camera feed is provided using the excellent [rpi-webrtc-streamer](https://github.com/kclyu/rpi-webrtc-streamer).
+Upon startup, Watney will detect if it's connected to a Wi-Fi hotspot. If not, it will host its own hotspot "Watney4".
+Once you connect to the hotspot, you can control it directly by going to http://192.168.4.1:5000, or connect it to a Wi-Fi
+hotspot by going to http://192.168.4.1. For advanced Wi-Fi setup, you can ssh to 192.168.4.1 (default credentials pi / 
+watney4) and edit wpa_supplicant.conf directly.
+
+Wi-Fi configuration is provided by [Raspberry Pi Turnkey](https://github.com/schollz/raspberry-pi-turnkey) 
+ 
+
 
 
 Components
@@ -31,22 +39,19 @@ Components
 All of these components can be found on Amazon, Ebay, AliExpress, Banggood and others.
 
 * **Raspberry Pi Zero W**
-If you live near a MicroCenter in the US, you could get one of these for $5. You also obviously need an SD card.
-* **Raspberry Pi Camera with Zero-compatible cable**
-I highly recommend the fish-eye camera for better FOV, but you can get a cheap camera on ebay for about $9 if you search for "raspberry pi zero camera". You can also give the night-vision camera a go, but you'd need to modify the housing.
-* **USB power bank that provides at least 1A**
-Bigger is better as long as it fits on the roof
+* **SD Card 4GB+**
+* **Sainsmart wide-angle Raspberry Pi camera** ([Sainsmart](https://www.sainsmart.com/products/noir-wide-angle-fov160-5-megapixel-camera-module) | [Amazon](http://a.co/eiLew1B))
+* **USB power bank that provides at least 1A** Bigger is better as long as it fits on the roof
 * **2x Arduino geared DC motors** ([Amazon](http://a.co/7sPakWM) | [AliExpress](https://www.aliexpress.com/item/TT-Motor-Smart-Car-Robot-Gear-Motor-for-Arduino-Free-Shipping/32529098435.html))
 * **L298N H-bridge controller** ([Amazon](https://www.amazon.com/s/field-keywords=l298n) | [AliExpress](https://www.aliexpress.com/item/Free-Shipping-New-Dual-H-Bridge-DC-Stepper-Motor-Drive-Controller-Board-Module-L298N-MOTOR-DRIVER/32769190826.html))
-* **Jumper wire 10cm or longer** ([Amazon](http://a.co/e25UqlS) or any other set of 10mm jumper wires)
-* **M3 screws** ([Amazon](http://a.co/bRE14nB) or any other M3 set)
+* **Jumper wire 15cm or longer** ([Amazon](http://a.co/e25UqlS))
+* **M3 screws 6mm - 20mm** ([Amazon](http://a.co/eMCbWCn))
 
-The major components (minus wire and screws) can be bought for around $40 depending on where you live.
 
 
 Assembly
 --------
-![Wiring](images/Wiring.jpg?raw=true)
+![Wiring](images/assembly.jpg?raw=true)
 
 1. Print out all of the parts found in the STLs folder (See printing instructions on [Thingiverse](https://www.thingiverse.com/thing:2810420))
 2. Install the GPIO header on the Raspberry Pi. Set up Raspbian and get it connected to your WiFi network
