@@ -79,7 +79,7 @@ with an allen wrench while turning the wheel to drive the screw in. Don't overti
 and the screw cap should be flush with the column, or just stick out a tiny bit. Repeat for the other 3 wheels.
 4. Install transfer gears next to the wheel gears, with spacers facing the columns, using 16mm screws.
 5. Put the motors into the housing with leads facing outwards. Run the wires through the holes in the housing. 
-The wires should be about 130mm long.
+The wires should be about 150mm long.
 Secure the housing to the bottom with 6mm screws. 
 6. M3 screws are a bit too big for Raspberry Pi mounting holes. Run a 1/8" drill bit through them, file them, or just 
 put an M3 screw through them carefully to expand them a bit. Attach the camera cable and the Micro-USB cable to the Raspberry Pi.
