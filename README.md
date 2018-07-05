@@ -12,7 +12,9 @@ Watney Rover
 <a href="https://i.imgur.com/pWdW8e0.gifv" target="_blank">Demo Video</a>
 </h1>
 
-Watney is a low-cost Raspberry Pi-enabled rover made of readily available parts. It has a Python and a REST APIs.
+Watney is a low-cost Raspberry Pi-enabled rover made of readily available parts.
+The majority of Watney's parts are 3D-printable.
+It has a Python and a REST APIs.
 Watney is all-wheel drive, with each side powered by a geared motor. Because of that, it turns like a tank by spinning
 each side in opposite directions. It drives best on smooth surfaces, like hardwood, linoleum and tile. For carpeted
 surfaces, Watney can do "soft turns", by spinning one side forward and the other alternating backwards and forwards.
@@ -38,7 +40,7 @@ Components
 
 All of these components can be found on Amazon, Ebay, AliExpress, Banggood and others.
 
-* **Raspberry Pi Zero W**
+* **Raspberry Pi Zero W with GPIO header**
 * **SD Card 4GB+**
 * **Sainsmart wide-angle Raspberry Pi camera** ([Sainsmart](https://www.sainsmart.com/products/noir-wide-angle-fov160-5-megapixel-camera-module) | [Amazon](http://a.co/eiLew1B))
 * **Pi Zero-compatible camera cable**
@@ -55,10 +57,33 @@ Assembly
 --------
 ![Wiring](images/assembly.jpg?raw=true)
 
-1. Print out all of the parts found in the STLs folder (See printing instructions on [Thingiverse](https://www.thingiverse.com/thing:2810420))
-2. Install the GPIO header on the Raspberry Pi. Set up Raspbian and get it connected to your WiFi network
-3. M3 screws are a bit too big for Raspberry Pi mounting holes. Run a 1/8" drill bit through them, file them, or just put an M3 screw through them carefully to expand them a bit.
-4. Attach the parts as shown in the picture. Motors should face leads out with about 130mm of wire coming out of them. Match [Raspberry Pi BOARD GPIO](images/pi-gpio.png) with the controller as follows:
+1. Print all parts except the tires in PETG. Print tires in TPU.
+    * 1x bottom.stl - print with a brim of about 15 lines to prevent edge lift
+    * 1x camera body.stl 
+    * 1x camera bucket.stl - print with supports
+    * 1x camera cover.stl
+    * 1x cover.stl - supports are only needed for the camera bucket opening. Add a brim to prevent edge lift.
+    * 2x drive gear.stl
+    * 1x motor housing.stl
+    * 1x servo pillar.stl
+    * 4x spacer.stl
+    * 1x swivel pillar.stl
+    * 4x tire.stl - print in TPU. If you don't have TPU, use rubber bands
+    * 4x transfer gear.stl
+    * 4x wheel.stl
+    * 4x wheel gear.stl
+2. Put tires over the wheels.
+3. Match wheels with wheel gears. They should snap together without too much force. Snap a wheel gear and a wheel 
+together through the hole in the body, put a spacer between the gear and the column and put a 20mm screw. Hold the screw
+with an allen wrench while turning the wheel to drive the screw in. Don't overtighten. The wheel should rotate freely
+and the screw cap should be flush with the column, or just stick out a tiny bit. Repeat for the other 3 wheels.
+4. Install transfer gears next to the wheel gears, with spacers facing the columns, using 16mm screws.
+5. Put the motors into the housing with leads facing outwards. Run the wires through the holes in the housing. Secure
+the housing to the bottom with 6mm screws. The wires should be about 130mm long.
+6. M3 screws are a bit too big for Raspberry Pi mounting holes. Run a 1/8" drill bit through them, file them, or just 
+put an M3 screw through them carefully to expand them a bit. Attach the camera cable to the Raspberry Pi and secure it 
+to the cover using 6mm screws. Attach the Micro-USB cable from the power bank to the Raspberry Pi.
+7. Connect motor wires to the outputs of the motor controller. Connect the controller to the Raspberry Pi as follows:
    * 12V - Pin 2
    * Gnd - Pin 14
    * ENA - Pin 36
@@ -67,42 +92,34 @@ Assembly
    * IN3 - Pin 11
    * IN4 - Pin 13
    * ENB - Pin 15
-   
-Servo:
-   * Black - Pin 6
-   * Red - Pin 4
-   * White - Pin 32
-5. Route the USB cable so it matches the notch on the cover, close the cover and secure it with a screw
-6. Attach the caster mount using screws on the left and right. Attach the caster articulator and secure it with the cap. Put a screw through the center of the cap. Secure the caster wheel with a screw and a nut - use superglue or thread locker to make sure the nut stays in place without overtightening
-7. Attach the camera mount, arm and the housing
-8. Attach the wheels
-9. Affix the battery pack to the roof using hotglue, double-side tape or something of that sort. Make sure the USB cable is long enough to reach the port
-
-
-Software
---------
-
-1. Clone the repo or download the repo zip and unpack it into the home directory of your Watney. SSH into Watney.
-2. Install RWS: sudo dpkg -i rws_0.72.0_RaspiZeroW_armhf.deb
-3. Modify media_config.conf if needed, though the default settings should be sufficient
-4. Copy media_config.conf: sudo cp media_config.conf /opt/rws/etc/
-5. Restart RWS to pick up the changes:
-   * sudo systemctl stop rws
-   * sudo systemctl start rws
-6. Make sure Python 3 PIP is installed: sudo apt-get install python3-pip
-7. Make sure Python 3 Rpi GPIO is installed: sudo apt-get install python3-rpi.gpio
-8. Install Flask: pip3 install flask
-9. Run Watney web server: python3 server.py
-
-At this point, you should be able to access and control Watney on your computer by going to http://[Your Watney IP]:5000. Click on the input field at the bottom of the page and control your rover with arrow keys. Press Shift to sprint. Some geared DC motors don't like going at low speeds, so if your rover has trouble turning gradually (as when you press Up and Right, for instance), edit your index.html and change the non-turbo speed from 0.5 to 0.7.
-
-You should shut down the rover gracefully before unplugging it from the power supply by executing "sudo halt" via SSH and waiting about 10 seconds for Linux to shut down.
+8. Attach the motor controller to the bottom using 6mm screws.
+9. Secure the camera bucket to the cover using 6mm screws.
+10. Attach the servo arm to the camera body.
+11. Insert the servo into the servo pillar and secure it with one of the bigger screws that came with the servo. Don't
+attach the pillar just yet - the servo needs to be in the neutral position before it can be attached to the camera.
+12. Connect the servo as follows:
+    * Black - Pin 6
+    * Red - Pin 4
+    * White - Pin 32
+12. Download the latest Watney release image and burn it onto the SD card.
+13. Connect your Pi to the power bank. The servo should move to the neutral position when it's booted up. Power down
+the Pi.
+14. Carefully attach the camera body vertically to the servo.
+15. Thread the camera cable through the body. Attach it to the camera. Secure the camera in the body with the cover.
+16. Secure the servo pillar to the cover using a 12mm screw and a 16mm screw.
+17. Secure the swivel pillar to the cover using same size screws.
+18. Attach the camera body to the swivel column using a 12mm screw. Don't overtighten.
+19. Attach your power bank to the top of the cover using double-sided tape, hot glue etc.
+20. Make sure the rover is working. If one of the motors is spinning in the wrong direction, swap ForwardPin and 
+ReversePin in ~/watney/rover.conf. Once everything is in order, secure the cover to the bottom using 12mm screws.
 
 
 Configuration
 -------------
 
-Rover configuration can be found in rover.conf:
+Default credentials for Watney are pi / watney4. Watney's mDNS name is watney4.local.
+
+Rover configuration can be found in ~/watney/rover.conf:
 * If you want to use different GPIO pins, you can specify them here
 * If you find a motor running in reverse (backwards when it's supposed to be rotating forward) simply swap ForwardPin and ReversePin
-* If you find the rover veering off to a side when it's supposed to be going straight, set the trim value appropriately. See the configuration file for an explanation
+* Several advanced configuration values can be found there as well - modify at your own risk!
