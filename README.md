@@ -74,7 +74,7 @@ Assembly
     * 4x wheel gear.stl
 2. Put tires over the wheels.
 3. Match wheels with wheel gears. They should snap together without too much force. Snap a wheel gear and a wheel 
-together through the hole in the body, put a spacer between the gear and the column and put a 20mm screw. Hold the screw
+together through the hole in the body, put a spacer between the gear and the column and thread a 20mm screw. Hold the screw
 with an allen wrench while turning the wheel to drive the screw in. Don't overtighten. The wheel should rotate freely
 and the screw cap should be flush with the column, or just stick out a tiny bit. Repeat for the other 3 wheels.
 4. Install transfer gears next to the wheel gears, with spacers facing the columns, using 16mm screws.
