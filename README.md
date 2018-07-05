@@ -41,9 +41,11 @@ All of these components can be found on Amazon, Ebay, AliExpress, Banggood and o
 * **Raspberry Pi Zero W**
 * **SD Card 4GB+**
 * **Sainsmart wide-angle Raspberry Pi camera** ([Sainsmart](https://www.sainsmart.com/products/noir-wide-angle-fov160-5-megapixel-camera-module) | [Amazon](http://a.co/eiLew1B))
+* **Pi Zero-compatible camera cable**
 * **USB power bank that provides at least 1A** Bigger is better as long as it fits on the roof
 * **2x Arduino geared DC motors** ([Amazon](http://a.co/7sPakWM) | [AliExpress](https://www.aliexpress.com/item/TT-Motor-Smart-Car-Robot-Gear-Motor-for-Arduino-Free-Shipping/32529098435.html))
 * **L298N H-bridge controller** ([Amazon](https://www.amazon.com/s/field-keywords=l298n) | [AliExpress](https://www.aliexpress.com/item/Free-Shipping-New-Dual-H-Bridge-DC-Stepper-Motor-Drive-Controller-Board-Module-L298N-MOTOR-DRIVER/32769190826.html))
+* **Tiny Micro Nano Servo** ([Amazon](https://www.amazon.com/s/field-keywords=tiny+micro+nano+servo) | [AliExpress](https://www.aliexpress.com/item/Tiny-Micro-Nano-Servo-3-7g-For-RC-Airplane-Helicopter-Drone-Boat-For-Arduino/32766035136.html))
 * **Jumper wire 15cm or longer** ([Amazon](http://a.co/e25UqlS))
 * **M3 screws 6mm - 20mm** ([Amazon](http://a.co/eMCbWCn))
 
