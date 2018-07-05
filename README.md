@@ -62,7 +62,7 @@ Assembly
     * 1x camera body.stl 
     * 1x camera bucket.stl - print with supports
     * 1x camera cover.stl
-    * 1x cover.stl - supports are only needed for the camera bucket opening. Add a brim to prevent edge lift.
+    * 1x cover.stl - supports are only needed for the camera bucket opening. Add a brim to prevent edge lift
     * 2x drive gear.stl
     * 1x motor housing.stl
     * 1x servo pillar.stl
@@ -110,8 +110,9 @@ the Pi.
 17. Secure the swivel pillar to the cover using same size screws.
 18. Attach the camera body to the swivel column using a 12mm screw. Don't overtighten.
 19. Attach your power bank to the top of the cover using double-sided tape, hot glue etc.
-20. Make sure the rover is working. If one of the motors is spinning in the wrong direction, swap ForwardPin and 
-ReversePin in ~/watney/rover.conf. Once everything is in order, secure the cover to the bottom using 12mm screws.
+20. Plug in the USB cable. Your Watney should be accessible at http://[IP]:5000 or, if you're running mDNS / bonjour, 
+at http://watney4.local:5000
+21. Once everything is in order, secure the cover to the bottom using 12mm screws.
 
 
 Configuration
@@ -121,5 +122,6 @@ Default credentials for Watney are pi / watney4. Watney's mDNS name is watney4.l
 
 Rover configuration can be found in ~/watney/rover.conf:
 * If you want to use different GPIO pins, you can specify them here
-* If you find a motor running in reverse (backwards when it's supposed to be rotating forward) simply swap ForwardPin and ReversePin
+* If you find a motor running in reverse (backwards when it's supposed to be rotating forward) simply swap ForwardPin 
+and ReversePin
 * Several advanced configuration values can be found there as well - modify at your own risk!
