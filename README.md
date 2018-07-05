@@ -3,8 +3,8 @@ Watney Rover
 
 
 <p align="center">
-  <img width="50%" height="auto" src="images/main_photo.png?raw=true">
-  <img width="50%" height="auto" src="images/main_render.png?raw=true">
+  <img width="49%" height="auto" src="images/main_photo.png?raw=true">
+  <img width="49%" height="auto" src="images/main_render.png?raw=true">
   <img width="100%" height="auto" src="images/evolution_of_watney.png?raw=true">
 </p>
 
