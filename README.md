@@ -78,12 +78,13 @@ together through the hole in the body, put a spacer between the gear and the col
 with an allen wrench while turning the wheel to drive the screw in. Don't overtighten. The wheel should rotate freely
 and the screw cap should be flush with the column, or just stick out a tiny bit. Repeat for the other 3 wheels.
 4. Install transfer gears next to the wheel gears, with spacers facing the columns, using 16mm screws.
-5. Put the motors into the housing with leads facing outwards. Run the wires through the holes in the housing. Secure
-the housing to the bottom with 6mm screws. The wires should be about 130mm long.
+5. Put the motors into the housing with leads facing outwards. Run the wires through the holes in the housing. 
+The wires should be about 130mm long.
+Secure the housing to the bottom with 6mm screws. 
 6. M3 screws are a bit too big for Raspberry Pi mounting holes. Run a 1/8" drill bit through them, file them, or just 
-put an M3 screw through them carefully to expand them a bit. Attach the camera cable to the Raspberry Pi and secure it 
-to the cover using 6mm screws. Attach the Micro-USB cable from the power bank to the Raspberry Pi.
-7. Connect motor wires to the outputs of the motor controller. Connect the controller to the Raspberry Pi as follows:
+put an M3 screw through them carefully to expand them a bit. Attach the camera cable and the Micro-USB cable to the Raspberry Pi.
+Secure the Pi to the cover using 6mm screws.
+7. Connect motor wires to the outputs of the motor controller. Connect the controller to the Raspberry Pi using [Pi GPIO BOARD pins](images/pi-gpio.png?raw=true) as follows:
    * 12V - Pin 2
    * Gnd - Pin 14
    * ENA - Pin 36
@@ -105,7 +106,7 @@ attach the pillar just yet - the servo needs to be in the neutral position befor
 13. Connect your Pi to the power bank. The servo should move to the neutral position when it's booted up. Power down
 the Pi.
 14. Carefully attach the camera body vertically to the servo.
-15. Thread the camera cable through the body. Attach it to the camera. Secure the camera in the body with the cover.
+15. Thread the camera cable through the body. Attach it to the camera. Secure the camera to the body with the cover.
 16. Secure the servo pillar to the cover using a 12mm screw and a 16mm screw.
 17. Secure the swivel pillar to the cover using same size screws.
 18. Attach the camera body to the swivel column using a 12mm screw. Don't overtighten.
