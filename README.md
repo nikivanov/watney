@@ -56,7 +56,7 @@ All of these components can be found on Amazon, Ebay, AliExpress, Banggood and o
 Assembly
 --------
 ![Wiring](images/assembly.jpg?raw=true)
-<img width="auto" height="50%" src="images/wheel%20and%20gear.png?raw=true">
+<img width="50%" height="50%" src="images/wheel%20and%20gear.png?raw=true">
 
 1. Print all parts except the tires in PETG. Print tires in TPU.
     * 1x bottom.stl - print with a brim of about 15 lines to prevent edge lift
