@@ -96,7 +96,7 @@ Secure the Pi to the cover using 6mm screws.
    * ENB - Pin 15
 8. Attach the motor controller to the bottom using 6mm screws.
 9. Secure the camera bucket to the cover using 6mm screws.
-10. Attach the servo arm to the camera body.
+10. Attach the servo arm to the camera body using the smaller screw from the set.
 11. Insert the servo into the servo pillar and secure it with one of the bigger screws that came with the servo. Don't
 attach the pillar just yet - the servo needs to be in the neutral position before it can be attached to the camera.
 12. Connect the servo as follows:
