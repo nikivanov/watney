@@ -103,7 +103,7 @@ attach the pillar just yet - the servo needs to be in the neutral position befor
     * Black - Pin 6
     * Red - Pin 4
     * White - Pin 32
-12. Download the latest Watney release image and burn it onto the SD card.
+12. Download the latest Watney release image and burn it onto the SD card. The latest image can be found in [Releases](/releases).
 13. Connect your Pi to the power bank. The servo should move to the neutral position when it's booted up. Power down
 the Pi.
 14. Carefully attach the camera body vertically to the servo.
