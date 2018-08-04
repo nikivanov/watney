@@ -86,7 +86,7 @@ Secure the housing to the bottom with 6mm screws.
 put an M3 screw through them carefully to expand them a bit. Attach the camera cable and the Micro-USB cable to the Raspberry Pi.
 Secure the Pi to the cover using 6mm screws.
 7. Connect motor wires to the outputs of the motor controller. Connect the controller to the Raspberry Pi using [Pi GPIO BOARD pins](images/pi-gpio.png?raw=true) as follows:
-   * 12V - Pin 2
+   * 12V - Pin 2 (**NOT** the 5V)
    * Gnd - Pin 14
    * ENA - Pin 36
    * IN1 - Pin 38
