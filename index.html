@@ -16,11 +16,9 @@
         var right = false;
         var lookUp = false;
         var lookDown = false;
-        var softTurn = false;
         
         var lastBearing = -1;
         var lastLook = 0;
-        var lastSoftTurn = false;
         
         function sendKeys() {
             var bearing = "0";
@@ -62,14 +60,12 @@
                 look = -1;
             }
 
-            if (lastBearing != bearing || lastLook != look || lastSoftTurn != softTurn) {
+            if (lastBearing != bearing || lastLook != look) {
                 lastBearing = bearing;
                 lastLook = look;
-                lastSoftTurn = softTurn;
                 var commandObj = {
                     'bearing': bearing,
-                    'look': look,
-                    'soft': softTurn
+                    'look': look
                 };
             
                 $.ajax({
@@ -87,10 +83,6 @@
         $(document).ready(function() {
             $("#inputControl").keydown(function(event) {
                 event.preventDefault();
-
-                if (event.ctrlKey) {
-                    softTurn = true;
-                }
 
                 if (event.keyCode == 38) {
                     up = true;
@@ -116,10 +108,6 @@
 
             $("#inputControl").keyup(function(event) {
                 event.preventDefault();
-
-                if (!event.ctrlKey) {
-                    softTurn = false;
-                }
 
                 if (event.keyCode == 38) {
                     up = false;
@@ -254,7 +242,6 @@
 <div id="info" tabindex="-1" style="display: none">
     <pre>Controls:
     Arrow keys: move the rover
-    Ctrl: soft turn (left or right)
     A: look up
     Z: look down</pre>
 </div>
