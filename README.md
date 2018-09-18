@@ -86,7 +86,7 @@ Secure the housing to the bottom with 6mm screws.
 put an M3 screw through them carefully to expand them a bit. Attach the camera cable and the Micro-USB cable to the Raspberry Pi.
 Secure the Pi to the cover using 6mm screws.
 7. Connect motor wires to the outputs of the motor controller. Connect the controller to the Raspberry Pi using [Pi GPIO BOARD pins](images/pi-gpio.png?raw=true) as follows:
-   * 12V - Pin 2
+   * 12V - Pin 2 (**NOT** the 5V)
    * Gnd - Pin 14
    * ENA - Pin 36
    * IN1 - Pin 38
@@ -96,14 +96,14 @@ Secure the Pi to the cover using 6mm screws.
    * ENB - Pin 15
 8. Attach the motor controller to the bottom using 6mm screws.
 9. Secure the camera bucket to the cover using 6mm screws.
-10. Attach the servo arm to the camera body.
+10. Attach the servo arm to the camera body using the smaller screw from the set.
 11. Insert the servo into the servo pillar and secure it with one of the bigger screws that came with the servo. Don't
 attach the pillar just yet - the servo needs to be in the neutral position before it can be attached to the camera.
 12. Connect the servo as follows:
     * Black - Pin 6
     * Red - Pin 4
     * White - Pin 32
-12. Download the latest Watney release image and burn it onto the SD card.
+12. Download the latest Watney release image and burn it onto the SD card. The latest image can be found in [Releases](https://github.com/nikivanov/watney/releases/latest).
 13. Connect your Pi to the power bank. The servo should move to the neutral position when it's booted up. Power down
 the Pi.
 14. Carefully attach the camera body vertically to the servo.
