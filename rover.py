@@ -143,10 +143,16 @@ class ServoController:
 
     def timingLoop(self):
         print("Servo starting...")
-
+        initialSleep = 0.25
         # go neutral first
         self.pi.hardware_PWM(self.pwmPin, self.frequency, self.neutral)
-        time.sleep(2)
+        time.sleep(initialSleep)
+        self.pi.hardware_PWM(self.pwmPin, self.frequency, self.neutral + int(self.amplitude / 2))
+        time.sleep(initialSleep)
+        self.pi.hardware_PWM(self.pwmPin, self.frequency, self.neutral - int(self.amplitude / 2))
+        time.sleep(initialSleep)
+        self.pi.hardware_PWM(self.pwmPin, self.frequency, self.neutral)
+        time.sleep(initialSleep)
         self.pi.hardware_PWM(self.pwmPin, self.frequency, 0)
 
         currentPosition = self.neutral
