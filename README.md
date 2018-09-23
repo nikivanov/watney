@@ -77,8 +77,8 @@ put an M3 screw through them carefully to expand them a bit. Attach the camera c
 Secure the Pi to the cover using 6mm screws.
 1. Secure the Micro USB breakout board to the cover with 6mm M3 screws. Connect another Micro USB cable to the port.
 1. Connect the motor controller to the breakout board and Raspberry Pi using [Pi GPIO BOARD pins](images/pi-gpio.png?raw=true) as follows:
-   * 12V - Board VCC Pin (**NOT** the 5V)
-   * Gnd - Board Gnd Pin
+   * 12V - Breakout board VCC Pin (**NOT** the 5V)
+   * Gnd - Breakout board Gnd Pin
    * ENA - Pin 36
    * IN1 - Pin 38
    * IN2 - Pin 40
