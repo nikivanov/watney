@@ -53,7 +53,7 @@ Ordering from China is significantly cheaper, but you'll have to wait about a mo
 
 Assembly
 --------
-![Wiring](images/assembly.jpg?raw=true)
+![Wiring](images/assembly_new.jpg?raw=true)
 
 1. Print all parts except the tires in PETG. Print the tires in TPU.
     * 1x bottom.stl - print with a brim of about 15 lines to prevent edge lift
