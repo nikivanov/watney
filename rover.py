@@ -265,13 +265,13 @@ class Driver:
         try:
             wifiInfo = subprocess.check_output("iwconfig wlan0", shell=True).decode("utf-8")
             ssidMatch = self.ssidRegex.search(wifiInfo)
-            ssid = ssidMatch.group(1) if ssidMatch else None
+            ssid = ssidMatch.group(1) if ssidMatch else "-"
 
             qualityMatch = self.qualityRegex.search(wifiInfo)
-            quality = qualityMatch.group(1) if qualityMatch else None
+            quality = qualityMatch.group(1) if qualityMatch else "-"
 
             signalMatch = self.signalRegex.search(wifiInfo)
-            signal = signalMatch.group(1) if signalMatch else None
+            signal = signalMatch.group(1) if signalMatch else "-"
 
             return {
                 "SSID": ssid,
