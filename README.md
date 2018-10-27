@@ -69,7 +69,7 @@ Assembly
 Solder each pair of leads together **in parallel** (left to left, right to right),
 so you have 2 pairs of motors, each connected in parallel.
 Make sure you don't cross them up or they'll spin in different directions.
-1. Secure each pair of motors to the sides using 4 motor holders and 6mm M3 screws.
+1. Secure each pair of motors to the sides using 4 motor holders and 6mm M3 screws. I found it easier to put the screws in for a few millimeters to prime the mounting holes.
 1. Connect each pair of leads to motor controller outputs.
 Polarity here doesn't matter much because we'll be able to set it in the config later.
 1. M3 screws are a bit too big for Raspberry Pi mounting holes. Run a 1/8" drill bit through them, file them, or just 
