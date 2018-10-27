@@ -1,4 +1,4 @@
-from flask import Flask, send_file, request, send_from_directory
+from flask import Flask, send_file, request, send_from_directory, jsonify
 import json
 from rover import Driver
 import signal
@@ -47,9 +47,17 @@ def setCommand():
 
     return "OK"
 
+
 @app.route("/shutDown", methods=['POST'])
 def shutdown():
     call("sudo halt", shell=True)
+
+
+@app.route("/heartbeat", methods=['POST'])
+def onHeartbeat():
+    stats = roverDriver.onHeartbeat()
+    return jsonify(stats)
+
 
 def signal_handler(signal, frame):
     roverDriver.cleanup()

@@ -3,6 +3,9 @@ import pigpio
 from threading import Thread, Condition
 import time
 import os
+import subprocess
+import re
+import sys
 
 class Motor:
     PWM_FREQUENCY = 200
@@ -92,8 +95,6 @@ class MotorController:
         leftDC, rightDC = self.getTargetMotorDCs(bearing)
         self.leftMotor.setMotion(leftDC)
         self.rightMotor.setMotion(rightDC)
-
-
 
 
 class ServoController:
@@ -214,20 +215,76 @@ class Driver:
         servoConfig = config["SERVO"]
 
         leftMotor = Motor(self.pi, int(leftMotorConfig["PWMPin"]),
-                            int(leftMotorConfig["ForwardPin"]),
-                            int(leftMotorConfig["ReversePin"]),
-                            float(leftMotorConfig["Trim"]))
+                          int(leftMotorConfig["ForwardPin"]),
+                          int(leftMotorConfig["ReversePin"]),
+                          float(leftMotorConfig["Trim"]))
 
         rightMotor = Motor(self.pi, int(rightMotorConfig["PWMPin"]),
-                             int(rightMotorConfig["ForwardPin"]),
-                             int(rightMotorConfig["ReversePin"]),
-                             float(rightMotorConfig["Trim"]))
+                           int(rightMotorConfig["ForwardPin"]),
+                           int(rightMotorConfig["ReversePin"]),
+                           float(rightMotorConfig["Trim"]))
 
         self.motorController = MotorController(leftMotor,
                                                rightMotor,
                                                float(driverConfig["HalfTurnSpeed"]))
 
         self.servoController = ServoController(self.pi, int(servoConfig["PWMPin"]))
+
+        heartbeatInterval = float(driverConfig["MaxHeartbeatInvervalMS"])
+        self.ssidRegex = re.compile(r"ESSID:\"(.+?)\"")
+        self.qualityRegex = re.compile(r"Link Quality=([^ ]+)")
+        self.signalRegex = re.compile(r"Signal level=(.*? dBm)")
+        self.lastHeartbeat = time.time()
+        self.heartbeatThread = Thread(daemon=True, target=self.heartbeatLoop, args=[heartbeatInterval])
+        self.heartbeatThread.start()
+
+    shuttingDown = False
+    lastHeartbeat = -1
+    heartbeatStop = False;
+    lastHeartbeatData = {
+                "SSID": "-",
+                "Quality": "-",
+                "Signal": "-"
+            }
+
+    def heartbeatLoop(self, maxInterval):
+        print("Starting heartbeat thread...")
+        while not self.shuttingDown:
+            if (time.time() - self.lastHeartbeat) > maxInterval:
+                if not self.heartbeatStop:
+                    self.stop()
+                    self.lookStop()
+                    self.heartbeatStop = True
+            else:
+                self.heartbeatStop = False
+
+            self.lastHeartbeatData = self.collectHeartbeatData()
+            time.sleep(0.5)
+
+    def collectHeartbeatData(self):
+        try:
+            wifiInfo = subprocess.check_output("iwconfig wlan0", shell=True).decode("utf-8")
+            ssidMatch = self.ssidRegex.search(wifiInfo)
+            ssid = ssidMatch.group(1) if ssidMatch else None
+
+            qualityMatch = self.qualityRegex.search(wifiInfo)
+            quality = qualityMatch.group(1) if qualityMatch else None
+
+            signalMatch = self.signalRegex.search(wifiInfo)
+            signal = signalMatch.group(1) if signalMatch else None
+
+            return {
+                "SSID": ssid,
+                "Quality": quality,
+                "Signal": signal
+            }
+        except Exception as ex:
+            print(str(ex), file=sys.stderr)
+            return {
+                "SSID": "-",
+                "Quality": "-",
+                "Signal": "-"
+            }
 
     def setBearing(self, bearing):
         self.motorController.setBearing(bearing)
@@ -244,6 +301,14 @@ class Driver:
     def lookStop(self):
         self.servoController.lookStop()
 
+    def onHeartbeat(self):
+        self.lastHeartbeat = time.time()
+        return self.lastHeartbeatData
+
     def cleanup(self):
         self.servoController.stop()
         self.pi.stop()
+        self.shuttingDown = True
+        print("Waiting for heartbeat thread to stop...")
+        self.heartbeatThread.join()
+        print("Heartbeat thread stopped")

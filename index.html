@@ -169,9 +169,25 @@
                 }
             });
 
+            doHeartbeat();
+
             doConnect();
 
         });
+
+        function doHeartbeat() {
+            $.ajax({
+                url:'/heartbeat',
+                type:"POST",
+                dataType:"json"
+            }).done(function(data) {
+                $("#wifi_ssid").text(data.SSID);
+                $("#wifi_quality").text(data.Quality);
+                $("#wifi_signal").text(data.Signal);
+            }).always(function() {
+                setTimeout(doHeartbeat, 1000);
+            });
+        }
 
 </script>
     <style>
@@ -227,6 +243,20 @@
         left: 0;
         padding: 10px;
     }
+
+    div#wifiInfo {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        border: 1px black solid;
+        background: white;
+        min-width: 200px;
+        height: 60px;
+        padding: 5px;
+        color: green;
+        font-weight: bold;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
 }
     </style>
 </head>
@@ -244,6 +274,11 @@
     Arrow keys: move the rover
     A: look up
     Z: look down</pre>
+</div>
+<div id="wifiInfo" tabindex="-1">
+    SSID: <span id="wifi_ssid"></span><br />
+    Quality: <span id="wifi_quality"></span><br />
+    Signal: <span id="wifi_signal"></span>
 </div>
 </body>
 </html>
