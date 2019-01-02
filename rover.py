@@ -6,6 +6,7 @@ import os
 import subprocess
 import re
 import sys
+import shlex
 
 class Motor:
     PWM_FREQUENCY = 200
@@ -204,15 +205,24 @@ class Driver:
     def __init__(self):
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         self.pi = pigpio.pi()
-        print("Creating motor controller...")
+        
 
         config = configparser.ConfigParser()
         config.read("rover.conf")
 
+        videoConfig = config["VIDEO"]
         driverConfig = config["DRIVER"]
         leftMotorConfig = config["LEFTMOTOR"]
         rightMotorConfig = config["RIGHTMOTOR"]
         servoConfig = config["SERVO"]
+
+        print("Starting GStreamer pipeline...")
+        self.execAndMonitor(videoConfig["GStreamerStartCommand"])
+
+        print("Starting Janus gateway...")
+        self.execAndMonitor(videoConfig["JanusStartCommand"])
+
+        print("Creating motor controller...")
 
         leftMotor = Motor(self.pi, int(leftMotorConfig["PWMPin"]),
                           int(leftMotorConfig["ForwardPin"]),
@@ -304,6 +314,11 @@ class Driver:
     def onHeartbeat(self):
         self.lastHeartbeat = time.time()
         return self.lastHeartbeatData
+
+    def execAndMonitor(self, command):
+        args = shlex.split(command)
+        print("Starting: " + str(args))
+        subprocess.Popen(args, stdout=sys.stdout, stderr=sys.stderr, shell=True)
 
     def cleanup(self):
         self.servoController.stop()

@@ -3,202 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <title>Watney-4 Rover</title>
-    <script src="js/jquery.min.js"></script>
-    <script src="js/lib/adapter.js"></script>
-    <script src="js/common.js"></script>
-    <script src="js/main_rws.js"></script>
-    <script src="js/ui/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <script type="text/javascript" src="js/ui/jquery-ui.min.js"></script>
     <link rel="stylesheet" type="text/css" href="js/ui/jquery-ui.min.css">
-    <script>
-        var up = false;
-        var down = false;
-        var left = false;
-        var right = false;
-        var lookUp = false;
-        var lookDown = false;
-        
-        var lastBearing = -1;
-        var lastLook = 0;
-        
-        function sendKeys() {
-            var bearing = "0";
-            var look = 0
-            
-            if (up) {
-                if (left) {
-                    bearing = "nw";
-                }
-                else if (right) {
-                    bearing = "ne";
-                }
-                else {
-                    bearing = "n";
-                }
-            }
-            else if (down) {
-                if (left) {
-                    bearing = "sw";
-                }
-                else if (right) {
-                    bearing = "se";
-                }
-                else {
-                    bearing = "s";
-                }
-            }
-            else if (left) {
-                bearing = "w";
-            }
-            else if (right) {
-                bearing = "e";
-            }
-
-            if (lookUp) {
-                look = 1;
-            }
-            else if (lookDown) {
-                look = -1;
-            }
-
-            if (lastBearing != bearing || lastLook != look) {
-                lastBearing = bearing;
-                lastLook = look;
-                var commandObj = {
-                    'bearing': bearing,
-                    'look': look
-                };
-            
-                $.ajax({
-                      url:'/sendCommand',
-                      type:"POST",
-                      data:JSON.stringify(commandObj),
-                      contentType:"application/json; charset=utf-8",
-                      dataType:"json"
-                });
-            }
-            
-            
-        }
-        
-        $(document).ready(function() {
-            $("#inputControl").keydown(function(event) {
-                event.preventDefault();
-
-                if (event.keyCode == 38) {
-                    up = true;
-                }
-                else if (event.keyCode == 40) {
-                    down = true;
-                }
-                else if(event.keyCode == 37) {
-                    left = true;
-                }
-                else if(event.keyCode == 39) {
-                    right = true;
-                }
-                else if (event.keyCode == 65) {
-                    lookDown = true;
-                }
-                else if(event.keyCode == 90) {
-                    lookUp = true;
-                }
-                
-                sendKeys();
-            });
-
-            $("#inputControl").keyup(function(event) {
-                event.preventDefault();
-
-                if (event.keyCode == 38) {
-                    up = false;
-                }
-                else if (event.keyCode == 40) {
-                    down = false;
-                }
-                else if(event.keyCode == 37) {
-                    left = false;
-                }
-                else if(event.keyCode == 39) {
-                    right = false;
-                }
-                else if (event.keyCode == 65) {
-                    lookDown = false;
-                }
-                else if(event.keyCode == 90) {
-                    lookUp = false;
-                }
-
-                sendKeys();
-            });
-
-            $("#inputControl").focus(function(event) {
-                 $(this).attr("placeholder", "Use Arrow Keys");
-            });
-
-            $("#inputControl").focusout(function(event) {
-                 $(this).attr("placeholder", "Click Here");
-            });
-
-            $("#powerButton").click(function(event) {
-                $("#shutdown-confirm").dialog({
-                  resizable: false,
-                  height: "auto",
-                  width: "auto",
-                  modal: true,
-                  buttons: {
-                    "Shut Down": function() {
-                        $(this).dialog("close");
-                        $.ajax({
-                              url:'/shutDown',
-                              type:"POST"
-                        });
-                    },
-                    Cancel: function() {
-                        $(this).dialog("close");
-                    }
-                  }
-                });
-            });
-
-            $("#infoButton").click(function(event) {
-                if($("#info").is(":visible")) {
-                    $("#info").hide();
-                }
-                else {
-                    $("#info").show();
-                }
-            });
-
-            doHeartbeat();
-
-            doConnect();
-
-        });
-
-        function doHeartbeat() {
-            $.ajax({
-                url:'/heartbeat',
-                type:"POST",
-                dataType:"json"
-            }).done(function(data) {
-                $("#wifi_ssid").text(data.SSID);
-                $("#wifi_quality").text(data.Quality);
-                $("#wifi_signal").text(data.Signal);
-            }).always(function() {
-                setTimeout(doHeartbeat, 1000);
-            });
-        }
-
-</script>
+    <script type="text/javascript" src="js/janus.js"></script>
+    <script type="text/javascript" src="js/adapter.min.js"></script>
+    <script type="text/javascript" src="js/watney_janus.js"></script>
+    <script type="text/javascript" src="js/watney.js"></script>
+    
     <style>
     #vid {
         object-fit: contain;
-    }
-
-    input::placeholder {
-        text-align: center;
-        vertical-align: middle;
-        font-size: 1em
     }
 
     div#powerButton {
@@ -257,13 +72,11 @@
         font-weight: bold;
         background-color: rgba(0, 0, 0, 0.5);
     }
-}
     </style>
 </head>
 
-<body style="margin 0; background-color: black">
-<video style="width: auto; height: calc(100vh - 32px); position: fixed; top: 0; left: 50%; transform: translateX(-50%); " id="vid" autoplay ></video>
-<input id="inputControl" style="position: fixed; bottom: 0; left: 44px; height: 30px; width: calc(100% - 88px)" placeholder="Click Here" />
+<body style="margin: 0; background-color: black">
+<video style="width: auto; height: 100vh; position: fixed; top: 0; left: 50%; transform: translateX(-50%); background:black; " id="vid" autoplay playsinline="true" webkit-playsinline="true" muted="muted"></video>
 <div id="powerButton" class="wButton"></div>
 <div id="infoButton" class="wButton">i</div>
 <div id="shutdown-confirm" title="Shut down Watney?" style="display:none">
