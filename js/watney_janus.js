@@ -55,9 +55,6 @@ function onJanusConnect() {
 }
 
 function onRemoteStreamStart(stream) {
-    $("#vid").bind("playing", function () {
-        console.log("I'm playing now!");
-    });
     var vidEl = $("#vid").get(0);
     Janus.attachMediaStream(vidEl, stream);
 
