@@ -16,9 +16,7 @@ Watney is all-wheel drive, with each wheel powered by a geared motor. Because of
 each side in opposite directions. It drives great indoors and can even manage short grass.
 
 The software part of Watney makes it a webcam on wheels. The camera feed is low-latency HD and rover 
-control is accessible via a browser.
-
-Watney uses the [Janus WebRTC Server](https://janus.conf.meetecho.com/) to establish the video feed.
+control is accessible via a browser. Watney uses the [Janus WebRTC Server](https://janus.conf.meetecho.com/) to establish the video feed.
 
 Upon startup, Watney will detect if it's connected to a Wi-Fi hotspot. If not, it will host its own hotspot "Watney4".
 Once you connect to the hotspot, you can control it directly by going to http://192.168.4.1:5000, or connect it to a Wi-Fi
