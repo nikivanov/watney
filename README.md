@@ -18,7 +18,7 @@ each side in opposite directions. It drives great indoors and can even manage sh
 The software part of Watney makes it a webcam on wheels. The camera feed is low-latency HD and rover 
 control is accessible via a browser.
 
-The HD camera feed is provided by [rpi-webrtc-streamer](https://github.com/kclyu/rpi-webrtc-streamer).
+Watney uses the [Janus WebRTC Server](https://janus.conf.meetecho.com/) to establish the video feed.
 
 Upon startup, Watney will detect if it's connected to a Wi-Fi hotspot. If not, it will host its own hotspot "Watney4".
 Once you connect to the hotspot, you can control it directly by going to http://192.168.4.1:5000, or connect it to a Wi-Fi
