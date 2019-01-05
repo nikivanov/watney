@@ -142,10 +142,10 @@ $(document).ready(function () {
 
     $("#infoButton").click(function (event) {
         if ($("#info").is(":visible")) {
-            $("#info").hide();
+            $("#info").fadeOut(200);
         }
         else {
-            $("#info").show();
+            $("#info").fadeIn(200);
         }
     });
 
