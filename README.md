@@ -123,6 +123,6 @@ Rover configuration can be found in ~/watney/rover.conf:
 * If you want to use different GPIO pins, you can specify them here
 * If you find motors on either side running in reverse (backwards when it's supposed to be rotating forward) simply swap ForwardPin 
 and ReversePin
-* You can also modify video stream properties by editing /opt/rws/etc/media_config.conf
+* You can also modify video stream properties by editing ~/watney/video.sh
 * Restart your Watney for configuration changes to take effect
 
