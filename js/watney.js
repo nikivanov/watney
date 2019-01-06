@@ -70,53 +70,70 @@ function sendKeys() {
 
 $(document).ready(function () {
     $(document).keydown(function (event) {
-        event.preventDefault();
+        if (!$("#ttsSection").is(":visible")) {
+            event.preventDefault();
 
-        if (event.keyCode == 38) {
-            up = true;
-        }
-        else if (event.keyCode == 40) {
-            down = true;
-        }
-        else if (event.keyCode == 37) {
-            left = true;
-        }
-        else if (event.keyCode == 39) {
-            right = true;
-        }
-        else if (event.keyCode == 65) {
-            lookDown = true;
-        }
-        else if (event.keyCode == 90) {
-            lookUp = true;
-        }
+            if (event.keyCode == 83) {
+                $("#ttsSection").fadeIn(200);
+                $("#ttsInput").focus();
+                up = false;
+                down = false;
+                left = false;
+                right = false;
+                lookUp = false;
+                lookDown = false;
+                sendKeys();
+                return;
+            }
 
-        sendKeys();
+            if (event.keyCode == 38) {
+                up = true;
+            }
+            else if (event.keyCode == 40) {
+                down = true;
+            }
+            else if (event.keyCode == 37) {
+                left = true;
+            }
+            else if (event.keyCode == 39) {
+                right = true;
+            }
+            else if (event.keyCode == 65) {
+                lookDown = true;
+            }
+            else if (event.keyCode == 90) {
+                lookUp = true;
+            }
+
+            sendKeys();
+        }
     });
 
     $(document).keyup(function (event) {
-        event.preventDefault();
+        if (!$("#ttsSection").is(":visible")) {
+            event.preventDefault();
 
-        if (event.keyCode == 38) {
-            up = false;
-        }
-        else if (event.keyCode == 40) {
-            down = false;
-        }
-        else if (event.keyCode == 37) {
-            left = false;
-        }
-        else if (event.keyCode == 39) {
-            right = false;
-        }
-        else if (event.keyCode == 65) {
-            lookDown = false;
-        }
-        else if (event.keyCode == 90) {
-            lookUp = false;
-        }
+            if (event.keyCode == 38) {
+                up = false;
+            }
+            else if (event.keyCode == 40) {
+                down = false;
+            }
+            else if (event.keyCode == 37) {
+                left = false;
+            }
+            else if (event.keyCode == 39) {
+                right = false;
+            }
+            else if (event.keyCode == 65) {
+                lookDown = false;
+            }
+            else if (event.keyCode == 90) {
+                lookUp = false;
+            }
 
-        sendKeys();
+            sendKeys();
+        }
     });
 
     $("#powerButton").click(function (event) {
@@ -149,6 +166,47 @@ $(document).ready(function () {
         }
     });
 
+    $("#infoButton").mouseleave(function (event) {
+        $("#info").fadeOut(200);
+    });
+
+    $("#ttsButton").click(function (event) {
+        if ($("#ttsSection").is(":visible")) {
+            $("#ttsSection").fadeOut(200);
+        }
+        else {
+            $("#ttsSection").fadeIn(200);
+            $("#ttsInput").focus();
+        }
+    });
+ 
+    $("#ttsInput").keydown(function (event) {
+        if (event.keyCode == 27) {
+            //escape
+            event.preventDefault();
+            $("#ttsInput").val("");
+            $("#ttsSection").fadeOut(200);
+        }
+        else if (event.keyCode == 13) {
+            //enter
+            event.preventDefault();
+            $("#ttsSection").animate({
+                bottom: '80vh',
+                opacity: '0'
+            }, 200, function() {
+                $("#ttsSection").hide();
+                $("#ttsSection").css("bottom", "200px");
+                $("#ttsSection").css("opacity", "1");
+            });
+            sendTTS($("#ttsInput").val());
+        }
+    });
+
+    $("#ttsInput").blur(function (event) {
+        $("#ttsInput").val("");
+        $("#ttsSection").fadeOut(200);
+    });
+
     doHeartbeat();
 
     doConnect();
@@ -168,3 +226,12 @@ function doHeartbeat() {
     });
 }
 
+function sendTTS(str) {
+    $.ajax({
+        url: '/sendTTS',
+        type: "POST",
+        data: JSON.stringify({str}),
+        contentType: "application/json; charset=utf-8",
+        dataType: "json"
+    });
+}

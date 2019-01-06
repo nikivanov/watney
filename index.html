@@ -6,119 +6,12 @@
     <title>Watney-4 Rover</title>
     <script type="text/javascript" src="js/jquery.min.js"></script>
     <script type="text/javascript" src="js/ui/jquery-ui.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="js/watney.css">
     <link rel="stylesheet" type="text/css" href="js/ui/jquery-ui.min.css">
     <script type="text/javascript" src="js/janus.js"></script>
     <script type="text/javascript" src="js/adapter.min.js"></script>
     <script type="text/javascript" src="js/watney_janus.js"></script>
     <script type="text/javascript" src="js/watney.js"></script>
-
-    <style>
-        #vid {
-            object-fit: contain;
-        }
-
-        div#powerButton {
-            position: relative;
-        }
-
-        div#powerButton::before {
-            content: "";
-            display: block;
-            width: 20px;
-            height: 20px;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-
-            border: 2px solid white;
-            border-radius: 50%;
-        }
-
-        div#powerButton::after {
-            content: "";
-            display: block;
-            width: 3px;
-            height: 10px;
-            position: absolute;
-            background-color: white;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-
-        div#infoButton {
-            text-align: center;
-            vertical-align: middle;
-            line-height: 36px;
-            color: white;
-        }
-
-        div.wButton {
-            display: table-cell;
-            width: 36px;
-            height: 36px;
-            background-color: rgba(255, 255, 255, 0.2);
-            box-sizing: border-box;
-            border: 1px solid white;
-        }
-
-        div.wButton:hover {
-            background-color: rgba(255, 255, 255, 0.5);
-            cursor: pointer;
-        }
-
-        div#buttonPanel {
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            position: fixed;
-            display: table;
-            border-collapse: separate;
-            border-spacing: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        div#buttonPanel>div {
-            display: table-row;
-        }
-
-        div#info {
-            background-color: rgba(255, 255, 255, 0.7);;
-            z-index: 100;
-            position: fixed;
-            bottom: 120px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 10px;
-        }
-
-        div#wifiInfo {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            background: white;
-            min-width: 200px;
-            
-            padding: 5px;
-            color: white;
-            font-family: "Helvetica Neue", Arial, sans-serif;
-            font-weight: 100;
-            -webkit-font-smoothing: antialiased;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: table;
-            border-collapse: separate;
-            border-spacing: 2px;
-        }
-        div#wifiInfo > div {
-            display: table-row;
-        }
-        div#wifiInfo > div > div {
-            display: table-cell;
-        }
-        
-    </style>
 </head>
 
 <body style="margin: 0; background-color: black">
@@ -128,6 +21,9 @@
         <div>
             <div id="infoButton" title="Help" class="wButton">i</div>
             <div id="powerButton" title="Shutdown" class="wButton"></div>
+            <div id="ttsButton" title="Text to Speech (S)" class="wButton">
+                <img src="js/tts.svg" />
+            </div>
         </div>
     </div>
     <div id="shutdown-confirm" title="Shut down Watney?" style="display:none">
@@ -137,7 +33,8 @@
         <pre>Controls:
     Arrow keys: move the rover
     A: look up
-    Z: look down</pre>
+    Z: look down
+    S: Text to speech</pre>
     </div>
     <div id="wifiInfo" tabindex="-1">
         <div>
@@ -152,7 +49,9 @@
             <div>Signal:</div>
             <div><span id="wifi_signal"></span></div>
         </div>
-        
+    </div>
+    <div id="ttsSection" style="display: none;">
+        <input type="text" id="ttsInput" placeholder="Enter to send, ESC to cancel" />
     </div>
 </body>
 

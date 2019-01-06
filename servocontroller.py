@@ -69,9 +69,7 @@ class ServoController:
             with self.timingLock:
                 if not self.__shouldBeMoving(currentPosition):
                     self.pi.hardware_PWM(self.pwmPin, self.frequency, 0)
-                    print("Servo idling...")
                     self.timingLock.wait()
-                    print("Servo woke up...")
 
                 if self.shuttingDown:
                     break

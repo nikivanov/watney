@@ -5,6 +5,7 @@ import signal
 import sys
 from rover import MotorController
 from subprocess import call
+import logging
 
 app = Flask(__name__)
 roverDriver = None
@@ -52,6 +53,12 @@ def setCommand():
 def shutdown():
     call("sudo halt", shell=True)
 
+@app.route("/sendTTS", methods=['POST'])
+def sendTTS():
+    ttsObj = json.loads(request.data.decode("utf-8"))
+    ttsString = ttsObj['str']
+    roverDriver.sayTTS(ttsString)
+    return "OK"
 
 @app.route("/heartbeat", methods=['POST'])
 def onHeartbeat():
@@ -66,5 +73,7 @@ def signal_handler(signal, frame):
 
 if __name__ == "__main__":
     signal.signal(signal.SIGINT, signal_handler)
+    log = logging.getLogger('werkzeug')
+    log.setLevel(logging.ERROR)
     roverDriver = Driver()
     app.run(host='0.0.0.0', port=5000, debug=False)

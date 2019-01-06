@@ -1,0 +1,144 @@
+#vid {
+    object-fit: contain;
+}
+
+div#powerButton {
+    position: relative;
+}
+
+div#powerButton::before {
+    content: "";
+    display: block;
+    width: 20px;
+    height: 20px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    border: 2px solid white;
+    border-radius: 50%;
+}
+
+div#powerButton::after {
+    content: "";
+    display: block;
+    width: 3px;
+    height: 10px;
+    position: absolute;
+    background-color: white;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+div#infoButton {
+    text-align: center;
+    vertical-align: middle;
+    line-height: 36px;
+    color: white;
+}
+
+div.wButton {
+    display: table-cell;
+    width: 36px;
+    height: 36px;
+    background-color: rgba(255, 255, 255, 0.2);
+    box-sizing: border-box;
+    border: 1px solid white;
+}
+
+div.wButton:hover {
+    background-color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+}
+
+div#buttonPanel {
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    position: fixed;
+    display: table;
+    border-collapse: separate;
+    border-spacing: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+div#buttonPanel>div {
+    display: table-row;
+}
+
+div#info {
+    background-color: rgba(255, 255, 255, 0.7);;
+    z-index: 100;
+    position: fixed;
+    bottom: 120px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px;
+}
+
+div#wifiInfo {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: white;
+    min-width: 200px;
+    
+    padding: 5px;
+    color: white;
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    font-weight: 100;
+    -webkit-font-smoothing: antialiased;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: table;
+    border-collapse: separate;
+    border-spacing: 2px;
+}
+div#wifiInfo > div {
+    display: table-row;
+}
+div#wifiInfo > div > div {
+    display: table-cell;
+}
+
+div#ttsSection {
+    border: 1px solid white;
+    position: fixed;
+    bottom: 200px;
+    width: 80%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: white;
+    min-width: 200px;
+    
+    padding: 5px;
+    color: white;
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    font-weight: 100;
+    -webkit-font-smoothing: antialiased;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: table;
+    border-collapse: separate;
+    border-spacing: 2px;
+}
+
+div#ttsButton {
+    vertical-align: middle;
+    text-align: center;
+}
+
+div#ttsButton > img {
+    filter: invert(100%);
+    padding-top: 5px;
+}
+
+input#ttsInput {
+    display: block;
+    margin : 0 auto;
+    width: 95%;
+    font-size: 14pt;
+    padding: 5px;
+}
