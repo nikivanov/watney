@@ -16,9 +16,7 @@ Watney is all-wheel drive, with each wheel powered by a geared motor. Because of
 each side in opposite directions. It drives great indoors and can even manage short grass.
 
 The software part of Watney makes it a webcam on wheels. The camera feed is low-latency HD and rover 
-control is accessible via a browser.
-
-The HD camera feed is provided by [rpi-webrtc-streamer](https://github.com/kclyu/rpi-webrtc-streamer).
+control is accessible via a browser. Watney uses the [Janus WebRTC Server](https://janus.conf.meetecho.com/) to establish the video feed.
 
 Upon startup, Watney will detect if it's connected to a Wi-Fi hotspot. If not, it will host its own hotspot "Watney4".
 Once you connect to the hotspot, you can control it directly by going to http://192.168.4.1:5000, or connect it to a Wi-Fi
@@ -125,6 +123,6 @@ Rover configuration can be found in ~/watney/rover.conf:
 * If you want to use different GPIO pins, you can specify them here
 * If you find motors on either side running in reverse (backwards when it's supposed to be rotating forward) simply swap ForwardPin 
 and ReversePin
-* You can also modify video stream properties by editing /opt/rws/etc/media_config.conf
+* You can also modify video stream properties by editing ~/watney/video.sh
 * Restart your Watney for configuration changes to take effect
 
