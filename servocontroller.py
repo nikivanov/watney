@@ -5,7 +5,7 @@ import time
 
 class ServoController:
 
-    def __init__(self, pi, pwmPin):
+    def __init__(self, pi, pwmPin, readyEvent):
         self.pwmPin = pwmPin
         self.neutral = 75000
         self.amplitude = 25000
@@ -13,7 +13,7 @@ class ServoController:
         self.speed_per_sec = 30000
         self.resolution = 0.03
         self.shuttingDown = False
-
+        self.readyEvent = readyEvent
         # 1 is forward, -1 is backward, 0 is stop
         self.direction = 0
 
@@ -51,6 +51,7 @@ class ServoController:
     def timingLoop(self):
         print("Servo starting...")
         initialSleep = 0.25
+        self.readyEvent.set()
         # go neutral first
         self.pi.hardware_PWM(self.pwmPin, self.frequency, self.neutral)
         time.sleep(initialSleep)

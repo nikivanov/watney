@@ -9,6 +9,7 @@ from motorcontroller import MotorController
 from servocontroller import ServoController
 from tts import TTSSpeaker
 from heartbeat import Heartbeat
+from threading import Event
 
 
 class Driver:
@@ -30,6 +31,7 @@ class Driver:
         servoConfig = config["SERVO"]
 
         ttsCommand = audioConfig["TTSCommand"]
+        greeting = audioConfig["Greeting"]
 
         print("Starting GStreamer pipeline...")
         self.executeCommand(videoConfig["GStreamerStartCommand"])
@@ -53,12 +55,19 @@ class Driver:
                                                rightMotor,
                                                float(driverConfig["HalfTurnSpeed"]))
 
-        self.servoController = ServoController(self.pi, int(servoConfig["PWMPin"]))
+        readyEvent = Event()
+
+        self.servoController = ServoController(self.pi, int(servoConfig["PWMPin"]), readyEvent)
 
         self.tts = TTSSpeaker(ttsCommand)
 
         heartbeatInterval = float(driverConfig["MaxHeartbeatInvervalMS"])
         self.heartbeat = Heartbeat(heartbeatInterval, self.servoController, self.motorController)
+
+        readyEvent.wait()
+        
+        if greeting:
+            self.tts.addPhrase(greeting)
 
     def setBearing(self, bearing):
         self.motorController.setBearing(bearing)
