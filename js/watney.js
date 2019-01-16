@@ -86,6 +86,11 @@ $(document).ready(function () {
                 return;
             }
 
+            if (event.keyCode == 86) {
+                unmute();
+                return;
+            }
+
             if (event.keyCode == 38) {
                 up = true;
             }
@@ -112,6 +117,11 @@ $(document).ready(function () {
     $(document).keyup(function (event) {
         if (!$("#ttsSection").is(":visible")) {
             event.preventDefault();
+
+            if (event.keyCode == 86) {
+                mute();
+                return;
+            }
 
             if (event.keyCode == 38) {
                 up = false;

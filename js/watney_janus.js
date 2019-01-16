@@ -1,6 +1,7 @@
 var janusConnection;
 var streamingPluginHandle;
 var forwarderPluginHandle;
+var microphoneStream;
 
 function doConnect() {
     Janus.init({
@@ -123,7 +124,11 @@ function attachForwarderPlugin() {
             console.log("Error attaching forwarder plugin: " + error);
         },
         onremotestream: function (stream) {
-            //streaming_onRemoteStreamStart(stream);
+            
+        },
+        onlocalstream: function (stream) {
+            microphoneStream = stream;
+            mute();
         },
         onmessage: function (msg, jsep) {
             forwarder_onMessage(msg, jsep);
@@ -155,6 +160,10 @@ function forwarder_onPluginAttached() {
         }
     );
 
+    doOffer();
+}
+
+function doOffer() {
     forwarderPluginHandle.createOffer(
         {
             media: {
@@ -164,6 +173,7 @@ function forwarder_onPluginAttached() {
                 data: false,
             },
             success: function(jsep) {
+
                 forwarderPluginHandle.send(
                     {
                         "message": 
@@ -180,7 +190,18 @@ function forwarder_onPluginAttached() {
             }
         }
     );
-    
+}
+
+function mute() {
+    if (microphoneStream) {
+        microphoneStream.getAudioTracks()[0].enabled = false;
+    }
+}
+
+function unmute() {
+    if (microphoneStream) {
+        microphoneStream.getAudioTracks()[0].enabled = true;
+    }
 }
 
 function forwarder_stopStream() {
