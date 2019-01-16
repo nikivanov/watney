@@ -132,22 +132,76 @@ function attachForwarderPlugin() {
 }
 
 function forwarder_onPluginAttached() {
-    var body = {
-        "request": "configure",
-	    "sendipv4": "127.0.0.1",
-	    "sendport_audio_rtp": 60000,
-	    "sendport_audio_rtcp": 60001,
-	    "sendport_video_rtp": 60002,
-	    "sendport_video_rtcp": 60003,     
-    };
-    forwarderPluginHandle.send({ "message": body });
-    forwarderPluginHandle.send({
-        "message": {
-            "video_enabled": false
+    
+    forwarderPluginHandle.send(
+        { 
+            "message": 
+            {
+                "request": "configure",
+                "sendipv4": "127.0.0.1",
+                "sendport_audio_rtp": 60000,
+                "sendport_audio_rtcp": 60001,
+                "sendport_video_rtp": 60002,
+                "sendport_video_rtcp": 60003,     
+            }
         }
-    });
+    );
+    forwarderPluginHandle.send(
+        {
+            "message":
+            {
+                "video_enabled": false
+            }
+        }
+    );
+
+    forwarderPluginHandle.createOffer(
+        {
+            media: {
+                audioSend: true,
+                audioRecv: false,
+                video: false,
+                data: false,
+            },
+            success: function(jsep) {
+                forwarderPluginHandle.send(
+                    {
+                        "message": 
+                        {
+                            "audio": true,
+                            "video": false
+                        },
+                        "jsep": jsep
+                    }
+                );
+            },
+            error: function(error) {
+                console.log("Remote offer error: " + error);
+            }
+        }
+    );
+    
+}
+
+function forwarder_stopStream() {
+    if (forwarderPluginHandle) {
+        forwarderPluginHandle.hangup();
+    }
 }
 
 function forwarder_onMessage(msg, jsep) {
-    
+    var result = msg["result"];
+    if (result && result["status"] && result["status"] === 'stopped') {
+        forwarder_stopStream();
+    }
+
+    var error = msg["error"];
+    if (error) {
+        console.log("Remote error: " + error);
+        forwarder_stopStream();
+    }
+
+    if(jsep !== undefined && jsep !== null) {
+        forwarderPluginHandle.handleRemoteJsep({jsep: jsep});
+    }
 }
