@@ -10,6 +10,7 @@
     <link rel="stylesheet" type="text/css" href="js/material.css">
     <link rel="stylesheet" type="text/css" href="js/watney.css">
     <link rel="stylesheet" type="text/css" href="js/ui/jquery-ui.min.css">
+    <script type="text/javascript" src="js/lodash.js"></script>
     <script type="text/javascript" src="js/janus.js"></script>
     <script type="text/javascript" src="js/adapter.min.js"></script>
     <script type="text/javascript" src="js/watney_janus.js"></script>
@@ -30,15 +31,17 @@
             <div id="micButton" title="Local mic on/off. Push-to-talk (V)" class="wButton">
                 <i class="material-icons">mic_none</i>
             </div>
+            <div id="volumeSlider" class="wButton">
+                <i class="material-icons">
+                    volume_down
+                </i>
+                <input type="range" value=0 min=0 max=100 />
+                <i class="material-icons">
+                    volume_up
+                </i>
+            </div>
             <div id="powerButton" title="Shutdown" class="wButton">
                 <i class="material-icons">power_settings_new</i>
-            </div>
-            <div id="volumeSlider" class="wButton">
-                <div id="player">
-                    <i class="fa fa-volume-down"></i>
-                    <div id="volume"></div>
-                    <i class="fa fa-volume-up"></i>
-                </div>
             </div>
         </div>
     </div>

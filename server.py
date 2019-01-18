@@ -60,6 +60,13 @@ def sendTTS():
     roverDriver.sayTTS(ttsString)
     return "OK"
 
+@app.route("/setVolume", methods=['POST'])
+def setVolume():
+    volumeObj = json.loads(request.data.decode("utf-8"))
+    volume = volumeObj['volume']
+    roverDriver.setVolume(volume)
+    return "OK"
+
 @app.route("/heartbeat", methods=['POST'])
 def onHeartbeat():
     stats = roverDriver.onHeartbeat()

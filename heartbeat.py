@@ -4,25 +4,28 @@ from threading import Thread
 import subprocess
 import sys
 
+
 class Heartbeat:
-    def __init__(self, heartbeatInterval, servoController, motorController):
+    def __init__(self, heartbeatInterval, servoController, motorController, alsa):
         self.servoController = servoController
         self.motorController = motorController
+		self.alsa = alsa
         self.ssidRegex = re.compile(r"ESSID:\"(.+?)\"")
         self.qualityRegex = re.compile(r"Link Quality=([^ ]+)")
         self.signalRegex = re.compile(r"Signal level=(.*? dBm)")
         self.lastHeartbeat = time.time()
-        self.heartbeatThread = Thread(daemon=True, target=self.heartbeatLoop, args=[heartbeatInterval])
+        self.heartbeatThread = Thread(
+            daemon=True, target=self.heartbeatLoop, args=[heartbeatInterval])
         self.heartbeatThread.start()
 
     shuttingDown = False
     lastHeartbeat = -1
     heartbeatStop = False
     lastHeartbeatData = {
-                "SSID": "-",
+        "SSID": "-",
                 "Quality": "-",
                 "Signal": "-"
-            }
+    }
 
     def heartbeatLoop(self, maxInterval):
         print("Starting heartbeat thread...")
@@ -41,7 +44,8 @@ class Heartbeat:
 
     def collectHeartbeatData(self):
         try:
-            wifiInfo = subprocess.check_output("iwconfig wlan0", shell=True).decode("utf-8")
+            wifiInfo = subprocess.check_output(
+                "iwconfig wlan0", shell=True).decode("utf-8")
             ssidMatch = self.ssidRegex.search(wifiInfo)
             ssid = ssidMatch.group(1) if ssidMatch else "-"
 
@@ -51,17 +55,21 @@ class Heartbeat:
             signalMatch = self.signalRegex.search(wifiInfo)
             signal = signalMatch.group(1) if signalMatch else "-"
 
+			volume = int(self.alsa.getVolume())
+
             return {
                 "SSID": ssid,
                 "Quality": quality,
-                "Signal": signal
+                "Signal": signal,
+				"Volume": volume
             }
         except Exception as ex:
             print(str(ex), file=sys.stderr)
             return {
                 "SSID": "-",
                 "Quality": "-",
-                "Signal": "-"
+                "Signal": "-",
+				"Volume": 0
             }
 
     def onHeartbeatReceived(self):

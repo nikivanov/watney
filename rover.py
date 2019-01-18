@@ -9,6 +9,7 @@ from motorcontroller import MotorController
 from servocontroller import ServoController
 from tts import TTSSpeaker
 from heartbeat import Heartbeat
+from alsa import Alsa
 from threading import Event
 
 
@@ -61,8 +62,10 @@ class Driver:
 
         self.tts = TTSSpeaker(ttsCommand)
 
+        self.alsa = Alsa()
+
         heartbeatInterval = float(driverConfig["MaxHeartbeatInvervalMS"])
-        self.heartbeat = Heartbeat(heartbeatInterval, self.servoController, self.motorController)
+        self.heartbeat = Heartbeat(heartbeatInterval, self.servoController, self.motorController, self.alsa)
 
         readyEvent.wait()
         
@@ -86,6 +89,9 @@ class Driver:
 
     def sayTTS(self, ttsString):
         self.tts.addPhrase(ttsString)
+
+    def setVolume(self, volume):
+        self.alsa.setVolume(volume)
 
     def onHeartbeat(self):
         return self.heartbeat.onHeartbeatReceived()

@@ -69,6 +69,8 @@ function sendKeys() {
 }
 
 $(document).ready(function () {
+    const setVolume_throttled = _.throttle(setVolume, 500, {leading: true});
+
     $(document).keydown(function (event) {
         if (!$("#ttsSection").is(":visible")) {
             event.preventDefault();
@@ -189,7 +191,7 @@ $(document).ready(function () {
             $("#ttsInput").focus();
         }
     });
- 
+
     $("#ttsInput").keydown(function (event) {
         if (event.keyCode == 27) {
             //escape
@@ -203,7 +205,7 @@ $(document).ready(function () {
             $("#ttsSection").animate({
                 bottom: '80vh',
                 opacity: '0'
-            }, 200, function() {
+            }, 200, function () {
                 $("#ttsSection").hide();
                 $("#ttsSection").css("bottom", "200px");
                 $("#ttsSection").css("opacity", "1");
@@ -221,18 +223,23 @@ $(document).ready(function () {
         if (microphoneStream) {
             if (microphoneStream.getAudioTracks()[0].enabled) {
                 mute();
-            } 
+            }
             else {
                 unmute();
             }
         }
     });
 
+    $("div#volumeSlider input").on("input", function () {
+        setVolume_throttled(this.value);
+    })
+
     doHeartbeat();
 
     doConnect();
 });
 
+var doVolumeSet = true;
 function doHeartbeat() {
     $.ajax({
         url: '/heartbeat',
@@ -242,6 +249,10 @@ function doHeartbeat() {
         $("#wifi_ssid").text(data.SSID);
         $("#wifi_quality").text(data.Quality);
         $("#wifi_signal").text(data.Signal);
+        if (doVolumeSet) {
+            $("div#volumeSlider input").val(data.volume);
+            doVolumeSet = false;
+        }
     }).always(function () {
         setTimeout(doHeartbeat, 1000);
     });
@@ -251,7 +262,17 @@ function sendTTS(str) {
     $.ajax({
         url: '/sendTTS',
         type: "POST",
-        data: JSON.stringify({str}),
+        data: JSON.stringify({ str }),
+        contentType: "application/json; charset=utf-8",
+        dataType: "json"
+    });
+}
+
+function setVolume(volume) {
+    $.ajax({
+        url: '/setVolume',
+        type: "POST",
+        data: JSON.stringify({ volume }),
         contentType: "application/json; charset=utf-8",
         dataType: "json"
     });
