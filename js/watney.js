@@ -217,6 +217,17 @@ $(document).ready(function () {
         $("#ttsSection").fadeOut(200);
     });
 
+    $("#micButton").click(function (event) {
+        if (microphoneStream) {
+            if (microphoneStream.getAudioTracks()[0].enabled) {
+                mute();
+            } 
+            else {
+                unmute();
+            }
+        }
+    });
+
     doHeartbeat();
 
     doConnect();

@@ -16,7 +16,7 @@ div#powerButton::before {
     left: 50%;
     transform: translate(-50%, -50%);
 
-    border: 2px solid white;
+    border: 2px solid darkred;
     border-radius: 50%;
 }
 
@@ -26,7 +26,7 @@ div#powerButton::after {
     width: 3px;
     height: 10px;
     position: absolute;
-    background-color: white;
+    background-color: darkred;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
@@ -89,7 +89,6 @@ div#wifiInfo {
     padding: 5px;
     color: white;
     font-family: "Helvetica Neue", Arial, sans-serif;
-    font-weight: 100;
     -webkit-font-smoothing: antialiased;
     background-color: rgba(0, 0, 0, 0.5);
     display: table;
@@ -117,7 +116,6 @@ div#ttsSection {
     padding: 5px;
     color: white;
     font-family: "Helvetica Neue", Arial, sans-serif;
-    font-weight: 100;
     -webkit-font-smoothing: antialiased;
     background-color: rgba(0, 0, 0, 0.5);
     display: table;
@@ -125,12 +123,12 @@ div#ttsSection {
     border-spacing: 2px;
 }
 
-div#ttsButton {
+div.imageButton {
     vertical-align: middle;
     text-align: center;
 }
 
-div#ttsButton > img {
+div.imageButton > img {
     filter: invert(100%);
     padding-top: 5px;
 }
