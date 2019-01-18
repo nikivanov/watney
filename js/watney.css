@@ -4,39 +4,7 @@
 
 div#powerButton {
     position: relative;
-}
-
-div#powerButton::before {
-    content: "";
-    display: block;
-    width: 20px;
-    height: 20px;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-
-    border: 2px solid darkred;
-    border-radius: 50%;
-}
-
-div#powerButton::after {
-    content: "";
-    display: block;
-    width: 3px;
-    height: 10px;
-    position: absolute;
-    background-color: darkred;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-}
-
-div#infoButton {
-    text-align: center;
-    vertical-align: middle;
-    line-height: 36px;
-    color: white;
+    color: darkred;
 }
 
 div.wButton {
@@ -46,6 +14,9 @@ div.wButton {
     background-color: rgba(255, 255, 255, 0.2);
     box-sizing: border-box;
     border: 1px solid white;
+    text-align: center;
+    vertical-align: middle;
+    color: white;
 }
 
 div.wButton:hover {
@@ -123,16 +94,6 @@ div#ttsSection {
     border-spacing: 2px;
 }
 
-div.imageButton {
-    vertical-align: middle;
-    text-align: center;
-}
-
-div.imageButton > img {
-    filter: invert(100%);
-    padding-top: 5px;
-}
-
 input#ttsInput {
     display: block;
     margin : 0 auto;
@@ -140,3 +101,62 @@ input#ttsInput {
     font-size: 14pt;
     padding: 5px;
 }
+
+div#volumeSlider {
+    width: 100px;
+}
+
+div#volumeSlider:hover {
+    cursor: auto;
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+
+#player {
+    width: 200px;
+    height: 36px;
+    position: relative;
+    margin: 0 auto;
+  }
+  #player i {
+    position: absolute;
+    margin-top: -6px;
+    color: #666;
+  }
+  #player i.fa-volume-down {
+    margin-left: -8px;
+  }
+  #player i.fa-volume-up {
+    margin-right: -8px;
+    right: 0;
+  }
+  
+  #volume {
+    position: absolute;
+    left: 24px;
+    margin: 0 auto;
+    height: 5px;
+    width: 150px;
+    background: #555;
+    border-radius: 15px;
+  }
+  #volume .ui-slider-range-min {
+    height: 5px;
+    width: 150px;
+    position: absolute;
+    background: #2ecc71;
+    border: none;
+    border-radius: 10px;
+    outline: none;
+  }
+  #volume .ui-slider-handle {
+    width: 20px;
+    height: 20px;
+    border-radius: 20px;
+    background: #fff;
+    position: absolute;
+    margin-left: -8px;
+    margin-top: -8px;
+    cursor: pointer;
+    outline: none;
+  }

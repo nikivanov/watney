@@ -195,14 +195,14 @@ function doOffer() {
 function mute() {
     if (microphoneStream) {
         microphoneStream.getAudioTracks()[0].enabled = false;
-        $("div#micButton > img").attr("src", "js/mic_off.svg");
+        $("div#micButton > i").text("mic_off");
     }
 }
 
 function unmute() {
     if (microphoneStream) {
         microphoneStream.getAudioTracks()[0].enabled = true;
-        $("div#micButton > img").attr("src", "js/mic.svg");
+        $("div#micButton > i").text("mic");
     }
 }
 

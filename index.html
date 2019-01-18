@@ -6,6 +6,8 @@
     <title>Watney-4 Rover</title>
     <script type="text/javascript" src="js/jquery.min.js"></script>
     <script type="text/javascript" src="js/ui/jquery-ui.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="js/all.css">
+    <link rel="stylesheet" type="text/css" href="js/material.css">
     <link rel="stylesheet" type="text/css" href="js/watney.css">
     <link rel="stylesheet" type="text/css" href="js/ui/jquery-ui.min.css">
     <script type="text/javascript" src="js/janus.js"></script>
@@ -19,14 +21,25 @@
         id="vid" autoplay playsinline="true" webkit-playsinline="true" muted="muted"></video>
     <div id="buttonPanel">
         <div>
-            <div id="infoButton" title="Help" class="wButton">i</div>
-            <div id="ttsButton" title="Text to Speech (S)" class="wButton imageButton">
-                <img src="js/tts.svg" />
+            <div id="infoButton" title="Help" class="wButton">
+                <i class="material-icons">info</i>
             </div>
-            <div id="micButton" title="Local mic on/off. Push-to-talk (V)" class="wButton imageButton">
-                <img src="js/mic_none.svg" />
+            <div id="ttsButton" title="Text to Speech (S)" class="wButton">
+                <i class="material-icons">chat_bubble_outline</i>
             </div>
-            <div id="powerButton" title="Shutdown" class="wButton"></div>
+            <div id="micButton" title="Local mic on/off. Push-to-talk (V)" class="wButton">
+                <i class="material-icons">mic_none</i>
+            </div>
+            <div id="powerButton" title="Shutdown" class="wButton">
+                <i class="material-icons">power_settings_new</i>
+            </div>
+            <div id="volumeSlider" class="wButton">
+                <div id="player">
+                    <i class="fa fa-volume-down"></i>
+                    <div id="volume"></div>
+                    <i class="fa fa-volume-up"></i>
+                </div>
+            </div>
         </div>
     </div>
     <div id="shutdown-confirm" title="Shut down Watney?" style="display:none">
