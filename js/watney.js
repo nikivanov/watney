@@ -93,6 +93,27 @@ $(document).ready(function () {
                 return;
             }
 
+            if (event.key === '+' || event.key === '=' || event.key === '-') {
+                let currentVolume = parseInt($("div#volumeSlider input").val());
+
+                if (event.key === '+' || event.key === '=') {
+                    currentVolume = currentVolume + 5;
+                }
+                else {
+                    currentVolume = currentVolume - 5;
+                }
+                
+                if (currentVolume > 100) {
+                    currentVolume = 100;
+                }
+                else if (currentVolume < 0) {
+                    currentVolume = 0;
+                }
+                
+                $("div#volumeSlider input").val(currentVolume).trigger("input");
+                return;
+            }
+
             if (event.keyCode == 38) {
                 up = true;
             }
