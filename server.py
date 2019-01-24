@@ -63,7 +63,7 @@ def sendTTS():
 @app.route("/setVolume", methods=['POST'])
 def setVolume():
     volumeObj = json.loads(request.data.decode("utf-8"))
-    volume = volumeObj['volume']
+    volume = int(volumeObj['volume'])
     roverDriver.setVolume(volume)
     return "OK"
 
