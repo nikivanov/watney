@@ -9,7 +9,7 @@ class Heartbeat:
     def __init__(self, heartbeatInterval, servoController, motorController, alsa):
         self.servoController = servoController
         self.motorController = motorController
-		self.alsa = alsa
+        self.alsa = alsa
         self.ssidRegex = re.compile(r"ESSID:\"(.+?)\"")
         self.qualityRegex = re.compile(r"Link Quality=([^ ]+)")
         self.signalRegex = re.compile(r"Signal level=(.*? dBm)")
@@ -23,8 +23,8 @@ class Heartbeat:
     heartbeatStop = False
     lastHeartbeatData = {
         "SSID": "-",
-                "Quality": "-",
-                "Signal": "-"
+        "Quality": "-",
+        "Signal": "-"
     }
 
     def heartbeatLoop(self, maxInterval):
@@ -55,13 +55,13 @@ class Heartbeat:
             signalMatch = self.signalRegex.search(wifiInfo)
             signal = signalMatch.group(1) if signalMatch else "-"
 
-			volume = int(self.alsa.getVolume())
+            volume = int(self.alsa.getVolume())
 
             return {
                 "SSID": ssid,
                 "Quality": quality,
                 "Signal": signal,
-				"Volume": volume
+                "Volume": volume
             }
         except Exception as ex:
             print(str(ex), file=sys.stderr)
@@ -69,7 +69,7 @@ class Heartbeat:
                 "SSID": "-",
                 "Quality": "-",
                 "Signal": "-",
-				"Volume": 0
+                "Volume": 0
             }
 
     def onHeartbeatReceived(self):

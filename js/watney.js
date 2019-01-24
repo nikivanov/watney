@@ -271,7 +271,7 @@ function doHeartbeat() {
         $("#wifi_quality").text(data.Quality);
         $("#wifi_signal").text(data.Signal);
         if (doVolumeSet) {
-            $("div#volumeSlider input").val(data.volume);
+            $("div#volumeSlider input").val(data.Volume);
             doVolumeSet = false;
         }
     }).always(function () {
