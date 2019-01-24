@@ -11,6 +11,7 @@ from tts import TTSSpeaker
 from heartbeat import Heartbeat
 from alsa import Alsa
 from threading import Event
+from externalrunner import ExternalRunner
 
 
 class Driver:
@@ -22,7 +23,7 @@ class Driver:
         config = configparser.ConfigParser()
         config.read("rover.conf")
 
-        self.childProcesses = []
+        self.externalRunner = ExternalRunner()
 
         audioConfig = config["AUDIO"]
         videoConfig = config["VIDEO"]
@@ -35,10 +36,13 @@ class Driver:
         greeting = audioConfig["Greeting"]
 
         print("Starting GStreamer pipeline...")
-        self.executeCommand(videoConfig["GStreamerStartCommand"])
+        self.externalRunner.addExternalProcess(videoConfig["GStreamerStartCommand"], True, False)
 
         print("Starting Janus gateway...")
-        self.executeCommand(videoConfig["JanusStartCommand"])
+        self.externalRunner.addExternalProcess(videoConfig["JanusStartCommand"], True, False)
+
+        print("Starting Audio Sink...")
+        self.externalRunner.addExternalProcess(audioConfig["AudioSinkCommand"], True, True)
 
         print("Creating motor controller...")
 
@@ -96,16 +100,11 @@ class Driver:
     def onHeartbeat(self):
         return self.heartbeat.onHeartbeatReceived()
 
-    def executeCommand(self, command):
-        args = shlex.split(command)
-        p = subprocess.Popen(args, stdout=sys.stdout, stderr=sys.stderr, shell=True)
-        self.childProcesses.append(p)
-
     def cleanup(self):
+        # external runner must be shutdown first to minimize the shutdown / restart race condition
+        self.externalRunner.shutdown()
         self.servoController.stop()
         self.tts.stop()
         self.heartbeat.stop()
         self.pi.stop()
 
-        for p in self.childProcesses:
-            p.terminate()
