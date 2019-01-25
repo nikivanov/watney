@@ -12,6 +12,7 @@ from heartbeat import Heartbeat
 from alsa import Alsa
 from threading import Event
 from externalrunner import ExternalRunner
+from janusmonitor import JanusMonitor
 
 
 class Driver:
@@ -23,7 +24,9 @@ class Driver:
         config = configparser.ConfigParser()
         config.read("rover.conf")
 
-        self.externalRunner = ExternalRunner()
+        self.janusMonitor = JanusMonitor()
+        self.externalRunner = ExternalRunner(self.janusMonitor)
+
 
         audioConfig = config["AUDIO"]
         videoConfig = config["VIDEO"]
@@ -36,13 +39,13 @@ class Driver:
         greeting = audioConfig["Greeting"]
 
         print("Starting GStreamer pipeline...")
-        self.externalRunner.addExternalProcess(videoConfig["GStreamerStartCommand"], True, False)
+        self.externalRunner.addExternalProcess(videoConfig["GStreamerStartCommand"], True, False, True)
 
         print("Starting Janus gateway...")
-        self.externalRunner.addExternalProcess(videoConfig["JanusStartCommand"], True, False)
+        self.externalRunner.addExternalProcess(videoConfig["JanusStartCommand"], True, False, False)
 
         print("Starting Audio Sink...")
-        self.externalRunner.addExternalProcess(audioConfig["AudioSinkCommand"], True, True)
+        self.externalRunner.addExternalProcess(audioConfig["AudioSinkCommand"], True, True, True)
 
         print("Creating motor controller...")
 
