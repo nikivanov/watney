@@ -1,9 +1,6 @@
 import configparser
 import pigpio
 import os
-import subprocess
-import sys
-import shlex
 from motor import Motor
 from motorcontroller import MotorController
 from servocontroller import ServoController
@@ -13,7 +10,7 @@ from alsa import Alsa
 from threading import Event
 from externalrunner import ExternalRunner
 from janusmonitor import JanusMonitor
-
+from blaudio import BLAudio
 
 class Driver:
 
@@ -27,7 +24,6 @@ class Driver:
         self.janusMonitor = JanusMonitor()
         self.externalRunner = ExternalRunner(self.janusMonitor)
 
-
         audioConfig = config["AUDIO"]
         videoConfig = config["VIDEO"]
         driverConfig = config["DRIVER"]
@@ -37,9 +33,17 @@ class Driver:
 
         ttsCommand = audioConfig["TTSCommand"]
         greeting = audioConfig["Greeting"]
+        mutePin = audioConfig["MutePin"]
+        blDeviceName = audioConfig["BLDeviceName"]
 
-        print("Starting GStreamer pipeline...")
+        self.blaudio = BLAudio(self.pi, int(mutePin), blDeviceName)
+        self.blaudio.waitForAudio()
+
+        print("Starting video GStreamer pipeline...")
         self.externalRunner.addExternalProcess(videoConfig["GStreamerStartCommand"], True, False, True)
+
+        # print("Starting audio GStreamer pipeline...")
+        # self.externalRunner.addExternalProcess(audioConfig["GStreamerStartCommand"], True, False, True)
 
         print("Starting Janus gateway...")
         self.externalRunner.addExternalProcess(videoConfig["JanusStartCommand"], True, False, False)
@@ -75,7 +79,7 @@ class Driver:
         self.heartbeat = Heartbeat(heartbeatInterval, self.servoController, self.motorController, self.alsa)
 
         readyEvent.wait()
-        
+
         if greeting:
             self.tts.addPhrase(greeting)
 
@@ -110,4 +114,3 @@ class Driver:
         self.tts.stop()
         self.heartbeat.stop()
         self.pi.stop()
-

@@ -7,7 +7,6 @@ import time
 class JanusMonitor:
 
     def __init__(self):
-        self.lastRequestFailed = False
         self.hasOpenSession = False
         self.watchers = list()
         print("Starting the janus session monitor")
@@ -15,14 +14,15 @@ class JanusMonitor:
         self.workerThread.start()
 
     def workLoop(self):
+        lastRequestFailed = True
         while True:
             try:
                 self.handleSessionsObject(self.getSessions().json())
-                self.lastRequestFailed = False
+                lastRequestFailed = False
             except Exception as e:
-                if not self.lastRequestFailed:
+                if not lastRequestFailed:
                     print("Janus session request failed: " + str(e))
-                self.lastRequestFailed = True
+                lastRequestFailed = True
 
             time.sleep(1)
 

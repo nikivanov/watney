@@ -3,9 +3,12 @@ import alsaaudio
 
 class Alsa:
     def __init__(self):
-        if len(alsaaudio.mixers()) > 0:
-            self.mixer = alsaaudio.Mixer(alsaaudio.mixers()[0])
-        else:
+        try:
+            if len(alsaaudio.mixers()) > 0:
+                self.mixer = alsaaudio.Mixer(alsaaudio.mixers()[0])
+            else:
+                self.mixer = None
+        except alsaaudio.ALSAAudioError:
             self.mixer = None
 
     def setVolume(self, volume):

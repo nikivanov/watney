@@ -51,7 +51,7 @@ def setCommand():
 
 @app.route("/shutDown", methods=['POST'])
 def shutdown():
-    call("sudo halt", shell=True)
+    call("halt", shell=True)
 
 @app.route("/sendTTS", methods=['POST'])
 def sendTTS():
