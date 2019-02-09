@@ -80,7 +80,9 @@ def signal_handler(signal, frame):
 
 if __name__ == "__main__":
     signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
     log = logging.getLogger('werkzeug')
     log.setLevel(logging.ERROR)
     roverDriver = Driver()
+    #ssl_context=('cert.pem', 'key.pem')
     app.run(host='0.0.0.0', port=5000, debug=False)

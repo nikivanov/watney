@@ -36,8 +36,8 @@ class Driver:
         mutePin = audioConfig["MutePin"]
         blDeviceName = audioConfig["BLDeviceName"]
 
-        self.blaudio = BLAudio(self.pi, int(mutePin), blDeviceName)
-        self.blaudio.waitForAudio()
+        # self.blaudio = BLAudio(self.pi, int(mutePin), blDeviceName, self.janusMonitor)
+        # self.blaudio.waitForAudio()
 
         print("Starting video GStreamer pipeline...")
         self.externalRunner.addExternalProcess(videoConfig["GStreamerStartCommand"], True, False, True)
@@ -110,6 +110,7 @@ class Driver:
     def cleanup(self):
         # external runner must be shutdown first to minimize the shutdown / restart race condition
         self.externalRunner.shutdown()
+        self.blaudio.stop()
         self.servoController.stop()
         self.tts.stop()
         self.heartbeat.stop()
