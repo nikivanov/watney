@@ -11,6 +11,7 @@ from threading import Event
 from externalrunner import ExternalRunner
 from janusmonitor import JanusMonitor
 
+
 class Driver:
 
     def __init__(self):
@@ -105,7 +106,6 @@ class Driver:
     def cleanup(self):
         # external runner must be shutdown first to minimize the shutdown / restart race condition
         self.externalRunner.shutdown()
-        self.blaudio.stop()
         self.servoController.stop()
         self.tts.stop()
         self.heartbeat.stop()
