@@ -135,8 +135,11 @@ watney: {
 	type = "rtp"
 	id = 10
 	description = "Watney HD stream"
-	audio = false
-	video = true
+	audio = true
+	audioport = 8005
+    audiopt = 111
+    audiortpmap = "opus/48000/2"
+    video = true
 	videoport = 8004
 	videopt = 96
 	videortpmap = "H264/90000"

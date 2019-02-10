@@ -10,7 +10,6 @@ from alsa import Alsa
 from threading import Event
 from externalrunner import ExternalRunner
 from janusmonitor import JanusMonitor
-from blaudio import BLAudio
 
 class Driver:
 
@@ -34,16 +33,12 @@ class Driver:
         ttsCommand = audioConfig["TTSCommand"]
         greeting = audioConfig["Greeting"]
         mutePin = audioConfig["MutePin"]
-        blDeviceName = audioConfig["BLDeviceName"]
-
-        # self.blaudio = BLAudio(self.pi, int(mutePin), blDeviceName, self.janusMonitor)
-        # self.blaudio.waitForAudio()
 
         print("Starting video GStreamer pipeline...")
         self.externalRunner.addExternalProcess(videoConfig["GStreamerStartCommand"], True, False, True)
 
-        # print("Starting audio GStreamer pipeline...")
-        # self.externalRunner.addExternalProcess(audioConfig["GStreamerStartCommand"], True, False, True)
+        print("Starting audio GStreamer pipeline...")
+        self.externalRunner.addExternalProcess(audioConfig["GStreamerStartCommand"], True, False, True)
 
         print("Starting Janus gateway...")
         self.externalRunner.addExternalProcess(videoConfig["JanusStartCommand"], True, False, False)
