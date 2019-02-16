@@ -3,6 +3,7 @@ import time
 from threading import Thread
 import subprocess
 import sys
+import psutil
 
 
 class Heartbeat:
@@ -57,11 +58,14 @@ class Heartbeat:
 
             volume = int(self.alsa.getVolume())
 
+            cpuIdle = psutil.cpu_percent()
+
             return {
                 "SSID": ssid,
                 "Quality": quality,
                 "Signal": signal,
-                "Volume": volume
+                "Volume": volume,
+                "CPU": cpuIdle
             }
         except Exception as ex:
             print(str(ex), file=sys.stderr)

@@ -270,6 +270,7 @@ function doHeartbeat() {
         $("#wifi_ssid").text(data.SSID);
         $("#wifi_quality").text(data.Quality);
         $("#wifi_signal").text(data.Signal);
+        $("#cpuUsage").text(data.CPU);
         if (doVolumeSet) {
             $("div#volumeSlider input").val(data.Volume);
             doVolumeSet = false;
