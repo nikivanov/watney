@@ -137,8 +137,8 @@ watney: {
 	description = "Watney HD stream"
 	audio = true
 	audioport = 8005
-        audiopt = 0
-        audiortpmap = "PCMU/8000"
+    audiopt = 0
+    audiortpmap = "PCMU/8000"
 	video = true
 	videoport = 8004
 	videopt = 96
