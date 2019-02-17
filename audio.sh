@@ -1,1 +1,1 @@
-gst-launch-1.0 alsasrc device=plughw:1,0 ! audio/x-raw,format=S16LE,rate=24000,channels=1 ! queue ! opusenc complexity=0 ! audio/x-opus, channels=1 ! rtpopuspay ! application/x-rtp,media=audio,payload=127,clock-rate=48000,encoding-name=OPUS ! udpsink host=127.0.0.1 port=8005
+gst-launch-1.0 alsasrc device=plughw:1,0 ! mulawenc ! rtppcmupay ! udpsink host=127.0.0.1 port=8005
