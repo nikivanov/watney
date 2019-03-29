@@ -33,7 +33,9 @@ class Driver:
 
         ttsCommand = audioConfig["TTSCommand"]
         greeting = audioConfig["Greeting"]
-        mutePin = audioConfig["MutePin"]
+        mutePin = int(audioConfig["MutePin"])
+
+        self.alsa = Alsa(self.pi, mutePin, self.janusMonitor)
 
         print("Starting video GStreamer pipeline...")
         self.externalRunner.addExternalProcess(videoConfig["GStreamerStartCommand"], True, False, True)
@@ -69,15 +71,15 @@ class Driver:
 
         self.tts = TTSSpeaker(ttsCommand)
 
-        self.alsa = Alsa()
-
         heartbeatInterval = float(driverConfig["MaxHeartbeatInvervalMS"])
         self.heartbeat = Heartbeat(heartbeatInterval, self.servoController, self.motorController, self.alsa)
 
         readyEvent.wait()
 
         if greeting:
+            self.alsa.unmute()
             self.tts.addPhrase(greeting)
+            self.alsa.mute()
 
     def setBearing(self, bearing):
         self.motorController.setBearing(bearing)
@@ -106,6 +108,7 @@ class Driver:
     def cleanup(self):
         # external runner must be shutdown first to minimize the shutdown / restart race condition
         self.externalRunner.shutdown()
+        self.alsa.stop()
         self.servoController.stop()
         self.tts.stop()
         self.heartbeat.stop()

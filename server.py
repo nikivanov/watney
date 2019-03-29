@@ -85,4 +85,4 @@ if __name__ == "__main__":
     log.setLevel(logging.ERROR)
     roverDriver = Driver()
     #ssl_context=('cert.pem', 'key.pem')
-    app.run(host='0.0.0.0', port=5000, debug=False)
+    app.run(host='0.0.0.0', port=5000, debug=False, ssl_context='adhoc')
