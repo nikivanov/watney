@@ -88,7 +88,6 @@ if __name__ == "__main__":
     signal.signal(signal.SIGTERM, signal_handler)
     log = logging.getLogger('werkzeug')
     log.setLevel(logging.ERROR)
-    ssl_context=('cert.pem', 'key.pem')
     signalingServer = SignalingServer()
     signalingServer.start()
     # roverDriver = Driver()

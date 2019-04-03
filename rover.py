@@ -7,12 +7,8 @@ from servocontroller import ServoController
 from tts import TTSSpeaker
 from heartbeat import Heartbeat
 from alsa import Alsa
-<<<<<<< Updated upstream
-from threading import Event
 from externalrunner import ExternalRunner
 from janusmonitor import JanusMonitor
-=======
->>>>>>> Stashed changes
 
 
 class Driver:
@@ -38,7 +34,6 @@ class Driver:
         greeting = audioConfig["Greeting"]
         mutePin = int(audioConfig["MutePin"])
 
-<<<<<<< Updated upstream
         self.alsa = Alsa(self.pi, mutePin, self.janusMonitor)
 
         print("Starting video GStreamer pipeline...")
@@ -53,8 +48,6 @@ class Driver:
         print("Starting Audio Sink...")
         self.externalRunner.addExternalProcess(audioConfig["AudioSinkCommand"], True, True, True)
 
-=======
->>>>>>> Stashed changes
         print("Creating motor controller...")
 
         leftMotor = Motor(self.pi, int(leftMotorConfig["PWMPin"]),
