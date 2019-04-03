@@ -5,7 +5,7 @@ import time
 
 class ServoController:
 
-    def __init__(self, pi, pwmPin, readyEvent):
+    def __init__(self, pi, pwmPin):
         self.pwmPin = pwmPin
         self.neutral = 75000
         self.amplitude = 25000
@@ -13,7 +13,6 @@ class ServoController:
         self.speed_per_sec = 30000
         self.resolution = 0.03
         self.shuttingDown = False
-        self.readyEvent = readyEvent
         # 1 is forward, -1 is backward, 0 is stop
         self.direction = 0
 

@@ -1,29 +1,32 @@
-from flask import Flask, send_file, request, send_from_directory, jsonify
+from quart import Quart, send_file, request, send_from_directory, jsonify
 import json
-from rover import Driver
+# from rover import Driver
 import signal
 import sys
-from rover import MotorController
+#from rover import MotorController
 from subprocess import call
 import logging
+import asyncio
+from signaling import SignalingServer
 
-app = Flask(__name__)
+app = Quart(__name__)
 roverDriver = None
+signalingServer = None
 
 
 @app.route("/")
-def getPageHTML():
-    return send_file("index.html")
+async def getPageHTML():
+    return await send_file("index.html")
 
 
 @app.route('/js/<path:path>')
-def send_js(path):
-    return send_from_directory('js', path)
+async def send_js(path):
+    return await send_from_directory('js', path)
 
 
 @app.route("/sendCommand", methods=['POST'])
-def setCommand():
-    commandObj = json.loads(request.data.decode("utf-8"))
+async def setCommand():
+    commandObj = await request.get_json()
     newBearing = commandObj['bearing']
     newLook = commandObj['look']
 
@@ -50,32 +53,34 @@ def setCommand():
 
 
 @app.route("/shutDown", methods=['POST'])
-def shutdown():
+async def shutdown():
     call("halt", shell=True)
 
+
 @app.route("/sendTTS", methods=['POST'])
-def sendTTS():
-    ttsObj = json.loads(request.data.decode("utf-8"))
+async def sendTTS():
+    ttsObj = await request.get_json()
     ttsString = ttsObj['str']
     roverDriver.sayTTS(ttsString)
     return "OK"
 
+
 @app.route("/setVolume", methods=['POST'])
-def setVolume():
-    volumeObj = json.loads(request.data.decode("utf-8"))
+async def setVolume():
+    volumeObj = await request.get_json()
     volume = int(volumeObj['volume'])
     roverDriver.setVolume(volume)
     return "OK"
 
+
 @app.route("/heartbeat", methods=['POST'])
-def onHeartbeat():
+async def onHeartbeat():
     stats = roverDriver.onHeartbeat()
     return jsonify(stats)
 
 
 def signal_handler(signal, frame):
-    roverDriver.cleanup()
-    sys.exit(0)
+    asyncio.get_event_loop().stop()
 
 
 if __name__ == "__main__":
@@ -83,6 +88,8 @@ if __name__ == "__main__":
     signal.signal(signal.SIGTERM, signal_handler)
     log = logging.getLogger('werkzeug')
     log.setLevel(logging.ERROR)
-    roverDriver = Driver()
-    #ssl_context=('cert.pem', 'key.pem')
-    app.run(host='0.0.0.0', port=5000, debug=False)
+    ssl_context=('cert.pem', 'key.pem')
+    signalingServer = SignalingServer()
+    signalingServer.start()
+    # roverDriver = Driver()
+    app.run(host='0.0.0.0', port=5000, debug=False, certfile='cert.pem', keyfile='key.pem')
