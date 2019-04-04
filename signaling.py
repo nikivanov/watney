@@ -14,6 +14,7 @@ import logging
 import asyncio
 import websockets
 from concurrent.futures._base import TimeoutError
+from events import Events
 
 ADDR_PORT = ('0.0.0.0', 8443)
 KEEPALIVE_TIMEOUT = 10
@@ -85,6 +86,7 @@ class SignalingServer:
         peer_status = None
         self.peers[uid] = [ws, raddr, peer_status]
         print("Registered peer {!r} at {!r}".format(uid, raddr))
+        Events.getInstance().fireSessionStarted()
         while True:
             # Receive command, wait forever if necessary
             msg = await self.recv_msg_ping(ws, raddr)
@@ -198,6 +200,7 @@ class SignalingServer:
             await self.connection_handler(ws, peer_id)
         except websockets.ConnectionClosed:
             print("Connection to peer {!r} closed, exiting handler".format(raddr))
+            Events.getInstance().fireSessionEnded()
         finally:
             await self.remove_peer(peer_id)
 

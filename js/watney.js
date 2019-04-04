@@ -255,9 +255,9 @@ $(document).ready(function () {
         setVolume_throttled(this.value);
     })
 
-    doHeartbeat();
+    //doHeartbeat();
 
-    doConnect();
+    websocketServerConnect();
 });
 
 var doVolumeSet = true;

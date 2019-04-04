@@ -1,41 +1,30 @@
-import pigpio
-from threading import Thread, Condition
+import asyncio
 import time
 
 
 class ServoController:
 
-    def __init__(self, pi, pwmPin):
-        self.pwmPin = pwmPin
+    def __init__(self, pi, config):
+        servoConfig = config["SERVO"]
+        self.pwmPin = int(servoConfig["PWMPin"])
         self.neutral = 75000
         self.amplitude = 25000
         self.frequency = 50
-        self.speed_per_sec = 30000
-        self.resolution = 0.03
+        self.changeVelocityPerSec = 25000
         self.shuttingDown = False
         # 1 is forward, -1 is backward, 0 is stop
         self.direction = 0
-
+        self.timingLock = asyncio.Condition()
         self.pi = pi
 
-        self.timingLock = Condition()
-        self.timingThread = Thread(daemon=True, target=self.timingLoop)
-        self.timingThread.start()
-
     def forward(self):
-        with self.timingLock:
-            self.direction = 1
-            self.timingLock.notify()
+        self.direction = 1
 
     def backward(self):
-        with self.timingLock:
-            self.direction = -1
-            self.timingLock.notify()
+        self.direction = -1
 
     def lookStop(self):
-        with self.timingLock:
-            self.direction = 0
-            self.timingLock.notify()
+        self.direction = 0
 
     def stop(self):
         with self.timingLock:
@@ -43,51 +32,49 @@ class ServoController:
             self.shuttingDown = True
             self.timingLock.notify()
 
-        print("Joining the timing thread")
-        self.timingThread.join()
-        print("Servo thread stopped")
+    def start(self):
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(self.timingLoop())
 
-    def timingLoop(self):
+    async def timingLoop(self):
         print("Servo starting...")
         initialSleep = 0.25
-        self.readyEvent.set()
         # go neutral first
         self.pi.hardware_PWM(self.pwmPin, self.frequency, self.neutral)
-        time.sleep(initialSleep)
+        await asyncio.sleep(initialSleep)
         self.pi.hardware_PWM(self.pwmPin, self.frequency, self.neutral + int(self.amplitude / 2))
-        time.sleep(initialSleep)
+        await asyncio.sleep(initialSleep)
         self.pi.hardware_PWM(self.pwmPin, self.frequency, self.neutral - int(self.amplitude / 2))
-        time.sleep(initialSleep)
+        await asyncio.sleep(initialSleep)
         self.pi.hardware_PWM(self.pwmPin, self.frequency, self.neutral)
-        time.sleep(initialSleep)
+        await asyncio.sleep(initialSleep)
         self.pi.hardware_PWM(self.pwmPin, self.frequency, 0)
 
         currentPosition = self.neutral
         lastChangeTime = -1
 
         while True:
-            with self.timingLock:
+            async with self.timingLock:
                 if not self.__shouldBeMoving(currentPosition):
                     self.pi.hardware_PWM(self.pwmPin, self.frequency, 0)
-                    self.timingLock.wait()
+                    await self.timingLock.wait()
 
                 if self.shuttingDown:
                     break
 
                 if lastChangeTime == -1:
-                    changeDelta = self.speed_per_sec * self.resolution
+                    changeDelta = 0
                 else:
                     timeDelta = time.time() - lastChangeTime
-                    changeDelta = self.speed_per_sec * timeDelta
+                    changeDelta = self.changeVelocityPerSec * timeDelta
 
                 if self.direction == 1:
                     currentPosition = int(min(currentPosition + changeDelta, self.neutral + self.amplitude))
                 elif self.direction == -1:
                     currentPosition = int(max(currentPosition - changeDelta, self.neutral - self.amplitude))
 
-            # print("Pin {} frequency {} position {}".format(self.pwmPin, self.frequency, currentPosition))
             self.pi.hardware_PWM(self.pwmPin, self.frequency, currentPosition)
-            time.sleep(self.resolution)
+            await asyncio.sleep(0)
 
         print("Servo stopping...")
         self.pi.hardware_PWM(self.pwmPin, self.frequency, 0)

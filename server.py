@@ -1,9 +1,8 @@
 from quart import Quart, send_file, request, send_from_directory, jsonify
-import json
-# from rover import Driver
+from rover import Driver
 import signal
 import sys
-#from rover import MotorController
+from rover import MotorController
 from subprocess import call
 import logging
 import asyncio
@@ -12,6 +11,7 @@ from signaling import SignalingServer
 app = Quart(__name__)
 roverDriver = None
 signalingServer = None
+regularHandler = None
 
 
 @app.route("/")
@@ -88,7 +88,15 @@ if __name__ == "__main__":
     signal.signal(signal.SIGTERM, signal_handler)
     log = logging.getLogger('werkzeug')
     log.setLevel(logging.ERROR)
+
     signalingServer = SignalingServer()
     signalingServer.start()
-    # roverDriver = Driver()
-    app.run(host='0.0.0.0', port=5000, debug=False, certfile='cert.pem', keyfile='key.pem')
+
+    roverDriver = Driver()
+    roverDriver.start()
+
+    loop = asyncio.get_event_loop()
+    app.run(host='0.0.0.0', port=5000, debug=False, certfile='cert.pem', keyfile='key.pem', loop=loop)
+    loop.run_forever()
+
+
