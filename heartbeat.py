@@ -50,7 +50,7 @@ class Heartbeat:
                 self.lastHeartbeatData = await self.collectHeartbeatData()
                 await asyncio.sleep(0.5)
         except asyncio.CancelledError:
-            print("Heartbeat stopping...")
+            print("Heartbeat stopped")
         except Exception as e:
             print("Unexpected exception in heartbeat: " + str(e))
 

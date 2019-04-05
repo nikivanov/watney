@@ -57,40 +57,38 @@ class ServoController:
             self.pi.hardware_PWM(self.pwmPin, self.frequency, 0)
 
             currentPosition = self.neutral
-            lastChangeTime = -1
-            deltas = list()
-
+            lastChangeTime = None
+            changeCount = 0
             while True:
                 async with self.timingLock:
                     if not self.__shouldBeMoving(currentPosition):
                         self.pi.hardware_PWM(self.pwmPin, self.frequency, 0)
-                        lastChangeTime = -1
-                        if len(deltas) > 0:
-                            print("Average change: {}, total: {}".format(sum(deltas) / len(deltas), len(deltas)))
-                        deltas.clear()
+                        lastChangeTime = None
+                        print("Got there in {} steps".format(changeCount))
                         print("Servo sleeping")
                         await self.timingLock.wait()
                         print("Servo woke up")
+                        changeCount = 0
 
-                    if lastChangeTime == -1:
-                        changeDelta = 0
-                    else:
-                        timeDelta = time.time() - lastChangeTime
-                        changeDelta = self.changeVelocityPerSec * timeDelta
+                if not lastChangeTime:
+                    changeDelta = 0
+                else:
+                    timeDelta = time.time() - lastChangeTime
+                    changeDelta = self.changeVelocityPerSec * timeDelta
 
-                    lastChangeTime = time.time()
-                    deltas.append(changeDelta)
+                lastChangeTime = time.time()
+                changeCount = changeCount + 1
 
-                    if self.direction == 1:
-                        currentPosition = int(min(currentPosition + changeDelta, self.neutral + self.amplitude))
-                    elif self.direction == -1:
-                        currentPosition = int(max(currentPosition - changeDelta, self.neutral - self.amplitude))
+                if self.direction == 1:
+                    currentPosition = int(min(currentPosition + changeDelta, self.neutral + self.amplitude))
+                elif self.direction == -1:
+                    currentPosition = int(max(currentPosition - changeDelta, self.neutral - self.amplitude))
 
                 self.pi.hardware_PWM(self.pwmPin, self.frequency, currentPosition)
-                await asyncio.sleep(0)
+                await asyncio.sleep(0.00005)
         except asyncio.CancelledError:
-            print("Servo stopping...")
             self.pi.hardware_PWM(self.pwmPin, self.frequency, 0)
+            print("Servo stopped")
         except Exception as e:
             print("Unexpected exception in servo: " + str(e))
 
