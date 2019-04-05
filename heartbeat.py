@@ -1,13 +1,15 @@
 import re
 import time
-from threading import Thread
-import subprocess
+import asyncio
 import sys
 import psutil
 
 
 class Heartbeat:
-    def __init__(self, heartbeatInterval, servoController, motorController, alsa):
+    def __init__(self, config, servoController, motorController, alsa):
+        driverConfig = config["DRIVER"]
+        self.heartbeatInterval = float(driverConfig["MaxHeartbeatInvervalS"])
+
         self.servoController = servoController
         self.motorController = motorController
         self.alsa = alsa
@@ -15,11 +17,8 @@ class Heartbeat:
         self.qualityRegex = re.compile(r"Link Quality=([^ ]+)")
         self.signalRegex = re.compile(r"Signal level=(.*? dBm)")
         self.lastHeartbeat = time.time()
-        self.heartbeatThread = Thread(
-            daemon=True, target=self.heartbeatLoop, args=[heartbeatInterval])
-        self.heartbeatThread.start()
+        self.task = None
 
-    shuttingDown = False
     lastHeartbeat = -1
     heartbeatStop = False
     lastHeartbeatData = {
@@ -28,25 +27,41 @@ class Heartbeat:
         "Signal": "-"
     }
 
-    def heartbeatLoop(self, maxInterval):
-        print("Starting heartbeat thread...")
-        while not self.shuttingDown:
-            if (time.time() - self.lastHeartbeat) > maxInterval:
-                if not self.heartbeatStop:
-                    self.motorController.setBearing(-1)
-                    self.servoController.lookStop()
-                    self.heartbeatStop = True
-            else:
-                self.heartbeatStop = False
+    def start(self):
+        loop = asyncio.get_event_loop()
+        self.task = loop.create_task(self.heartbeatLoop())
 
-            self.lastHeartbeatData = self.collectHeartbeatData()
-            time.sleep(0.5)
-        print("Stopping heartbeat thread...")
+    def stop(self):
+        if self.task:
+            self.task.cancel()
 
-    def collectHeartbeatData(self):
+    async def heartbeatLoop(self):
+        print("Heartbeat starting...")
         try:
-            wifiInfo = subprocess.check_output(
-                "iwconfig wlan0", shell=True).decode("utf-8")
+            while True:
+                if (time.time() - self.lastHeartbeat) > self.heartbeatInterval:
+                    if not self.heartbeatStop:
+                        self.motorController.setBearing("0")
+                        self.servoController.lookStop()
+                        self.heartbeatStop = True
+                else:
+                    self.heartbeatStop = False
+
+                self.lastHeartbeatData = await self.collectHeartbeatData()
+                await asyncio.sleep(0.5)
+        except asyncio.CancelledError:
+            print("Heartbeat stopping...")
+
+    async def collectHeartbeatData(self):
+        try:
+            proc = await asyncio.create_subprocess_shell(
+                "iwconfig wlan0",
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE)
+
+            stdout, stderr = await proc.communicate()
+
+            wifiInfo = stdout.decode()
             ssidMatch = self.ssidRegex.search(wifiInfo)
             ssid = ssidMatch.group(1) if ssidMatch else "-"
 
@@ -79,7 +94,3 @@ class Heartbeat:
     def onHeartbeatReceived(self):
         self.lastHeartbeat = time.time()
         return self.lastHeartbeatData
-
-    def stop(self):
-        self.shuttingDown = True
-        self.heartbeatThread.join()

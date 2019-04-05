@@ -1,5 +1,6 @@
 import pigpio
 
+
 class Motor:
     PWM_FREQUENCY = 200
 

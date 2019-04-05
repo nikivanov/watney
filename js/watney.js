@@ -255,7 +255,7 @@ $(document).ready(function () {
         setVolume_throttled(this.value);
     })
 
-    //doHeartbeat();
+    doHeartbeat();
 
     websocketServerConnect();
 });

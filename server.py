@@ -1,17 +1,22 @@
 from quart import Quart, send_file, request, send_from_directory, jsonify
-from rover import Driver
-import signal
-import sys
-from rover import MotorController
+import hypercorn
+from motorcontroller import MotorController
+from servocontroller import ServoController
+from heartbeat import Heartbeat
 from subprocess import call
-import logging
 import asyncio
 from signaling import SignalingServer
+import os
+import pigpio
+from configparser import ConfigParser
+from alsa import Alsa
 
 app = Quart(__name__)
-roverDriver = None
+motorController = None
+servoController = None
+heartbeat = None
 signalingServer = None
-regularHandler = None
+alsa = None
 
 
 @app.route("/")
@@ -31,20 +36,17 @@ async def setCommand():
     newLook = commandObj['look']
 
     if newBearing in MotorController.validBearings:
-        if newBearing == "0":
-            roverDriver.stop()
-        else:
-            roverDriver.setBearing(newBearing)
+        motorController.setBearing(newBearing)
     else:
         print("Invalid bearing {}".format(newBearing))
         return "Invalid", 400
 
     if newLook == 0:
-        roverDriver.lookStop()
+        servoController.lookStop()
     elif newLook == -1:
-        roverDriver.lookUp()
+        servoController.forward()
     elif newLook == 1:
-        roverDriver.lookDown()
+        servoController.backward()
     else:
         print("Invalid look at {}".format(newLook))
         return "Invalid", 400
@@ -69,34 +71,47 @@ async def sendTTS():
 async def setVolume():
     volumeObj = await request.get_json()
     volume = int(volumeObj['volume'])
-    roverDriver.setVolume(volume)
+    alsa.setVolume(volume)
     return "OK"
 
 
 @app.route("/heartbeat", methods=['POST'])
 async def onHeartbeat():
-    stats = roverDriver.onHeartbeat()
+    stats = heartbeat.onHeartbeatReceived()
     return jsonify(stats)
 
 
-def signal_handler(signal, frame):
-    asyncio.get_event_loop().stop()
-
-
 if __name__ == "__main__":
-    signal.signal(signal.SIGINT, signal_handler)
-    signal.signal(signal.SIGTERM, signal_handler)
-    log = logging.getLogger('werkzeug')
-    log.setLevel(logging.ERROR)
+    homePath = os.path.dirname(os.path.abspath(__file__))
+    pi = pigpio.pi()
+
+    config = ConfigParser()
+    config.read(os.path.join(homePath, "rover.conf"))
 
     signalingServer = SignalingServer()
     signalingServer.start()
 
-    roverDriver = Driver()
-    roverDriver.start()
+    motorController = MotorController(pi, config)
+
+    alsa = Alsa(pi, config)
+
+    servoController = ServoController(pi, config)
+    servoController.start()
+
+    heartbeat = Heartbeat(config, servoController, motorController, alsa)
+    heartbeat.start()
 
     loop = asyncio.get_event_loop()
-    app.run(host='0.0.0.0', port=5000, debug=False, certfile='cert.pem', keyfile='key.pem', loop=loop)
-    loop.run_forever()
 
+    try:
+        app.run(host='0.0.0.0', port=5000, debug=False, certfile='cert.pem', keyfile='key.pem', loop=loop)
+    finally:
+        alsa.stop()
+        heartbeat.stop()
+        servoController.stop()
 
+        pending = asyncio.Task.all_tasks()
+        try:
+            loop.run_until_complete(asyncio.gather(*pending))
+        except hypercorn.utils.Shutdown:
+            pass

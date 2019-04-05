@@ -1,9 +1,13 @@
 import alsaaudio
 import pigpio
+from events import Events
 
 
 class Alsa:
-    def __init__(self, pi, mutePin, janusMonitor):
+    def __init__(self, pi, config):
+        audioConfig = config["AUDIO"]
+        mutePin = int(audioConfig["MutePin"])
+
         try:
             if len(alsaaudio.mixers()) > 0:
                 self.mixer = alsaaudio.Mixer(alsaaudio.mixers()[0])
@@ -16,7 +20,9 @@ class Alsa:
         self.mutePin = mutePin
         self.pi.set_mode(self.mutePin, pigpio.OUTPUT)
         self.mute()
-        janusMonitor.addWatcher(lambda sessionPresent: self.handleSessionChange(sessionPresent))
+
+        Events.getInstance().sessionStarted.append(lambda: self.onSessionStarted())
+        Events.getInstance().sessionEnded.append(lambda: self.onSessionEnded())
 
     def setVolume(self, volume):
         if volume < 0:
@@ -35,11 +41,11 @@ class Alsa:
 
         return 0
 
-    def handleSessionChange(self, sessionPresent):
-        if sessionPresent:
-            self.unmute()
-        else:
-            self.mute()
+    def onSessionStarted(self):
+        self.unmute()
+
+    def onSessionEnded(self):
+        self.mute()
 
     def stop(self):
         self.mute()
