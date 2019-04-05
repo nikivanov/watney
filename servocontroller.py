@@ -17,14 +17,20 @@ class ServoController:
         self.pi = pi
         self.task = None
 
-    def forward(self):
-        self.direction = 1
+    async def forward(self):
+        async with self.timingLock:
+            self.direction = 1
+            self.timingLock.notify()
 
-    def backward(self):
-        self.direction = -1
+    async def backward(self):
+        async with self.timingLock:
+            self.direction = -1
+            self.timingLock.notify()
 
-    def lookStop(self):
-        self.direction = 0
+    async def lookStop(self):
+        async with self.timingLock:
+            self.direction = 0
+            self.timingLock.notify()
 
     def start(self):
         loop = asyncio.get_event_loop()
@@ -52,18 +58,28 @@ class ServoController:
 
             currentPosition = self.neutral
             lastChangeTime = -1
+            deltas = list()
 
             while True:
                 async with self.timingLock:
                     if not self.__shouldBeMoving(currentPosition):
                         self.pi.hardware_PWM(self.pwmPin, self.frequency, 0)
+                        lastChangeTime = -1
+                        if len(deltas) > 0:
+                            print("Average change: {}, total: {}".format(sum(deltas) / len(deltas), len(deltas)))
+                        deltas.clear()
+                        print("Servo sleeping")
                         await self.timingLock.wait()
+                        print("Servo woke up")
 
                     if lastChangeTime == -1:
                         changeDelta = 0
                     else:
                         timeDelta = time.time() - lastChangeTime
                         changeDelta = self.changeVelocityPerSec * timeDelta
+
+                    lastChangeTime = time.time()
+                    deltas.append(changeDelta)
 
                     if self.direction == 1:
                         currentPosition = int(min(currentPosition + changeDelta, self.neutral + self.amplitude))
@@ -75,6 +91,8 @@ class ServoController:
         except asyncio.CancelledError:
             print("Servo stopping...")
             self.pi.hardware_PWM(self.pwmPin, self.frequency, 0)
+        except Exception as e:
+            print("Unexpected exception in servo: " + str(e))
 
     def __shouldBeMoving(self, currentPosition):
         if self.direction == 0:

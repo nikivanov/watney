@@ -42,11 +42,11 @@ async def setCommand():
         return "Invalid", 400
 
     if newLook == 0:
-        servoController.lookStop()
+        await servoController.lookStop()
     elif newLook == -1:
-        servoController.forward()
+        await servoController.forward()
     elif newLook == 1:
-        servoController.backward()
+        await servoController.backward()
     else:
         print("Invalid look at {}".format(newLook))
         return "Invalid", 400

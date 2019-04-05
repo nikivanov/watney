@@ -42,7 +42,7 @@ class Heartbeat:
                 if (time.time() - self.lastHeartbeat) > self.heartbeatInterval:
                     if not self.heartbeatStop:
                         self.motorController.setBearing("0")
-                        self.servoController.lookStop()
+                        await self.servoController.lookStop()
                         self.heartbeatStop = True
                 else:
                     self.heartbeatStop = False
@@ -51,6 +51,8 @@ class Heartbeat:
                 await asyncio.sleep(0.5)
         except asyncio.CancelledError:
             print("Heartbeat stopping...")
+        except Exception as e:
+            print("Unexpected exception in heartbeat: " + str(e))
 
     async def collectHeartbeatData(self):
         try:
