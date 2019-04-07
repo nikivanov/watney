@@ -1,12 +1,3 @@
-/* vim: set sts=4 sw=4 et :
- *
- * Demo Javascript app for negotiating and streaming a sendrecv webrtc stream
- * with a GStreamer app. Runs only in passive mode, i.e., responds to offers
- * with answers, exchanges ICE candidates, and streams.
- *
- * Author: Nirbheek Chauhan <nirbheek@centricular.com>
- */
-
 var rtc_configuration = {iceServers: [{urls: "stun:stun.services.mozilla.com"},
                                       {urls: "stun:stun.l.google.com:19302"}]};
 var default_constraints = {false: true, audio: true};
@@ -123,6 +114,7 @@ function onServerMessage(event) {
     }
 }
 
+let reconnectSchedule = null;
 function onServerClose(event) {
     setStatus('Disconnected from server');
     resetVideo();
@@ -132,14 +124,22 @@ function onServerClose(event) {
         peer_connection = null;
     }
 
-    // Reset after a second
-    window.setTimeout(websocketServerConnect, 1000);
+    if (event && event.reason == 'invalid peer uid') {
+        alert("Another connection is already open. Watney supports only one client at a time");
+    }
+    else if (!reconnectSchedule) {
+        // Reset after a second
+        reconnectSchedule = window.setTimeout(websocketServerConnect, 1000);
+    }
 }
 
 function onServerError(event) {
-    setError("Unable to connect to server, did you add an exception for the certificate?")
-    // Retry after 3 seconds
-    window.setTimeout(websocketServerConnect, 3000);
+    setError("Unable to connect to server, did you add an exception for the certificate?");
+    if (!reconnectSchedule) {
+        // Retry after 3 seconds
+        reconnectSchedule = window.setTimeout(websocketServerConnect, 3000);
+    }
+    
 }
 
 function getLocalStream() {
@@ -159,6 +159,7 @@ function websocketServerConnect() {
     ws_port = '8443';
     ws_server = window.location.hostname;
     var ws_url = 'wss://' + ws_server + ':' + ws_port
+    reconnectSchedule = null;
     setStatus("Connecting to server " + ws_url);
     ws_conn = new WebSocket(ws_url);
     /* When connected, immediately register with the server */

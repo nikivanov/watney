@@ -1,12 +1,3 @@
-#!/usr/bin/env python3
-#
-# Example 1-1 call signalling server
-#
-# Copyright (C) 2017 Centricular Ltd.
-#
-#  Author: Nirbheek Chauhan <nirbheek@centricular.com>
-#
-
 import os
 import sys
 import ssl
@@ -86,7 +77,6 @@ class SignalingServer:
         peer_status = None
         self.peers[uid] = [ws, raddr, peer_status]
         print("Registered peer {!r} at {!r}".format(uid, raddr))
-        Events.getInstance().fireSessionStarted()
         while True:
             # Receive command, wait forever if necessary
             msg = await self.recv_msg_ping(ws, raddr)
@@ -119,8 +109,8 @@ class SignalingServer:
                         print('room {}: {} -> {}: {}'.format(room_id, uid, other_id, msg))
                         await wso.send(msg)
                     elif msg == 'ROOM_PEER_LIST':
-                        room_id = self.peers[peer_id][2]
-                        room_peers = ' '.join([pid for pid in self.rooms[room_id] if pid != peer_id])
+                        room_id = self.peers[uid][2]
+                        room_peers = ' '.join([pid for pid in self.rooms[room_id] if pid != uid])
                         msg = 'ROOM_PEER_LIST {}'.format(room_peers)
                         print('room {}: -> {}: {}'.format(room_id, uid, msg))
                         await ws.send(msg)
@@ -140,6 +130,11 @@ class SignalingServer:
                     await ws.send('ERROR peer {!r} busy'.format(callee_id))
                     continue
                 await ws.send('SESSION_OK')
+
+                fireSessionStarted = False
+                if len(self.peers) == 0:
+                    fireSessionStarted = True
+
                 wsc = self.peers[callee_id][0]
                 print('Session from {!r} ({!r}) to {!r} ({!r})'
                       ''.format(uid, raddr, callee_id, wsc.remote_address))
@@ -148,6 +143,10 @@ class SignalingServer:
                 self.sessions[uid] = callee_id
                 self.peers[callee_id][2] = 'session'
                 self.sessions[callee_id] = uid
+
+                if fireSessionStarted:
+                    Events.getInstance().fireSessionStarted()
+
             # Requested joining or creation of a room
             elif msg.startswith('ROOM'):
                 print('{!r} command {!r}'.format(uid, msg))
@@ -200,9 +199,10 @@ class SignalingServer:
             await self.connection_handler(ws, peer_id)
         except websockets.ConnectionClosed:
             print("Connection to peer {!r} closed, exiting handler".format(raddr))
-            Events.getInstance().fireSessionEnded()
         finally:
             await self.remove_peer(peer_id)
+            if len(self.peers) == 0:
+                Events.getInstance().fireSessionEnded()
 
     def start(self):
         # Create an SSL context to be used by the websocket server

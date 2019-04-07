@@ -10,6 +10,8 @@ import os
 import pigpio
 from configparser import ConfigParser
 from alsa import Alsa
+import ssl
+from av import AV
 
 app = Quart(__name__)
 motorController = None
@@ -81,12 +83,24 @@ async def onHeartbeat():
     return jsonify(stats)
 
 
+# Python 3.7 is overly wordy about self-signed certificates, so we'll suppress the error here
+def loopExceptionHandler(loop, context):
+    exception = context.get('exception')
+    if isinstance(exception, ssl.SSLError) and exception.reason == 'SSLV3_ALERT_CERTIFICATE_UNKNOWN':
+        pass
+    else:
+        loop.default_exception_handler(context)
+
+
 if __name__ == "__main__":
     homePath = os.path.dirname(os.path.abspath(__file__))
     pi = pigpio.pi()
 
     config = ConfigParser()
     config.read(os.path.join(homePath, "rover.conf"))
+
+    loop = asyncio.get_event_loop()
+    loop.set_exception_handler(loopExceptionHandler)
 
     signalingServer = SignalingServer()
     signalingServer.start()
@@ -95,14 +109,13 @@ if __name__ == "__main__":
 
     alsa = Alsa(pi, config)
 
+    av = AV(config)
+
     servoController = ServoController(pi, config)
     servoController.start()
 
     heartbeat = Heartbeat(config, servoController, motorController, alsa)
     heartbeat.start()
-
-    loop = asyncio.get_event_loop()
-
     try:
         app.run(host='0.0.0.0', port=5000, debug=False, certfile='cert.pem', keyfile='key.pem', loop=loop)
     finally:
@@ -114,4 +127,6 @@ if __name__ == "__main__":
         try:
             loop.run_until_complete(asyncio.gather(*pending))
         except hypercorn.utils.Shutdown:
+            pass
+        except asyncio.CancelledError:
             pass
