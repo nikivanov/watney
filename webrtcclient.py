@@ -11,18 +11,18 @@ from gi.repository import GstWebRTC
 gi.require_version('GstSdp', '1.0')
 from gi.repository import GstSdp
 
-# PIPELINE_DESC = '''
-# webrtcbin name=sendrecv bundle-policy=max-bundle rpicamsrc preview=0 bitrate=1500000 inline-headers=true keyframe-interval=30 ! video/x-h264, width=1280, height=720, framerate=30/1, profile=baseline ! h264parse ! rtph264pay config-interval=1 pt=96 ! application/x-rtp,media=video,encoding-name=H264,payload=96 ! sendrecv. audiotestsrc is-live=true wave=red-noise ! audioconvert ! audioresample ! queue ! opusenc ! rtpopuspay ! queue ! application/x-rtp,media=audio,encoding-name=OPUS,payload=96 ! sendrecv.
-# '''
+PIPELINE_DESC = '''
+webrtcbin name=sendrecv bundle-policy=max-bundle rpicamsrc preview=0 bitrate=1500000 inline-headers=true keyframe-interval=30 ! video/x-h264, width=1280, height=720, framerate=30/1, profile=baseline ! h264parse ! rtph264pay config-interval=1 pt=96 ! application/x-rtp,media=video,encoding-name=H264,payload=96 ! sendrecv. audiotestsrc is-live=true wave=red-noise ! audioconvert ! audioresample ! queue ! opusenc ! rtpopuspay ! queue ! application/x-rtp,media=audio,encoding-name=OPUS,payload=96 ! sendrecv.
+'''
 
-VIDEO = 'rpicamsrc preview=0 bitrate=1500000 inline-headers=true keyframe-interval=30 ! video/x-h264, width=1280, ' \
-        'height=720, framerate=30/1, profile=baseline ! h264parse ! rtph264pay config-interval=1 pt=96 ! ' \
-        'application/x-rtp,media=video,encoding-name=H264,payload=96'
-
-AUDIO = 'alsasrc device=plughw:1,0 ! audio/x-raw,format=S16LE,layout=interleaved,rate=48000,channels=1 ! opusenc ! ' \
-        'rtpopuspay ! application/x-rtp,media=audio,encoding-name=OPUS,payload=96'
-
-PIPELINE = 'webrtcbin name=sendrecv bundle-policy=max-bundle {} ! sendrecv. {} ! sendrecv.'.format(VIDEO, AUDIO)
+# VIDEO = 'rpicamsrc preview=0 bitrate=1500000 inline-headers=true keyframe-interval=30 ! video/x-h264, width=1280, ' \
+#         'height=720, framerate=30/1, profile=baseline ! h264parse ! rtph264pay config-interval=1 pt=96 ! ' \
+#         'application/x-rtp,media=video,encoding-name=H264,payload=96'
+#
+# AUDIO = 'alsasrc device=plughw:1,0 ! audio/x-raw,format=S16LE,layout=interleaved,rate=48000,channels=1 ! opusenc ! ' \
+#         'rtpopuspay ! application/x-rtp,media=audio,encoding-name=OPUS,payload=96'
+#
+# PIPELINE = 'webrtcbin name=sendrecv bundle-policy=max-bundle {} ! sendrecv. {} ! sendrecv.'.format(VIDEO, AUDIO)
 
 
 class WebRTCClient:
@@ -89,23 +89,27 @@ class WebRTCClient:
             self.pipe.sync_children_states()
             pad.link(sink.get_static_pad('sink'))
         elif name.startswith('audio'):
-            mixer = Gst.ElementFactory.make('audiomixer')
-            audioPad = mixer.get_request_pad("sink_%u")
-            ttsPad = mixer.get_request_pad("sink_%u")
-
-            conv = Gst.ElementFactory.make('audioconvert')
-            resample = Gst.ElementFactory.make('audioresample')
-            sink = Gst.ElementFactory.make('alsasink')
-
-            self.espeak = Gst.ElementFactory.make("espeak")
-
-            self.pipe.add(mixer, conv, resample, sink, self.espeak)
+            sink = Gst.ElementFactory.make('fakesink')
+            self.pipe.add(sink)
             self.pipe.sync_children_states()
-            pad.link(audioPad)
-            self.espeak.link(ttsPad)
-            mixer.link(conv)
-            conv.link(resample)
-            resample.link(sink)
+            pad.link(sink.get_static_pad('sink'))
+            # mixer = Gst.ElementFactory.make('audiomixer')
+            # audioPad = mixer.get_request_pad("sink_%u")
+            # ttsPad = mixer.get_request_pad("sink_%u")
+            #
+            # conv = Gst.ElementFactory.make('audioconvert')
+            # resample = Gst.ElementFactory.make('audioresample')
+            # sink = Gst.ElementFactory.make('alsasink')
+            #
+            # self.espeak = Gst.ElementFactory.make("espeak")
+            #
+            # self.pipe.add(mixer, conv, resample, sink, self.espeak)
+            # self.pipe.sync_children_states()
+            # pad.link(audioPad)
+            # self.espeak.link(ttsPad)
+            # mixer.link(conv)
+            # conv.link(resample)
+            # resample.link(sink)
 
     def on_incoming_stream(self, _, pad):
         print("Got an incoming stream!")
@@ -121,7 +125,7 @@ class WebRTCClient:
 
     def start_pipeline(self):
         print("Parsing pipeline")
-        self.pipe = Gst.parse_launch(PIPELINE)
+        self.pipe = Gst.parse_launch(PIPELINE_DESC)
         print("Parsed pipeline")
         self.webrtc = self.pipe.get_by_name('sendrecv')
         print("Got webrtc, attaching handlers")

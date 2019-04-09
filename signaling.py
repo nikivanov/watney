@@ -77,6 +77,9 @@ class SignalingServer:
         peer_status = None
         self.peers[uid] = [ws, raddr, peer_status]
         print("Registered peer {!r} at {!r}".format(uid, raddr))
+        if len(self.peers) == 1:
+            print("Firing session started")
+            Events.getInstance().fireSessionStarted()
         while True:
             # Receive command, wait forever if necessary
             msg = await self.recv_msg_ping(ws, raddr)
@@ -131,10 +134,6 @@ class SignalingServer:
                     continue
                 await ws.send('SESSION_OK')
 
-                fireSessionStarted = False
-                if len(self.peers) == 0:
-                    fireSessionStarted = True
-
                 wsc = self.peers[callee_id][0]
                 print('Session from {!r} ({!r}) to {!r} ({!r})'
                       ''.format(uid, raddr, callee_id, wsc.remote_address))
@@ -143,9 +142,6 @@ class SignalingServer:
                 self.sessions[uid] = callee_id
                 self.peers[callee_id][2] = 'session'
                 self.sessions[callee_id] = uid
-
-                if fireSessionStarted:
-                    Events.getInstance().fireSessionStarted()
 
             # Requested joining or creation of a room
             elif msg.startswith('ROOM'):
