@@ -1,5 +1,4 @@
-from quart import Quart, send_file, request, send_from_directory, jsonify
-import hypercorn
+from aiohttp import web
 from motorcontroller import MotorController
 from servocontroller import ServoController
 from heartbeat import Heartbeat
@@ -12,8 +11,10 @@ from configparser import ConfigParser
 from alsa import Alsa
 import ssl
 from av import AV
+import sys
 
-app = Quart(__name__)
+routes = web.RouteTableDef()
+
 motorController = None
 servoController = None
 heartbeat = None
@@ -21,19 +22,14 @@ signalingServer = None
 alsa = None
 
 
-@app.route("/")
-async def getPageHTML():
-    return await send_file("index.html")
+@routes.get("/")
+async def getPageHTML(request):
+    return web.FileResponse("index.html")
 
 
-@app.route('/js/<path:path>')
-async def send_js(path):
-    return await send_from_directory('js', path)
-
-
-@app.route("/sendCommand", methods=['POST'])
-async def setCommand():
-    commandObj = await request.get_json()
+@routes.post("/sendCommand")
+async def setCommand(request):
+    commandObj = await request.json()
     newBearing = commandObj['bearing']
     newLook = commandObj['look']
 
@@ -41,7 +37,7 @@ async def setCommand():
         motorController.setBearing(newBearing)
     else:
         print("Invalid bearing {}".format(newBearing))
-        return "Invalid", 400
+        return web.Response(status=400, text="Invalid")
 
     if newLook == 0:
         await servoController.lookStop()
@@ -51,36 +47,36 @@ async def setCommand():
         await servoController.backward()
     else:
         print("Invalid look at {}".format(newLook))
-        return "Invalid", 400
+        return web.Response(status=400, text="Invalid")
 
-    return "OK"
+    return web.Response(text="OK")
 
 
-@app.route("/shutDown", methods=['POST'])
-async def shutdown():
+@routes.post("/shutdown")
+async def shutdown(request):
     call("halt", shell=True)
 
 
-@app.route("/sendTTS", methods=['POST'])
-async def sendTTS():
-    ttsObj = await request.get_json()
-    ttsString = ttsObj['str']
-    roverDriver.sayTTS(ttsString)
-    return "OK"
+# @app.route("/sendTTS", methods=['POST'])
+# async def sendTTS():
+#     ttsObj = await request.get_json()
+#     ttsString = ttsObj['str']
+#     roverDriver.sayTTS(ttsString)
+#     return "OK"
+#
+#
+# @app.route("/setVolume", methods=['POST'])
+# async def setVolume():
+#     volumeObj = await request.get_json()
+#     volume = int(volumeObj['volume'])
+#     alsa.setVolume(volume)
+#     return "OK"
 
 
-@app.route("/setVolume", methods=['POST'])
-async def setVolume():
-    volumeObj = await request.get_json()
-    volume = int(volumeObj['volume'])
-    alsa.setVolume(volume)
-    return "OK"
-
-
-@app.route("/heartbeat", methods=['POST'])
-async def onHeartbeat():
+@routes.post("/heartbeat")
+async def onHeartbeat(request):
     stats = heartbeat.onHeartbeatReceived()
-    return jsonify(stats)
+    return web.json_response(stats)
 
 
 # Python 3.7 is overly wordy about self-signed certificates, so we'll suppress the error here
@@ -92,8 +88,27 @@ def loopExceptionHandler(loop, context):
         loop.default_exception_handler(context)
 
 
+def createSSLContext(homePath):
+    # Create an SSL context to be used by the websocket server
+    print('Using TLS with keys in {!r}'.format(homePath))
+    chain_pem = os.path.join(homePath, 'cert.pem')
+    key_pem = os.path.join(homePath, 'key.pem')
+    sslctx = ssl.create_default_context()
+
+    try:
+        sslctx.load_cert_chain(chain_pem, keyfile=key_pem)
+    except FileNotFoundError:
+        print("Certificates not found, did you run generate_cert.sh?")
+        sys.exit(1)
+    # FIXME
+    sslctx.check_hostname = False
+    sslctx.verify_mode = ssl.CERT_NONE
+    return sslctx
+
+
 if __name__ == "__main__":
     homePath = os.path.dirname(os.path.abspath(__file__))
+    sslctx = createSSLContext(homePath)
     pi = pigpio.pi()
 
     config = ConfigParser()
@@ -103,7 +118,7 @@ if __name__ == "__main__":
     loop.set_exception_handler(loopExceptionHandler)
 
     signalingServer = SignalingServer()
-    signalingServer.start()
+    signalingServer.start(sslctx)
 
     motorController = MotorController(pi, config)
 
@@ -116,17 +131,24 @@ if __name__ == "__main__":
 
     heartbeat = Heartbeat(config, servoController, motorController, alsa)
     heartbeat.start()
-    try:
-        app.run(host='0.0.0.0', port=5000, debug=False, certfile='cert.pem', keyfile='key.pem', loop=loop)
-    finally:
-        alsa.stop()
-        heartbeat.stop()
-        servoController.stop()
 
-        pending = asyncio.Task.all_tasks()
-        try:
-            loop.run_until_complete(asyncio.gather(*pending))
-        except hypercorn.utils.Shutdown:
-            pass
-        except asyncio.CancelledError:
-            pass
+    app = web.Application()
+    app.add_routes(routes)
+    app.router.add_static('/js/', path=os.path.join(homePath, 'js'))
+
+    web.run_app(app, host='0.0.0.0', port=5000, ssl_context=sslctx)
+
+    # try:
+    #     app.run(host='0.0.0.0', port=5000, debug=False, certfile='cert.pem', keyfile='key.pem', loop=loop)
+    # finally:
+    #     alsa.stop()
+    #     heartbeat.stop()
+    #     servoController.stop()
+    #
+    #     pending = asyncio.Task.all_tasks()
+    #     try:
+    #         loop.run_until_complete(asyncio.gather(*pending))
+    #     except hypercorn.utils.Shutdown:
+    #         pass
+    #     except asyncio.CancelledError:
+    #         pass

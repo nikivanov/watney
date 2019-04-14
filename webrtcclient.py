@@ -11,8 +11,12 @@ from gi.repository import GstWebRTC
 gi.require_version('GstSdp', '1.0')
 from gi.repository import GstSdp
 
+# PIPELINE_DESC = '''
+# webrtcbin name=sendrecv bundle-policy=max-bundle rpicamsrc preview=0 bitrate=1500000 inline-headers=true keyframe-interval=30 ! video/x-h264, width=1280, height=720, framerate=30/1, profile=baseline ! h264parse ! rtph264pay config-interval=1 pt=96 ! application/x-rtp,media=video,encoding-name=H264,payload=96 ! sendrecv. audiotestsrc is-live=true wave=red-noise ! audioconvert ! audioresample ! queue ! opusenc ! rtpopuspay ! queue ! application/x-rtp,media=audio,encoding-name=OPUS,payload=96 ! sendrecv.
+# '''
+
 PIPELINE_DESC = '''
-webrtcbin name=sendrecv bundle-policy=max-bundle rpicamsrc preview=0 bitrate=1500000 inline-headers=true keyframe-interval=30 ! video/x-h264, width=1280, height=720, framerate=30/1, profile=baseline ! h264parse ! rtph264pay config-interval=1 pt=96 ! application/x-rtp,media=video,encoding-name=H264,payload=96 ! sendrecv. audiotestsrc is-live=true wave=red-noise ! audioconvert ! audioresample ! queue ! opusenc ! rtpopuspay ! queue ! application/x-rtp,media=audio,encoding-name=OPUS,payload=96 ! sendrecv.
+webrtcbin name=sendrecv bundle-policy=max-bundle rpicamsrc preview=0 bitrate=1000000 inline-headers=true keyframe-interval=25 ! video/x-h264, width=1280, height=720, framerate=25/1, profile=baseline ! h264parse ! rtph264pay config-interval=1 pt=96 ! application/x-rtp,media=video,encoding-name=H264,payload=96 ! sendrecv. alsasrc device=plughw:1,0 ! audio/x-raw,format=S16LE,layout=interleaved,rate=8000,channels=1 ! mulawenc ! rtppcmupay ! application/x-rtp,media=audio,encoding-name=PCMU,payload=96 ! sendrecv.
 '''
 
 # VIDEO = 'rpicamsrc preview=0 bitrate=1500000 inline-headers=true keyframe-interval=30 ! video/x-h264, width=1280, ' \

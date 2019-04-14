@@ -200,22 +200,8 @@ class SignalingServer:
             if len(self.peers) == 0:
                 Events.getInstance().fireSessionEnded()
 
-    def start(self):
-        # Create an SSL context to be used by the websocket server
-        certpath = os.path.dirname(__file__)
-        print('Using TLS with keys in {!r}'.format(certpath))
-        chain_pem = os.path.join(certpath, 'cert.pem')
-        key_pem = os.path.join(certpath, 'key.pem')
-        sslctx = ssl.create_default_context()
+    def start(self, sslctx):
 
-        try:
-            sslctx.load_cert_chain(chain_pem, keyfile=key_pem)
-        except FileNotFoundError:
-            print("Certificates not found, did you run generate_cert.sh?")
-            sys.exit(1)
-        # FIXME
-        sslctx.check_hostname = False
-        sslctx.verify_mode = ssl.CERT_NONE
 
         print("Listening on https://{}:{}".format(*ADDR_PORT))
         # Websocket server
