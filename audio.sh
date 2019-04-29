@@ -1,1 +1,1 @@
-gst-launch-1.0 alsasrc device=plughw:1,0 ! audio/x-raw,format=S16LE,layout=interleaved,rate=8000,channels=1 ! volume volume=5 ! volume volume=3 ! mulawenc ! rtppcmupay ! udpsink host=127.0.0.1 port=8005
+gst-launch-1.0 alsasrc device=plughw:1,0 ! audio/x-raw,format=S16LE,layout=interleaved,rate=48000,channels=1 ! volume volume=10 ! volume volume=3 ! opusenc ! rtpopuspay ! udpsink host=127.0.0.1 port=8005
