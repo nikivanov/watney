@@ -4,17 +4,17 @@ from motor import Motor
 class MotorController:
     validBearings = ["n", "ne", "e", "se", "s", "sw", "w", "nw", "0"]
 
-    def __init__(self, pi, config):
+    def __init__(self, config):
         driverConfig = config["DRIVER"]
         leftMotorConfig = config["LEFTMOTOR"]
         rightMotorConfig = config["RIGHTMOTOR"]
 
-        leftMotor = Motor(pi, int(leftMotorConfig["PWMPin"]),
+        leftMotor = Motor(int(leftMotorConfig["PWMPin"]),
                           int(leftMotorConfig["ForwardPin"]),
                           int(leftMotorConfig["ReversePin"]),
                           float(leftMotorConfig["Trim"]))
 
-        rightMotor = Motor(pi, int(rightMotorConfig["PWMPin"]),
+        rightMotor = Motor(int(rightMotorConfig["PWMPin"]),
                            int(rightMotorConfig["ForwardPin"]),
                            int(rightMotorConfig["ReversePin"]),
                            float(rightMotorConfig["Trim"]))

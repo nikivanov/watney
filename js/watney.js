@@ -257,7 +257,7 @@ $(document).ready(function () {
 
     doHeartbeat();
 
-    websocketServerConnect();
+    doConnect();
 });
 
 var doVolumeSet = true;

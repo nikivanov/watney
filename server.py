@@ -3,15 +3,15 @@ from motorcontroller import MotorController
 from servocontroller import ServoController
 from heartbeat import Heartbeat
 from subprocess import call
-import asyncio
-from signaling import SignalingServer
 import os
-import pigpio
+import RPi.GPIO as GPIO
 from configparser import ConfigParser
 from alsa import Alsa
 import ssl
-from av import AV
 import sys
+from externalrunner import ExternalProcess
+import asyncio
+from janusmonitor import JanusMonitor
 
 routes = web.RouteTableDef()
 
@@ -108,47 +108,39 @@ def createSSLContext(homePath):
 
 if __name__ == "__main__":
     homePath = os.path.dirname(os.path.abspath(__file__))
-    sslctx = createSSLContext(homePath)
-    pi = pigpio.pi()
+    sslctx = createSSLContext(os.path.dirname(homePath))
+
+    GPIO.setmode(GPIO.BCM)
 
     config = ConfigParser()
     config.read(os.path.join(homePath, "rover.conf"))
+    audioConfig = config["AUDIO"]
+    videoConfig = config["VIDEO"]
 
     loop = asyncio.get_event_loop()
     loop.set_exception_handler(loopExceptionHandler)
 
-    signalingServer = SignalingServer()
-    signalingServer.start(sslctx)
+    motorController = MotorController(config)
 
-    motorController = MotorController(pi, config)
+    alsa = Alsa(config)
 
-    alsa = Alsa(pi, config)
-
-    av = AV(config)
-
-    servoController = ServoController(pi, config)
+    servoController = ServoController(config)
     servoController.start()
 
     heartbeat = Heartbeat(config, servoController, motorController, alsa)
     heartbeat.start()
+
+    janus = ExternalProcess(videoConfig["JanusStartCommand"], False)
+    videoStream = ExternalProcess(videoConfig["GStreamerStartCommand"], True)
+    audioStream = ExternalProcess(audioConfig["GStreamerStartCommand"], True)
+    audioSink = ExternalProcess(audioConfig["AudioSinkCommand"], True)
+
+    janusMonitor = JanusMonitor()
+    janusMonitor.start()
 
     app = web.Application()
     app.add_routes(routes)
     app.router.add_static('/js/', path=os.path.join(homePath, 'js'))
 
     web.run_app(app, host='0.0.0.0', port=5000, ssl_context=sslctx)
-
-    # try:
-    #     app.run(host='0.0.0.0', port=5000, debug=False, certfile='cert.pem', keyfile='key.pem', loop=loop)
-    # finally:
-    #     alsa.stop()
-    #     heartbeat.stop()
-    #     servoController.stop()
-    #
-    #     pending = asyncio.Task.all_tasks()
-    #     try:
-    #         loop.run_until_complete(asyncio.gather(*pending))
-    #     except hypercorn.utils.Shutdown:
-    #         pass
-    #     except asyncio.CancelledError:
-    #         pass
+    GPIO.cleanup()

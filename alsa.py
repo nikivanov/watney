@@ -1,10 +1,10 @@
 import alsaaudio
-import pigpio
 from events import Events
+import RPi.GPIO as GPIO
 
 
 class Alsa:
-    def __init__(self, pi, config):
+    def __init__(self, config):
         audioConfig = config["AUDIO"]
         mutePin = int(audioConfig["MutePin"])
 
@@ -16,9 +16,8 @@ class Alsa:
         except alsaaudio.ALSAAudioError:
             self.mixer = None
 
-        self.pi = pi
         self.mutePin = mutePin
-        self.pi.set_mode(self.mutePin, pigpio.OUTPUT)
+        GPIO.setup(self.mutePin, GPIO.OUT)
         self.mute()
 
         Events.getInstance().sessionStarted.append(lambda: self.onSessionStarted())
@@ -51,8 +50,8 @@ class Alsa:
         self.mute()
 
     def mute(self):
-        self.pi.write(self.mutePin, 0)
+        GPIO.output(self.mutePin, GPIO.LOW)
 
     def unmute(self):
-        self.pi.write(self.mutePin, 1)
+        GPIO.output(self.mutePin, GPIO.HIGH)
 
