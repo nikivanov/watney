@@ -1,12 +1,16 @@
 from events import Events
 import shlex
 import asyncio
+import os
+import signal
 
 
 class ExternalProcess:
-    def __init__(self, command, sessionBased):
+    def __init__(self, command, sessionBased, logName=None):
         self.command = command
         self.task = None
+        self.process = None
+        self.logName = logName
         if sessionBased:
             Events.getInstance().sessionStarted.append(lambda: self.onSessionStarted())
             Events.getInstance().sessionEnded.append(lambda: self.onSessionEnded())
@@ -25,13 +29,23 @@ class ExternalProcess:
 
     async def __startProcess(self):
         print('Executing \'{}\''.format(self.command))
-        try:
-            process = await asyncio.create_subprocess_shell(self.command)
-            await process.communicate()
-            self.task = None
-        except asyncio.CancelledError:
-            pass
+        logFilePath = os.path.join(os.path.dirname(os.path.realpath(__file__)), self.logName)
+        print("Logging to \'{}\'".format(logFilePath))
+        with open(logFilePath, 'w') as logFile:
+            try:
+                self.process = await asyncio.create_subprocess_shell(self.command, stdout=logFile, stderr=logFile, preexec_fn=os.setsid)
+                await self.process.communicate()
+                print("Process \'{}\' finished".format(self.command))
+                self.task = None
+                self.process = None
+            except asyncio.CancelledError:
+                print('Terminated \'{}\''.format(self.command))
+                if self.process is not None:
+                    os.killpg(os.getpgid(self.process.pid), signal.SIGTERM)
+                self.task = None
+                self.process = None
 
     def endProcess(self):
-        if self.task is not None and not self.task.done():
-            self.task.cancel()
+        print("Terminating \'{}\'".format(self.command))
+        if self.process is not None:
+            os.killpg(os.getpgid(self.process.pid), signal.SIGTERM)

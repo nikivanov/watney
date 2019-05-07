@@ -130,10 +130,10 @@ if __name__ == "__main__":
     heartbeat = Heartbeat(config, servoController, motorController, alsa)
     heartbeat.start()
 
-    janus = ExternalProcess(videoConfig["JanusStartCommand"], False)
-    videoStream = ExternalProcess(videoConfig["GStreamerStartCommand"], True)
-    audioStream = ExternalProcess(audioConfig["GStreamerStartCommand"], True)
-    audioSink = ExternalProcess(audioConfig["AudioSinkCommand"], True)
+    janus = ExternalProcess(videoConfig["JanusStartCommand"], False, "janus.log")
+    videoStream = ExternalProcess(videoConfig["GStreamerStartCommand"], True, "video.log")
+    audioStream = ExternalProcess(audioConfig["GStreamerStartCommand"], True, "audio.log")
+    audioSink = ExternalProcess(audioConfig["AudioSinkCommand"], True, "audiosink.log")
 
     janusMonitor = JanusMonitor()
     janusMonitor.start()
@@ -143,4 +143,8 @@ if __name__ == "__main__":
     app.router.add_static('/js/', path=os.path.join(homePath, 'js'))
 
     web.run_app(app, host='0.0.0.0', port=5000, ssl_context=sslctx)
+
+    alsa.stop()
+
     GPIO.cleanup()
+
