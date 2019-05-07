@@ -33,7 +33,7 @@ class ExternalProcess:
         print("Logging to \'{}\'".format(logFilePath))
         with open(logFilePath, 'w') as logFile:
             try:
-                self.process = await asyncio.create_subprocess_shell(self.command, stdout=logFile, stderr=logFile, preexec_fn=os.setsid)
+                self.process = await asyncio.create_subprocess_shell(self.command, stdout=logFile, stderr=logFile, start_new_session=True)
                 await self.process.communicate()
                 print("Process \'{}\' finished".format(self.command))
                 self.task = None
