@@ -66,9 +66,7 @@ class ServoController:
                     if not self.__shouldBeMoving(currentPosition):
                         self.pwmControl.ChangeDutyCycle(0)
                         lastChangeTime = None
-                        print("Servo sleeping")
                         await self.timingLock.wait()
-                        print("Servo woke up")
 
                 if not lastChangeTime:
                     changeDelta = 0

@@ -1,7 +1,8 @@
 var janusConnection;
 var streamingPluginHandle;
-var forwarderPluginHandle;
-var microphoneStream;
+var videoroomPluginHandle;
+var publisherId;
+
 
 function doConnect() {
     Janus.init({
@@ -37,7 +38,7 @@ function onJanusInit() {
 
 function onJanusConnect() {
     attachStreamingPlugin();
-    attachForwarderPlugin();
+    attachVideoroomPlugin();
 }
 
 function attachStreamingPlugin() {
@@ -111,120 +112,109 @@ function streaming_stopStream() {
     }
 }
 
-function attachForwarderPlugin() {
-    var opaqueId = "forwarder-" + Janus.randomString(12);
+function attachVideoroomPlugin() {
+    var opaqueId = "videoroom-" + Janus.randomString(12);
     janusConnection.attach({
-        plugin: "janus.plugin.rtpforward",
+        plugin: "janus.plugin.videoroom",
         opaqueId: opaqueId,
         success: function (plugin) {
-            forwarderPluginHandle = plugin;
-            forwarder_onPluginAttached();
+            videoroomPluginHandle = plugin;
+            videoroom_onPluginAttached();
         },
         error: function (error) {
-            console.log("Error attaching forwarder plugin: " + error);
+            console.log("Error in videoroom plugin: " + error);
         },
         onremotestream: function (stream) {
             
         },
         onlocalstream: function (stream) {
-            microphoneStream = stream;
             mute();
         },
         onmessage: function (msg, jsep) {
-            forwarder_onMessage(msg, jsep);
+            videoroom_onMessage(msg, jsep);
         }
     });
 }
 
-function forwarder_onPluginAttached() {
-    
-    forwarderPluginHandle.send(
-        { 
-            "message": 
-            {
-                "request": "configure",
-                "sendipv4": "127.0.0.1",
-                "sendport_audio_rtp": 60000,
-                "sendport_audio_rtcp": 60001,
-                "sendport_video_rtp": 60002,
-                "sendport_video_rtcp": 60003,     
-            }
-        }
-    );
-    forwarderPluginHandle.send(
-        {
-            "message":
-            {
-                "video_enabled": false
-            }
-        }
-    );
-
-    doOffer();
+function videoroom_onPluginAttached() {
+    var register = { "request": "join", "room": 1337, "ptype": "publisher", "display": "watney" };
+	videoroomPluginHandle.send({"message": register});
 }
 
-function doOffer() {
-    forwarderPluginHandle.createOffer(
-        {
-            media: {
-                audioSend: true,
-                audioRecv: false,
-                video: false,
-                data: false,
-            },
-            success: function(jsep) {
-
-                forwarderPluginHandle.send(
-                    {
-                        "message": 
-                        {
-                            "audio": true,
-                            "video": false
-                        },
-                        "jsep": jsep
-                    }
-                );
-            },
-            error: function(error) {
-                console.log("Remote offer error: " + error);
+function videoroom_onMessage(msg, jsep) {
+    Janus.debug(msg);
+    var event = msg["videoroom"];
+    Janus.debug("Event: " + event);
+    console.log("Message from the server: " + JSON.stringify(msg));
+    if(event != undefined && event != null) {
+        if(event === "joined") {
+            // Publisher/manager created, negotiate WebRTC and attach to existing feeds, if any
+            publisherId = msg["id"];
+            mypvtid = msg["private_id"];
+            Janus.log("Successfully joined room " + msg["room"] + " with ID " + publisherId);
+            publishOwnFeed();
+            
+        } else if(event === "destroyed") {
+            // The room has been destroyed
+            Janus.warn("The room has been destroyed!");
+        } else if(event === "event") {
+            if(msg["error"] !== undefined && msg["error"] !== null) {
+                Janus.debug("Videoroom error: " + msg["error"]);
+            } else if (msg["configured"] === 'ok' && msg["audio_codec"] === 'opus') {
+                requestForward();
             }
         }
-    );
+    }
+    if(jsep !== undefined && jsep !== null) {
+        Janus.debug("Handling SDP as well...");
+        Janus.debug(jsep);
+        videoroomPluginHandle.handleRemoteJsep({jsep: jsep});
+        Janus.debug("JSEP message: "+  JSON.stringify(msg));
+    }
+}
+
+function publishOwnFeed() {
+    videoroomPluginHandle.createOffer({
+        media: { audioRecv: false, videoRecv: false, audioSend: true, videoSend: false },
+        simulcast: false,
+        simulcast2: false,
+        success: function(jsep) {
+            Janus.debug("Got publisher SDP!");
+            Janus.debug(jsep);
+            var publish = { "request": "publish", "audio": true, "video": false, "data": false, "audiocodec": "opus"};
+            videoroomPluginHandle.send({"message": publish, "jsep": jsep});
+        },
+        error: function(error) {
+            Janus.error("WebRTC error:", error);
+        }
+    });
+}
+
+function requestForward() {
+    var request = {
+        "request": "rtp_forward",
+        "room": 1337,
+        "publisher_id": publisherId,
+        "host": "127.0.0.1",
+        "audio_port" : 60000,
+        "audio_rtcp_port" : 60001,
+        "video_port" : 60002,
+        "video_rtcp_port" : 60003,
+        "data_port" : 60004,
+    };
+    videoroomPluginHandle.send({"message": request});
 }
 
 function mute() {
-    if (microphoneStream) {
-        microphoneStream.getAudioTracks()[0].enabled = false;
+    if (videoroomPluginHandle) {
+        videoroomPluginHandle.muteAudio();
         $("div#micButton > i").text("mic_off");
     }
 }
 
 function unmute() {
-    if (microphoneStream) {
-        microphoneStream.getAudioTracks()[0].enabled = true;
+    if (videoroomPluginHandle) {
+        videoroomPluginHandle.unmuteAudio();
         $("div#micButton > i").text("mic");
-    }
-}
-
-function forwarder_stopStream() {
-    if (forwarderPluginHandle) {
-        forwarderPluginHandle.hangup();
-    }
-}
-
-function forwarder_onMessage(msg, jsep) {
-    var result = msg["result"];
-    if (result && result["status"] && result["status"] === 'stopped') {
-        forwarder_stopStream();
-    }
-
-    var error = msg["error"];
-    if (error) {
-        console.log("Remote error: " + error);
-        forwarder_stopStream();
-    }
-
-    if(jsep !== undefined && jsep !== null) {
-        forwarderPluginHandle.handleRemoteJsep({jsep: jsep});
     }
 }

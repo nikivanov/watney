@@ -241,12 +241,11 @@ $(document).ready(function () {
     });
 
     $("#micButton").click(function (event) {
-        if (microphoneStream) {
-            if (microphoneStream.getAudioTracks()[0].enabled) {
-                mute();
-            }
-            else {
+        if (videoroomPluginHandle) {
+            if (videoroomPluginHandle.isAudioMuted()) {
                 unmute();
+            } else {
+                mute();
             }
         }
     });
