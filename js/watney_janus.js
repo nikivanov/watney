@@ -196,11 +196,11 @@ function requestForward() {
         "room": 1337,
         "publisher_id": publisherId,
         "host": "127.0.0.1",
-        "audio_port" : 60000,
-        "audio_rtcp_port" : 60001,
-        "video_port" : 60002,
-        "video_rtcp_port" : 60003,
-        "data_port" : 60004,
+        "audio_port" : 50000,
+        "audio_rtcp_port" : 50001,
+        "video_port" : 50002,
+        "video_rtcp_port" : 50003,
+        "data_port" : 50004,
     };
     videoroomPluginHandle.send({"message": request});
 }
