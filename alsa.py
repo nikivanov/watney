@@ -7,7 +7,7 @@ class Alsa:
     def __init__(self, config):
         audioConfig = config["AUDIO"]
         mutePin = int(audioConfig["MutePin"])
-
+        self.isMuted = False
         try:
             if len(alsaaudio.mixers()) > 0:
                 self.mixer = alsaaudio.Mixer(alsaaudio.mixers()[0])
@@ -51,7 +51,8 @@ class Alsa:
 
     def mute(self):
         GPIO.output(self.mutePin, GPIO.LOW)
+        self.isMuted = True
 
     def unmute(self):
         GPIO.output(self.mutePin, GPIO.HIGH)
-
+        self.isMuted = False

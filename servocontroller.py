@@ -1,11 +1,14 @@
 import asyncio
 import time
 import RPi.GPIO as GPIO
+from events import Events
 
 
 class ServoController:
 
     def __init__(self, config):
+        Events.getInstance().janusFirstConnect.append(lambda: self.onJanusConnected())
+
         servoConfig = config["SERVO"]
         self.pwmPin = int(servoConfig["PWMPin"])
         self.neutral = 7.5
@@ -35,13 +38,9 @@ class ServoController:
             self.direction = 0
             self.timingLock.notify()
 
-    def start(self):
+    def onJanusConnected(self):
         loop = asyncio.get_event_loop()
         self.task = loop.create_task(self.timingLoop())
-
-    def stop(self):
-        if self.task:
-            self.task.cancel()
 
     async def timingLoop(self):
         print("Servo starting...")

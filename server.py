@@ -12,6 +12,7 @@ import sys
 from externalrunner import ExternalProcess
 import asyncio
 from janusmonitor import JanusMonitor
+from tts import TTSSpeaker
 
 routes = web.RouteTableDef()
 
@@ -20,6 +21,7 @@ servoController = None
 heartbeat = None
 signalingServer = None
 alsa = None
+tts = None
 
 
 @routes.get("/")
@@ -57,20 +59,20 @@ async def shutdown(request):
     call("halt", shell=True)
 
 
-# @app.route("/sendTTS", methods=['POST'])
-# async def sendTTS():
-#     ttsObj = await request.get_json()
-#     ttsString = ttsObj['str']
-#     roverDriver.sayTTS(ttsString)
-#     return "OK"
-#
-#
-# @app.route("/setVolume", methods=['POST'])
-# async def setVolume():
-#     volumeObj = await request.get_json()
-#     volume = int(volumeObj['volume'])
-#     alsa.setVolume(volume)
-#     return "OK"
+@routes.post("/sendTTS")
+async def sendTTS(request):
+    ttsObj = await request.json()
+    ttsString = ttsObj['str']
+    tts.sayText(ttsString)
+    return web.Response(text="OK")
+
+
+@routes.post("/setVolume")
+async def setVolume(request):
+    volumeObj = await request.json()
+    volume = int(volumeObj['volume'])
+    alsa.setVolume(volume)
+    return web.Response(text="OK")
 
 
 @routes.post("/heartbeat")
@@ -125,7 +127,8 @@ if __name__ == "__main__":
     alsa = Alsa(config)
 
     servoController = ServoController(config)
-    servoController.start()
+
+    tts = TTSSpeaker(config, alsa)
 
     heartbeat = Heartbeat(config, servoController, motorController, alsa)
     heartbeat.start()

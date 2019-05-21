@@ -37,6 +37,7 @@ class JanusMonitor:
 
                     if firstTime:
                         print("Janus monitor connected to Janus...")
+                        Events.getInstance().fireJanusFirstConnect()
                         firstTime = False
 
                     async with response:
