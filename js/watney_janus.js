@@ -2,7 +2,7 @@ var janusConnection;
 var streamingPluginHandle;
 var videoroomPluginHandle;
 var publisherId;
-
+var inputDevices;
 
 function doConnect() {
     Janus.init({
@@ -15,12 +15,40 @@ function doConnect() {
 }
 
 function onJanusInit() {
+    Janus.listDevices(listDevices);   
+}
+
+function listDevices(devices) {
+    const defaultDeviceId = getCookie("defaultDevice");
+
+    const inputDevices = devices.filter(d => d.kind === 'audioinput');
+    const inputDeviceOptions = inputDevices.map(d => $('<option value="' + d.deviceId + '">' + (d.label || d.deviceId) + '</option>'));
+    inputDeviceOptions.forEach(ido => $("#deviceSelector").append(ido));
+
+    if (defaultDeviceId) {
+        const defaultDevice = inputDevices.find(d => d.deviceId === defaultDeviceId);
+        if(defaultDevice) {
+            $("#deviceSelector").val(defaultDeviceId);
+        }
+    }
+
+    $("#deviceSelector").change(audioDeviceChange);
+    connectJanus();
+}
+
+function audioDeviceChange() {
+    setCookie("defaultDevice", $('#deviceSelector').val(), 3650);
+    if (videoroomPluginHandle) {
+        unpublishOwnFeed();
+    }
+}
+
+function connectJanus() {
     var server = null;
     if (window.location.protocol === 'http:')
         server = "http://" + window.location.hostname + ":8088/janus";
     else
         server = "https://" + window.location.hostname + ":8089/janus";
-
 
     janusConnection = new Janus({
         server: server,
@@ -33,7 +61,7 @@ function onJanusInit() {
         destroyed: function () {
 
         }
-    })
+    });
 }
 
 function onJanusConnect() {
@@ -124,6 +152,9 @@ function attachVideoroomPlugin() {
         error: function (error) {
             console.log("Error in videoroom plugin: " + error);
         },
+        mediaState: function(medium, on) {
+            Janus.log("Janus " + (on ? "started" : "stopped") + " receiving our " + medium);
+        },
         onremotestream: function (stream) {
             
         },
@@ -132,6 +163,9 @@ function attachVideoroomPlugin() {
         },
         onmessage: function (msg, jsep) {
             videoroom_onMessage(msg, jsep);
+        },
+        oncleanup: function() {
+            publishOwnFeed(false);
         }
     });
 }
@@ -152,7 +186,7 @@ function videoroom_onMessage(msg, jsep) {
             publisherId = msg["id"];
             mypvtid = msg["private_id"];
             Janus.log("Successfully joined room " + msg["room"] + " with ID " + publisherId);
-            publishOwnFeed();
+            publishOwnFeed(true);
             
         } else if(event === "destroyed") {
             // The room has been destroyed
@@ -161,7 +195,9 @@ function videoroom_onMessage(msg, jsep) {
             if(msg["error"] !== undefined && msg["error"] !== null) {
                 Janus.debug("Videoroom error: " + msg["error"]);
             } else if (msg["configured"] === 'ok' && msg["audio_codec"] === 'opus') {
-                requestForward();
+                if (!forwarded) {
+                    requestForward();
+                }
             }
         }
     }
@@ -173,9 +209,10 @@ function videoroom_onMessage(msg, jsep) {
     }
 }
 
-function publishOwnFeed() {
+function publishOwnFeed(firstTime) {
+    const deviceId = $('#deviceSelector').val();
     videoroomPluginHandle.createOffer({
-        media: { audioRecv: false, videoRecv: false, audioSend: true, videoSend: false },
+        media: { audioRecv: false, videoRecv: false, audioSend: true, videoSend: false, audio: { deviceId: {exact: deviceId}}, replaceAudio: !firstTime },
         simulcast: false,
         simulcast2: false,
         success: function(jsep) {
@@ -190,6 +227,12 @@ function publishOwnFeed() {
     });
 }
 
+function unpublishOwnFeed() {
+    var unpublish = { "request": "unpublish" };
+	videoroomPluginHandle.send({"message": unpublish});
+}
+
+var forwarded = false;
 function requestForward() {
     var request = {
         "request": "rtp_forward",
@@ -203,6 +246,7 @@ function requestForward() {
         "data_port" : 50004,
     };
     videoroomPluginHandle.send({"message": request});
+    forwarded = true;
 }
 
 function mute() {

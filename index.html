@@ -10,9 +10,10 @@
     <link rel="stylesheet" type="text/css" href="js/material.css">
     <link rel="stylesheet" type="text/css" href="js/watney.css">
     <link rel="stylesheet" type="text/css" href="js/ui/jquery-ui.min.css">
+    <script type="text/javascript" src="js/cookies.js"></script>
     <script type="text/javascript" src="js/lodash.js"></script>
+    <script type="text/javascript" src="js/adapter-latest.js"></script>
     <script type="text/javascript" src="js/janus.js"></script>
-    <script type="text/javascript" src="js/adapter.min.js"></script>
     <script type="text/javascript" src="js/watney_janus.js"></script>
     <script type="text/javascript" src="js/watney.js"></script>
 </head>
@@ -31,7 +32,7 @@
             <div id="micButton" title="Local mic on/off. Push-to-talk (V)" class="wButton">
                 <i class="material-icons">mic_none</i>
             </div>
-            <div id="volumeSlider" class="wButton" title="Remote Volume (-/+)">
+            <div id="volumeSlider" class="wButton noHover" title="Remote Volume (-/+)">
                 <i class="material-icons">
                     volume_down
                 </i>
@@ -39,6 +40,9 @@
                 <i class="material-icons">
                     volume_up
                 </i>
+            </div>
+            <div id="deviceSelectSection" class="wButton noHover" title="Audio Input Device">
+                <select id="deviceSelector"></select>
             </div>
             <div id="powerButton" title="Shutdown" class="wButton">
                 <i class="material-icons">power_settings_new</i>

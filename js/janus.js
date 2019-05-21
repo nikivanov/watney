@@ -26,7 +26,7 @@
 Janus.sessions = {};
 
 Janus.isExtensionEnabled = function() {
-	if(navigator.getDisplayMedia) {
+	if(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
 		// No need for the extension, getDisplayMedia is supported
 		return true;
 	}
@@ -340,20 +340,38 @@ Janus.init = function(options) {
 		Janus.safariVp8 = false;
 		if(Janus.webRTCAdapter.browserDetails.browser === 'safari' &&
 				Janus.webRTCAdapter.browserDetails.version >= 605) {
-			// We do it in a very ugly way, as there's no alternative...
-			// We create a PeerConnection to see if VP8 is in an offer
-			var testpc = new RTCPeerConnection({}, {});
-			testpc.createOffer({offerToReceiveVideo: true}).then(function(offer) {
-				Janus.safariVp8 = offer.sdp.indexOf("VP8") !== -1;
+			// Let's see if RTCRtpSender.getCapabilities() is there
+			if(RTCRtpSender && RTCRtpSender.getCapabilities && RTCRtpSender.getCapabilities("video") &&
+					RTCRtpSender.getCapabilities("video").codecs && RTCRtpSender.getCapabilities("video").codecs.length) {
+				for(var i in RTCRtpSender.getCapabilities("video").codecs) {
+					var codec = RTCRtpSender.getCapabilities("video").codecs[i];
+					if(codec && codec.mimeType && codec.mimeType.toLowerCase() === "video/vp8") {
+						Janus.safariVp8 = true;
+						break;
+					}
+				}
 				if(Janus.safariVp8) {
 					Janus.log("This version of Safari supports VP8");
 				} else {
 					Janus.warn("This version of Safari does NOT support VP8: if you're using a Technology Preview, " +
 						"try enabling the 'WebRTC VP8 codec' setting in the 'Experimental Features' Develop menu");
 				}
-				testpc.close();
-				testpc = null;
-			});
+			} else {
+				// We do it in a very ugly way, as there's no alternative...
+				// We create a PeerConnection to see if VP8 is in an offer
+				var testpc = new RTCPeerConnection({}, {});
+				testpc.createOffer({offerToReceiveVideo: true}).then(function(offer) {
+					Janus.safariVp8 = offer.sdp.indexOf("VP8") !== -1;
+					if(Janus.safariVp8) {
+						Janus.log("This version of Safari supports VP8");
+					} else {
+						Janus.warn("This version of Safari does NOT support VP8: if you're using a Technology Preview, " +
+							"try enabling the 'WebRTC VP8 codec' setting in the 'Experimental Features' Develop menu");
+					}
+					testpc.close();
+					testpc = null;
+				});
+			}
 		}
 		Janus.initDone = true;
 		options.callback();
@@ -363,7 +381,8 @@ Janus.init = function(options) {
 // Helper method to check whether WebRTC is supported by this browser
 Janus.isWebrtcSupported = function() {
 	return window.RTCPeerConnection !== undefined && window.RTCPeerConnection !== null &&
-		navigator.getUserMedia !== undefined && navigator.getUserMedia !== null;
+		navigator.mediaDevices !== undefined && navigator.mediaDevices !== null &&
+		navigator.mediaDevices.getUserMedia !== undefined && navigator.mediaDevices.getUserMedia !== null;
 };
 
 // Helper method to create random identifiers (e.g., transaction)
@@ -431,7 +450,7 @@ function Janus(gatewayCallbacks) {
 	if(gatewayCallbacks.withCredentials !== undefined && gatewayCallbacks.withCredentials !== null)
 		withCredentials = gatewayCallbacks.withCredentials === true;
 	// Optional max events
-	var maxev = null;
+	var maxev = 10;
 	if(gatewayCallbacks.max_poll_events !== undefined && gatewayCallbacks.max_poll_events !== null)
 		maxev = gatewayCallbacks.max_poll_events;
 	if(maxev < 1)
@@ -520,7 +539,7 @@ function Janus(gatewayCallbacks) {
 	function handleEvent(json, skipTimeout) {
 		retries = 0;
 		if(!websockets && sessionId !== undefined && sessionId !== null && skipTimeout !== true)
-			setTimeout(eventHandler, 200);
+			eventHandler();
 		if(!websockets && Janus.isArray(json)) {
 			// We got an array: it means we passed a maxev > 1, iterate on all objects
 			for(var i=0; i<json.length; i++) {
@@ -1421,6 +1440,7 @@ function Janus(gatewayCallbacks) {
 			gap = 50;	// We choose 50ms as the default gap between tones
 		Janus.debug("Sending DTMF string " + tones + " (duration " + duration + "ms, gap " + gap + "ms)");
 		config.dtmfSender.insertDTMF(tones, duration, gap);
+		callbacks.success();
 	}
 
 	// Private method to destroy a plugin handle
@@ -1506,84 +1526,71 @@ function Janus(gatewayCallbacks) {
 			if(((!media.update && isAudioSendEnabled(media)) || (media.update && (media.addAudio || media.replaceAudio))) &&
 					stream.getAudioTracks() && stream.getAudioTracks().length) {
 				config.myStream.addTrack(stream.getAudioTracks()[0]);
-				if(media.replaceAudio && Janus.webRTCAdapter.browserDetails.browser === "firefox") {
-					Janus.log("Replacing audio track:", stream.getAudioTracks()[0]);
-					for(var index in config.pc.getSenders()) {
-						var s = config.pc.getSenders()[index];
-						if(s && s.track && s.track.kind === "audio") {
-							s.replaceTrack(stream.getAudioTracks()[0]);
-						}
-					}
-				} else {
-					if(Janus.webRTCAdapter.browserDetails.browser === "firefox" && Janus.webRTCAdapter.browserDetails.version >= 59) {
-						// Firefox >= 59 uses Transceivers
-						Janus.log((media.replaceVideo ? "Replacing" : "Adding") + " video track:", stream.getVideoTracks()[0]);
-						var audioTransceiver = null;
-						var transceivers = config.pc.getTransceivers();
-						if(transceivers && transceivers.length > 0) {
-							for(var i in transceivers) {
-								var t = transceivers[i];
-								if((t.sender && t.sender.track && t.sender.track.kind === "audio") ||
-										(t.receiver && t.receiver.track && t.receiver.track.kind === "audio")) {
-									audioTransceiver = t;
-									break;
-								}
+				if((Janus.webRTCAdapter.browserDetails.browser === "firefox" && Janus.webRTCAdapter.browserDetails.version >= 59) ||
+						(Janus.webRTCAdapter.browserDetails.browser === "safari" && window.RTCRtpSender.prototype.replaceTrack) ||
+						(Janus.webRTCAdapter.browserDetails.browser === "chrome" && Janus.webRTCAdapter.browserDetails.version >= 72)) {
+					// Use Transceivers
+					Janus.log((media.replaceAudio ? "Replacing" : "Adding") + " audio track:", stream.getAudioTracks()[0]);
+					var audioTransceiver = null;
+					var transceivers = config.pc.getTransceivers();
+					if(transceivers && transceivers.length > 0) {
+						for(var i in transceivers) {
+							var t = transceivers[i];
+							if((t.sender && t.sender.track && t.sender.track.kind === "audio") ||
+									(t.receiver && t.receiver.track && t.receiver.track.kind === "audio")) {
+								audioTransceiver = t;
+								break;
 							}
 						}
-						if(audioTransceiver && audioTransceiver.sender) {
-							audioTransceiver.sender.replaceTrack(stream.getVideoTracks()[0]);
-						} else {
-							config.pc.addTrack(stream.getVideoTracks()[0], stream);
-						}
+					}
+					if(audioTransceiver && audioTransceiver.sender) {
+						audioTransceiver.sender.replaceTrack(stream.getAudioTracks()[0]);
 					} else {
-						Janus.log((media.replaceAudio ? "Replacing" : "Adding") + " audio track:", stream.getAudioTracks()[0]);
 						config.pc.addTrack(stream.getAudioTracks()[0], stream);
 					}
+				} else {
+					Janus.log((media.replaceAudio ? "Replacing" : "Adding") + " audio track:", stream.getAudioTracks()[0]);
+					config.pc.addTrack(stream.getAudioTracks()[0], stream);
 				}
 			}
 			if(((!media.update && isVideoSendEnabled(media)) || (media.update && (media.addVideo || media.replaceVideo))) &&
 					stream.getVideoTracks() && stream.getVideoTracks().length) {
 				config.myStream.addTrack(stream.getVideoTracks()[0]);
-				if(media.replaceVideo && Janus.webRTCAdapter.browserDetails.browser === "firefox") {
-					Janus.log("Replacing video track:", stream.getVideoTracks()[0]);
-					for(var index in config.pc.getSenders()) {
-						var s = config.pc.getSenders()[index];
-						if(s && s.track && s.track.kind === "video") {
-							s.replaceTrack(stream.getVideoTracks()[0]);
-						}
-					}
-				} else {
-					if(Janus.webRTCAdapter.browserDetails.browser === "firefox" && Janus.webRTCAdapter.browserDetails.version >= 59) {
-						// Firefox >= 59 uses Transceivers
-						Janus.log((media.replaceVideo ? "Replacing" : "Adding") + " video track:", stream.getVideoTracks()[0]);
-						var videoTransceiver = null;
-						var transceivers = config.pc.getTransceivers();
-						if(transceivers && transceivers.length > 0) {
-							for(var i in transceivers) {
-								var t = transceivers[i];
-								if((t.sender && t.sender.track && t.sender.track.kind === "video") ||
-										(t.receiver && t.receiver.track && t.receiver.track.kind === "video")) {
-									videoTransceiver = t;
-									break;
-								}
+				if((Janus.webRTCAdapter.browserDetails.browser === "firefox" && Janus.webRTCAdapter.browserDetails.version >= 59) ||
+						(Janus.webRTCAdapter.browserDetails.browser === "safari" && window.RTCRtpSender.prototype.replaceTrack) ||
+						(Janus.webRTCAdapter.browserDetails.browser === "chrome" && Janus.webRTCAdapter.browserDetails.version >= 72)) {
+					// Use Transceivers
+					Janus.log((media.replaceVideo ? "Replacing" : "Adding") + " video track:", stream.getVideoTracks()[0]);
+					var videoTransceiver = null;
+					var transceivers = config.pc.getTransceivers();
+					if(transceivers && transceivers.length > 0) {
+						for(var i in transceivers) {
+							var t = transceivers[i];
+							if((t.sender && t.sender.track && t.sender.track.kind === "video") ||
+									(t.receiver && t.receiver.track && t.receiver.track.kind === "video")) {
+								videoTransceiver = t;
+								break;
 							}
 						}
-						if(videoTransceiver && videoTransceiver.sender) {
-							videoTransceiver.sender.replaceTrack(stream.getVideoTracks()[0]);
-						} else {
-							config.pc.addTrack(stream.getVideoTracks()[0], stream);
-						}
+					}
+					if(videoTransceiver && videoTransceiver.sender) {
+						videoTransceiver.sender.replaceTrack(stream.getVideoTracks()[0]);
 					} else {
-						Janus.log((media.replaceVideo ? "Replacing" : "Adding") + " video track:", stream.getVideoTracks()[0]);
 						config.pc.addTrack(stream.getVideoTracks()[0], stream);
 					}
+				} else {
+					Janus.log((media.replaceVideo ? "Replacing" : "Adding") + " video track:", stream.getVideoTracks()[0]);
+					config.pc.addTrack(stream.getVideoTracks()[0], stream);
 				}
 			}
 		}
 		// If we still need to create a PeerConnection, let's do that
 		if(!config.pc) {
 			var pc_config = {"iceServers": iceServers, "iceTransportPolicy": iceTransportPolicy, "bundlePolicy": bundlePolicy};
-			//~ var pc_constraints = {'mandatory': {'MozDontOfferDataChannel':true}};
+			if(Janus.webRTCAdapter.browserDetails.browser === "chrome") {
+				// For Chrome versions before 72, we force a plan-b semantic, and unified-plan otherwise
+				pc_config["sdpSemantics"] = (Janus.webRTCAdapter.browserDetails.version < 72) ? "plan-b" : "unified-plan";
+			}
 			var pc_constraints = {
 				"optional": [{"DtlsSrtpKeyAgreement": true}]
 			};
@@ -1894,7 +1901,8 @@ function Janus(gatewayCallbacks) {
 				}
 				if(config.pc.getSenders() && config.pc.getSenders().length) {
 					var ra = true;
-					if(media.replaceAudio && Janus.webRTCAdapter.browserDetails.browser === "firefox") {
+					if(media.replaceAudio && (Janus.webRTCAdapter.browserDetails.browser === "firefox" ||
+							(Janus.webRTCAdapter.browserDetails.browser === "chrome" && Janus.webRTCAdapter.browserDetails.version >= 72))) {
 						// On Firefox we can use replaceTrack
 						ra = false;
 					}
@@ -1920,7 +1928,8 @@ function Janus(gatewayCallbacks) {
 				}
 				if(config.pc.getSenders() && config.pc.getSenders().length) {
 					var rv = true;
-					if(media.replaceVideo && Janus.webRTCAdapter.browserDetails.browser === "firefox") {
+					if(media.replaceVideo && (Janus.webRTCAdapter.browserDetails.browser === "firefox" ||
+							(Janus.webRTCAdapter.browserDetails.browser === "chrome" && Janus.webRTCAdapter.browserDetails.version >= 72))) {
 						// On Firefox we can use replaceTrack
 						rv = false;
 					}
@@ -2037,11 +2046,11 @@ function Janus(gatewayCallbacks) {
 					if(!media.screenshareFrameRate) {
 						media.screenshareFrameRate = 3;
 					}
-					if(navigator.getDisplayMedia) {
+					if(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
 						// The new experimental getDisplayMedia API is available, let's use that
 						// https://groups.google.com/forum/#!topic/discuss-webrtc/Uf0SrR4uxzk
 						// https://webrtchacks.com/chrome-screensharing-getdisplaymedia/
-						navigator.getDisplayMedia({ video: true })
+						navigator.mediaDevices.getDisplayMedia({ video: true })
 							.then(function(stream) {
 								pluginHandle.consentDialog(false);
 								if(isAudioSendEnabled(media) && !media.keepAudio) {
@@ -2135,9 +2144,8 @@ function Janus(gatewayCallbacks) {
 									isAudioSendEnabled(media) && !media.keepAudio);
 							});
 						}
-					} else if (window.navigator.userAgent.match('Firefox')) {
-						var ffver = parseInt(window.navigator.userAgent.match(/Firefox\/(.*)/)[1], 10);
-						if(ffver >= 33) {
+					} else if(Janus.webRTCAdapter.browserDetails.browser === 'firefox') {
+						if(Janus.webRTCAdapter.browserDetails.version >= 33) {
 							// Firefox 33+ has experimental support for screen sharing
 							constraints = {
 								video: {
@@ -2401,15 +2409,18 @@ function Janus(gatewayCallbacks) {
 		if(sendVideo && simulcast && Janus.webRTCAdapter.browserDetails.browser === "firefox") {
 			// FIXME Based on https://gist.github.com/voluntas/088bc3cc62094730647b
 			Janus.log("Enabling Simulcasting for Firefox (RID)");
-			var sender = config.pc.getSenders()[1];
-			Janus.log(sender);
-			var parameters = sender.getParameters();
-			Janus.log(parameters);
-			sender.setParameters({encodings: [
-				{ rid: "high", active: true, priority: "high", maxBitrate: 1000000 },
-				{ rid: "medium", active: true, priority: "medium", maxBitrate: 300000 },
-				{ rid: "low", active: true, priority: "low", maxBitrate: 100000 }
-			]});
+			var sender = config.pc.getSenders().find(s => s.track.kind == "video");
+			if(sender) {
+				var parameters = sender.getParameters();
+				if(!parameters)
+					parameters = {};
+				parameters.encodings = [
+					{ rid: "h", active: true, maxBitrate: 900000 },
+					{ rid: "m", active: true, maxBitrate: 300000, scaleResolutionDownBy: 2 },
+					{ rid: "l", active: true, maxBitrate: 100000, scaleResolutionDownBy: 4 }
+				];
+				sender.setParameters(parameters);
+			}
 		}
 		config.pc.createOffer(mediaConstraints)
 			.then(function(offer) {
@@ -2465,8 +2476,10 @@ function Janus(gatewayCallbacks) {
 			Janus.log("Creating answer (iceDone=" + config.iceDone + ", simulcast=" + simulcast + ")");
 		}
 		var mediaConstraints = null;
-		if(Janus.webRTCAdapter.browserDetails.browser === "firefox" && Janus.webRTCAdapter.browserDetails.version >= 59) {
-			// Firefox >= 59 uses Transceivers
+		if((Janus.webRTCAdapter.browserDetails.browser === "firefox" && Janus.webRTCAdapter.browserDetails.version >= 59) ||
+				(Janus.webRTCAdapter.browserDetails.browser === "safari" && window.RTCRtpSender.prototype.replaceTrack) ||
+				(Janus.webRTCAdapter.browserDetails.browser === "chrome" && Janus.webRTCAdapter.browserDetails.version >= 72)) {
+			// Firefox >= 59 and Chrome >= 72 use Transceivers
 			mediaConstraints = {};
 			var audioTransceiver = null, videoTransceiver = null;
 			var transceivers = config.pc.getTransceivers();
@@ -2498,7 +2511,7 @@ function Janus(gatewayCallbacks) {
 				}
 			} else {
 				// Take care of audio m-line
-				if(audioSend && audioRecv) {
+				if(true) {
 					if(audioTransceiver) {
 						audioTransceiver.direction = "sendrecv";
 						Janus.log("Setting audio transceiver to sendrecv:", audioTransceiver);
@@ -2970,11 +2983,11 @@ function Janus(gatewayCallbacks) {
 				if(match) {
 					mslabel = match[1];
 				}
-				match = lines[i].match('a=ssrc:' + ssrc + ' label:(.+)')
+				match = lines[i].match('a=ssrc:' + ssrc[0] + ' label:(.+)')
 				if(match) {
 					label = match[1];
 				}
-				if(lines[i].indexOf('a=ssrc:' + ssrc_fid) === 0) {
+				if(lines[i].indexOf('a=ssrc:' + ssrc_fid[0]) === 0) {
 					lines.splice(i, 1); i--;
 					continue;
 				}
