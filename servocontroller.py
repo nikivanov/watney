@@ -12,9 +12,9 @@ class ServoController:
         servoConfig = config["SERVO"]
         self.pwmPin = int(servoConfig["PWMPin"])
         self.neutral = 7.5
-        self.amplitude = 2.5
+        self.amplitude = 2
         self.frequency = 50
-        self.changeVelocityPerSec = 2.5
+        self.changeVelocityPerSec = 2
         # 1 is forward, -1 is backward, 0 is stop
         self.direction = 0
         self.timingLock = asyncio.Condition()
@@ -81,7 +81,7 @@ class ServoController:
                     currentPosition = max(currentPosition - changeDelta, self.neutral - self.amplitude)
 
                 self.pwmControl.ChangeDutyCycle(currentPosition)
-                await asyncio.sleep(0.01)
+                await asyncio.sleep(0.05)
         except asyncio.CancelledError:
             self.pwmControl.ChangeDutyCycle(0)
             print("Servo stopped")

@@ -15,7 +15,7 @@ function doConnect() {
 }
 
 function onJanusInit() {
-    Janus.listDevices(listDevices);   
+    connectJanus();
 }
 
 function listDevices(devices) {
@@ -23,6 +23,8 @@ function listDevices(devices) {
 
     const inputDevices = devices.filter(d => d.kind === 'audioinput');
     const inputDeviceOptions = inputDevices.map(d => $('<option value="' + d.deviceId + '">' + (d.label || d.deviceId) + '</option>'));
+
+    $("#deviceSelector").find('option').remove().end();
     inputDeviceOptions.forEach(ido => $("#deviceSelector").append(ido));
 
     if (defaultDeviceId) {
@@ -33,7 +35,7 @@ function listDevices(devices) {
     }
 
     $("#deviceSelector").change(audioDeviceChange);
-    connectJanus();
+    
 }
 
 function audioDeviceChange() {
@@ -210,21 +212,39 @@ function videoroom_onMessage(msg, jsep) {
 }
 
 function publishOwnFeed(firstTime) {
-    const deviceId = $('#deviceSelector').val();
-    videoroomPluginHandle.createOffer({
-        media: { audioRecv: false, videoRecv: false, audioSend: true, videoSend: false, audio: { deviceId: {exact: deviceId}}, replaceAudio: !firstTime },
-        simulcast: false,
-        simulcast2: false,
-        success: function(jsep) {
-            Janus.debug("Got publisher SDP!");
-            Janus.debug(jsep);
-            var publish = { "request": "publish", "audio": true, "video": false, "data": false, "audiocodec": "opus"};
-            videoroomPluginHandle.send({"message": publish, "jsep": jsep});
-        },
-        error: function(error) {
-            Janus.error("WebRTC error:", error);
+    const deviceId = getCookie("defaultDevice");
+    navigator.mediaDevices.enumerateDevices().then(devices => {
+        const device = devices.find(d => d.deviceId === deviceId);
+        let constraints;
+        if (device) {
+            constraints = {video: false, audio: {deviceId}};
+        } else {
+            constraints = {video: false, audio: true};
         }
+        navigator.mediaDevices.getUserMedia(constraints)
+        .then(stream => {
+            navigator.mediaDevices.enumerateDevices().then(devices => listDevices(devices));
+
+            videoroomPluginHandle.createOffer({
+                stream,
+                simulcast: false,
+                simulcast2: false,
+                success: function(jsep) {
+                    Janus.debug("Got publisher SDP!");
+                    Janus.debug(jsep);
+                    var publish = { "request": "publish", "audio": true, "video": false, "data": false, "audiocodec": "opus"};
+                    videoroomPluginHandle.send({"message": publish, "jsep": jsep});
+                },
+                error: function(error) {
+                    Janus.error("WebRTC error:", error);
+                }
+            });
+        })
+        .catch(reason => {
+            console.error("Error getting user media: " + reason);
+        });
     });
+    
 }
 
 function unpublishOwnFeed() {
