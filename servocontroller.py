@@ -19,9 +19,9 @@ class ServoController:
         self.direction = 0
         self.timingLock = asyncio.Condition()
         self.task = None
-        GPIO.setup(self.pwmPin, GPIO.OUT)
-        self.pwmControl = GPIO.PWM(self.pwmPin, self.frequency)
-        self.pwmControl.start(0)
+        self.pwmControl = None
+        self.startServo()
+
 
     async def forward(self):
         async with self.timingLock:
@@ -35,8 +35,9 @@ class ServoController:
 
     async def lookStop(self):
         async with self.timingLock:
-            self.direction = 0
-            self.timingLock.notify()
+            if self.direction != 0:
+                self.direction = 0
+                self.timingLock.notify()
 
     def onJanusConnected(self):
         loop = asyncio.get_event_loop()
@@ -63,9 +64,10 @@ class ServoController:
             while True:
                 async with self.timingLock:
                     if not self.__shouldBeMoving(currentPosition):
-                        self.pwmControl.ChangeDutyCycle(0)
+                        self.stopServo()
                         lastChangeTime = None
                         await self.timingLock.wait()
+                        self.startServo()
 
                 if not lastChangeTime:
                     changeDelta = 0
@@ -80,10 +82,10 @@ class ServoController:
                 elif self.direction == -1:
                     currentPosition = max(currentPosition - changeDelta, self.neutral - self.amplitude)
 
-                self.pwmControl.ChangeDutyCycle(currentPosition)
+                self.changeServo(currentPosition)
                 await asyncio.sleep(0.05)
         except asyncio.CancelledError:
-            self.pwmControl.ChangeDutyCycle(0)
+            self.stopServo()
             print("Servo stopped")
         except Exception as e:
             print("Unexpected exception in servo: " + str(e))
@@ -97,3 +99,17 @@ class ServoController:
             return False
 
         return True
+
+    def startServo(self):
+        GPIO.setup(self.pwmPin, GPIO.OUT)
+        self.pwmControl = GPIO.PWM(self.pwmPin, self.frequency)
+        self.pwmControl.start(0)
+
+    def stopServo(self):
+        if self.pwmControl is not None:
+            self.pwmControl.stop()
+            self.pwmControl = None
+        GPIO.setup(self.pwmPin, GPIO.IN)
+
+    def changeServo(self, val):
+        self.pwmControl.ChangeDutyCycle(val)
