@@ -68,7 +68,6 @@ function connectJanus() {
 
 function onJanusConnect() {
     attachStreamingPlugin();
-    attachVideoroomPlugin();
 }
 
 function attachStreamingPlugin() {
@@ -95,6 +94,7 @@ function attachStreamingPlugin() {
 function streaming_onRemoteStreamStart(stream) {
     var vidEl = $("#vid").get(0);
     Janus.attachMediaStream(vidEl, stream);
+    attachVideoroomPlugin();
 }
 
 function streaming_onPluginAttached() {

@@ -131,3 +131,14 @@ div#buttonPanel > div > div > i {
     margin-left: 5px;
     margin-right: 5px;
 }
+
+#joystickContainer {
+    width		: 100vw;
+    height		: 100vh;
+    overflow	: hidden;
+    padding		: 0;
+    margin		: 0;
+    -webkit-user-select	: none;
+    -moz-user-select	: none;
+    z-index: 1000;
+}

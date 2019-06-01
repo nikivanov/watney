@@ -73,8 +73,6 @@ $(document).ready(function () {
 
     $(document).keydown(function (event) {
         if (!$("#ttsSection").is(":visible")) {
-            event.preventDefault();
-
             if (event.keyCode == 83) {
                 $("#ttsSection").fadeIn(200);
                 $("#ttsInput").focus();
@@ -85,11 +83,13 @@ $(document).ready(function () {
                 lookUp = false;
                 lookDown = false;
                 sendKeys();
+                event.preventDefault();
                 return;
             }
 
             if (event.keyCode == 86) {
                 unmute();
+                event.preventDefault();
                 return;
             }
 
@@ -111,26 +111,33 @@ $(document).ready(function () {
                 }
                 
                 $("div#volumeSlider input").val(currentVolume).trigger("input");
+                event.preventDefault();
                 return;
             }
 
             if (event.keyCode == 38) {
                 up = true;
+                event.preventDefault();
             }
             else if (event.keyCode == 40) {
                 down = true;
+                event.preventDefault();
             }
             else if (event.keyCode == 37) {
                 left = true;
+                event.preventDefault();
             }
             else if (event.keyCode == 39) {
                 right = true;
+                event.preventDefault();
             }
             else if (event.keyCode == 65) {
                 lookDown = true;
+                event.preventDefault();
             }
             else if (event.keyCode == 90) {
                 lookUp = true;
+                event.preventDefault();
             }
 
             sendKeys();
@@ -139,30 +146,35 @@ $(document).ready(function () {
 
     $(document).keyup(function (event) {
         if (!$("#ttsSection").is(":visible")) {
-            event.preventDefault();
-
             if (event.keyCode == 86) {
                 mute();
+                event.preventDefault();
                 return;
             }
 
             if (event.keyCode == 38) {
                 up = false;
+                event.preventDefault();
             }
             else if (event.keyCode == 40) {
                 down = false;
+                event.preventDefault();
             }
             else if (event.keyCode == 37) {
                 left = false;
+                event.preventDefault();
             }
             else if (event.keyCode == 39) {
                 right = false;
+                event.preventDefault();
             }
             else if (event.keyCode == 65) {
                 lookDown = false;
+                event.preventDefault();
             }
             else if (event.keyCode == 90) {
                 lookUp = false;
+                event.preventDefault();
             }
 
             sendKeys();
@@ -252,12 +264,58 @@ $(document).ready(function () {
 
     $("div#volumeSlider input").on("input", function () {
         setVolume_throttled(this.value);
-    })
+    });
+
+    //detectMobile();
 
     doHeartbeat();
 
     doConnect();
 });
+
+function detectMobile() {
+    mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    mobile = true;
+    if(mobile) {
+        console.log("Creating a joystick...");
+        console.log("touchscreen is", VirtualJoystick.touchScreenAvailable() ? "available" : "not available");
+
+        const deadzone = 15;
+        let intervalPtr = null;
+	
+        var joystick	= new VirtualJoystick({
+            container	: document.getElementById('joystickContainer'),
+            mouseSupport	: true,
+        });
+        joystick.addEventListener('touchStart', function(){
+            intervalPtr = setInterval(function() {
+                const distance = Math.sqrt(pow(joystick.deltaX(), 2) + pow(joystick.deltaY(), 2));
+                if (distance <= deadzone) {
+                    up = false;
+                    down = false;
+                    left = false;
+                    right = false;
+                    sendKeys();
+                }
+                else {
+                    up = joystick.up();
+                    down = joystick.down();
+                    left = joystick.left();
+                    right = joystick.right();
+                    sendKeys();
+                }
+            }, 1/30 * 1000);
+        });
+        joystick.addEventListener('touchEnd', function(){
+            clearInterval(intervalPtr);
+            up = false;
+            down = false;
+            left = false;
+            right = false;
+            sendKeys();
+        });
+    }
+}
 
 var doVolumeSet = true;
 function doHeartbeat() {
