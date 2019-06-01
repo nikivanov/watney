@@ -34,6 +34,7 @@ div#buttonPanel {
     border-collapse: separate;
     border-spacing: 20px;
     border: 1px solid rgba(255, 255, 255, 0.3);
+    z-index: 10;
 }
 
 div#buttonPanel>div {
@@ -140,5 +141,5 @@ div#buttonPanel > div > div > i {
     margin		: 0;
     -webkit-user-select	: none;
     -moz-user-select	: none;
-    z-index: 1000;
+    z-index: 5;
 }
