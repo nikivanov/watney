@@ -93,6 +93,7 @@ function attachStreamingPlugin() {
 }
 
 function streaming_onRemoteStreamStart(stream) {
+    $("#playButton").show();
     var vidEl = $("#vid").get(0);
     Janus.attachMediaStream(vidEl, stream);
 }

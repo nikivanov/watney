@@ -266,6 +266,18 @@ $(document).ready(function () {
         setVolume_throttled(this.value);
     });
 
+    $("#vid").on("play", function(e) {
+        $("#playButton").hide();
+    });
+
+    $("#vid").on("pause", function(e) {
+        $("#playButton").show();
+    });
+
+    $("#playButton").click(function(e) {
+        $("#vid")[0].play();
+    });
+
     setupJoystick();
 
     doHeartbeat();

@@ -1,4 +1,5 @@
 function setupJoystick() {
+    return;
     console.log("Creating a joystick...");
     console.log("touchscreen is", VirtualJoystick.touchScreenAvailable() ? "available" : "not available");
 

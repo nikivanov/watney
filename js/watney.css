@@ -1,5 +1,20 @@
 #vid {
     object-fit: contain;
+    width: auto;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 50%; 
+    transform: translateX(-50%);
+    background: black;
+}
+
+#playButton {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    font-size: 32px;
 }
 
 div#powerButton {
