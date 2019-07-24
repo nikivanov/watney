@@ -25,6 +25,7 @@ def setCommand():
     commandObj = json.loads(request.data.decode("utf-8"))
     newBearing = commandObj['bearing']
     newLook = commandObj['look']
+    newLight = commandObj['light']
 
     if newBearing in MotorController.validBearings:
         if newBearing == "0":
@@ -44,6 +45,9 @@ def setCommand():
     else:
         print("Invalid look at {}".format(newLook))
         return "Invalid", 400
+
+    if newLight == 1:
+        roverDriver.lightSwitch()
 
     return "OK"
 

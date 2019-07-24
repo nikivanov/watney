@@ -11,6 +11,20 @@ from motor import Motor
 from motorcontroller import MotorController
 from servocontroller import ServoController
 
+class LightController:
+    def __init__(self, pi, controlPin):
+        self.controlPin = controlPin
+        self.pi = pi
+        self.pi.set_mode(self.controlPin, pigpio.OUTPUT)
+        self.pi.write(self.controlPin, 1)
+
+    def switch(self):
+        lightState = self.pi.read(self.controlPin)
+        if lightState:
+            self.pi.write(self.controlPin, 0)
+        else:
+            self.pi.write(self.controlPin, 1)
+
 
 class Driver:
 
@@ -28,6 +42,7 @@ class Driver:
         leftMotorConfig = config["LEFTMOTOR"]
         rightMotorConfig = config["RIGHTMOTOR"]
         servoConfig = config["SERVO"]
+        lightConfig = config["LIGHT"]
 
         print("Starting GStreamer pipeline...")
         self.execAndMonitor(videoConfig["GStreamerStartCommand"])
@@ -52,6 +67,7 @@ class Driver:
                                                float(driverConfig["HalfTurnSpeed"]))
 
         self.servoController = ServoController(self.pi, int(servoConfig["PWMPin"]))
+        self.lightController = LightController(self.pi, int(lightConfig["CONTROLPin"]))
 
         heartbeatInterval = float(driverConfig["MaxHeartbeatInvervalMS"])
         self.ssidRegex = re.compile(r"ESSID:\"(.+?)\"")
@@ -114,6 +130,9 @@ class Driver:
 
     def stop(self):
         self.motorController.setBearing(-1)
+
+    def lightSwitch(self):
+        self.lightController.switch()
 
     def lookUp(self):
         self.servoController.backward()

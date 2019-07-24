@@ -4,13 +4,18 @@ var left = false;
 var right = false;
 var lookUp = false;
 var lookDown = false;
+var lightButton = false;
 
 var lastBearing = -1;
 var lastLook = 0;
+var lastLight = 0;
+
 
 function sendKeys() {
     var bearing = "0";
-    var look = 0
+    var look = 0;
+    var light = 0;
+
 
     if (up) {
         if (left) {
@@ -48,12 +53,18 @@ function sendKeys() {
         look = -1;
     }
 
-    if (lastBearing != bearing || lastLook != look) {
+    if (lightButton) {
+        light = 1;
+    }
+
+    if (lastBearing != bearing || lastLook != look || lastLight != light) {
         lastBearing = bearing;
         lastLook = look;
+
         var commandObj = {
             'bearing': bearing,
-            'look': look
+            'look': look,
+            'light':light
         };
 
         $.ajax({
@@ -90,6 +101,9 @@ $(document).ready(function () {
         else if (event.keyCode == 90) {
             lookUp = true;
         }
+        else if (event.keyCode == 76) {
+            lightButton = true;
+        }
 
         sendKeys();
     });
@@ -114,6 +128,9 @@ $(document).ready(function () {
         }
         else if (event.keyCode == 90) {
             lookUp = false;
+        }
+        else if (event.keyCode == 76) {
+            lightButton = false;
         }
 
         sendKeys();
