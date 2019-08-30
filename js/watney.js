@@ -4,14 +4,16 @@ var left = false;
 var right = false;
 var lookUp = false;
 var lookDown = false;
+var slow = false;
 
 var lastBearing = -1;
 var lastLook = 0;
+var lastSlow = false;
 
 function sendKeys() {
     var bearing = "0";
-    var look = 0
-
+    var look = 0;
+    
     if (up) {
         if (left) {
             bearing = "nw";
@@ -48,12 +50,13 @@ function sendKeys() {
         look = -1;
     }
 
-    if (lastBearing != bearing || lastLook != look) {
+    if (lastBearing != bearing || lastLook != look || lastSlow != slow) {
         lastBearing = bearing;
         lastLook = look;
         var commandObj = {
             'bearing': bearing,
-            'look': look
+            'look': look,
+            'slow': slow,
         };
 
         $.ajax({
@@ -138,6 +141,9 @@ $(document).ready(function () {
             else if (event.keyCode == 90) {
                 lookUp = true;
                 event.preventDefault();
+            } else if (event.keyCode == 16) {
+                slow = true;
+                event.preventDefault();
             }
 
             sendKeys();
@@ -174,6 +180,9 @@ $(document).ready(function () {
             }
             else if (event.keyCode == 90) {
                 lookUp = false;
+                event.preventDefault();
+            } else if (event.keyCode == 16) {
+                slow = false;
                 event.preventDefault();
             }
 

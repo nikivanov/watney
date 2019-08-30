@@ -41,7 +41,7 @@ class Heartbeat:
             while True:
                 if (time.time() - self.lastHeartbeat) > self.heartbeatInterval:
                     if not self.heartbeatStop:
-                        self.motorController.setBearing("0")
+                        self.motorController.setBearing("0", False)
                         await self.servoController.lookStop()
                         self.heartbeatStop = True
                 else:

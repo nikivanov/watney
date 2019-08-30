@@ -34,9 +34,10 @@ async def setCommand(request):
     commandObj = await request.json()
     newBearing = commandObj['bearing']
     newLook = commandObj['look']
+    newSlow = commandObj['slow']
 
     if newBearing in MotorController.validBearings:
-        motorController.setBearing(newBearing)
+        motorController.setBearing(newBearing, newSlow)
     else:
         print("Invalid bearing {}".format(newBearing))
         return web.Response(status=400, text="Invalid")

@@ -22,8 +22,9 @@ class MotorController:
         self.leftMotor = leftMotor
         self.rightMotor = rightMotor
         self.halfTurnSpeed = float(driverConfig["HalfTurnSpeed"])
+        self.slowSpeed = float(driverConfig["SlowSpeed"])
 
-    def getTargetMotorDCs(self, targetBearing):
+    def getTargetMotorDCs(self, targetBearing, slow):
         if targetBearing == "0":
             leftDC = 0
             rightDC = 0
@@ -54,12 +55,16 @@ class MotorController:
         else:
             raise Exception("Bad bearing: " + targetBearing)
 
+        if slow:
+            leftDC = leftDC * self.slowSpeed
+            rightDC = rightDC * self.slowSpeed
+
         return int(leftDC), int(rightDC)
 
-    def setBearing(self, bearing):
+    def setBearing(self, bearing, slow):
         if bearing not in self.validBearings:
             raise ValueError("Invalid bearing: {}".format(bearing))
 
-        leftDC, rightDC = self.getTargetMotorDCs(bearing)
+        leftDC, rightDC = self.getTargetMotorDCs(bearing, slow)
         self.leftMotor.setMotion(leftDC)
         self.rightMotor.setMotion(rightDC)
