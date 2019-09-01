@@ -4,7 +4,7 @@ After=multi-user.target
 
 [Service]
 Type=idle
-ExecStart=/usr/local/bin/python3 -u /home/pi/watney/server.py
+ExecStart=/usr/bin/python3 -u /home/pi/watney/server.py
 WorkingDirectory=/home/pi/watney
 
 [Install]
