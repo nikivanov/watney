@@ -12,7 +12,7 @@ class ServoController:
         servoConfig = config["SERVO"]
         self.pwmPin = int(servoConfig["PWMPin"])
         self.neutral = 7.5
-        self.amplitude = 2
+        self.amplitude = 2.5
         self.frequency = 50
         self.changeVelocityPerSec = 2
         # 1 is forward, -1 is backward, 0 is stop
