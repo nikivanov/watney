@@ -8,6 +8,12 @@
 * Universal Qi Wireless Charger Receiver ($5)
 * Left-Angle 25CM Micro-USB extension cable ($3)
 * PAM8302 Audio Amplifier ($2)
+* Adafruit SPH0645 I2S MEMS Microphone ($11)
+* Dual 18650 V8 Power Board ($5)
+* 2.54m pitch Male connector strip ($2)
+    * You'll only need 14 of them
+* 2x 18650 3000mah recharable batteries $(6)
+    * There are many 18650 batteries, not all of them are good. I've had good experience with LiitoKala HG2, but YMMV.
 * 40MM 4ohm 3W Ultra-thin Speaker ($4)
     * You only need one but they usually come in packs of 5
 * 10cm Female-To-Female Dupoint Jumper Wire x20 ($1)
