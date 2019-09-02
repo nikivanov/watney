@@ -55,8 +55,8 @@ async def setCommand(request):
     return web.Response(text="OK")
 
 
-@routes.post("/shutdown")
-async def shutdown(request):
+@routes.post("/shutDown")
+async def shutDown(request):
     call("sudo halt", shell=True)
 
 
