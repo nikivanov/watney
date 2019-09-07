@@ -2,7 +2,7 @@
 * SD Card 8GB or more ($5)
 * 4x Arduino Gear Motor ($4)
 * L298N Dual H-Bridge ($2)
-* SainSmart 160° Fish-Eye Camera ($15)
+* Raspberry Pi 160° Fish-Eye Camera ($15)
 * SG90 9G Servo ($1)
 * Qi 5W Wireless Charger ($4)
 * Universal Qi Wireless Charger Receiver ($5)

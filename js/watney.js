@@ -53,6 +53,7 @@ function sendKeys() {
     if (lastBearing != bearing || lastLook != look || lastSlow != slow) {
         lastBearing = bearing;
         lastLook = look;
+        lastSlow = slow;
         var commandObj = {
             'bearing': bearing,
             'look': look,
