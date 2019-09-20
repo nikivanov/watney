@@ -11,9 +11,12 @@ class ServoController:
 
         servoConfig = config["SERVO"]
         self.pwmPin = int(servoConfig["PWMPin"])
-        self.neutral = 7.5
-        self.amplitude = 2.5
+        self.neutral = float(servoConfig["Neutral"])
+        self.min = float(servoConfig["Min"])
+        self.max = float(servoConfig["Max"])
+
         self.frequency = 50
+
         self.changeVelocityPerSec = 2
         # 1 is forward, -1 is backward, 0 is stop
         self.direction = 0
@@ -51,9 +54,9 @@ class ServoController:
             # go neutral first
             self.pwmControl.ChangeDutyCycle(self.neutral)
             await asyncio.sleep(initialSleep)
-            self.pwmControl.ChangeDutyCycle(self.neutral + self.amplitude / 2)
+            self.pwmControl.ChangeDutyCycle(self.max * 0.8)
             await asyncio.sleep(initialSleep)
-            self.pwmControl.ChangeDutyCycle(self.neutral - self.amplitude / 2)
+            self.pwmControl.ChangeDutyCycle(self.min * 0.8)
             await asyncio.sleep(initialSleep)
             self.pwmControl.ChangeDutyCycle(self.neutral)
             await asyncio.sleep(initialSleep)
@@ -78,9 +81,9 @@ class ServoController:
                 lastChangeTime = time.time()
 
                 if self.direction == 1:
-                    currentPosition = min(currentPosition + changeDelta, self.neutral + self.amplitude)
+                    currentPosition = min(currentPosition + changeDelta, self.max)
                 elif self.direction == -1:
-                    currentPosition = max(currentPosition - changeDelta, self.neutral - self.amplitude)
+                    currentPosition = max(currentPosition - changeDelta, self.min)
 
                 self.changeServo(currentPosition)
                 await asyncio.sleep(0.05)
@@ -93,9 +96,9 @@ class ServoController:
     def __shouldBeMoving(self, currentPosition):
         if self.direction == 0:
             return False
-        elif self.direction == 1 and currentPosition >= self.neutral + self.amplitude:
+        elif self.direction == 1 and currentPosition >= self.max:
             return False
-        elif self.direction == -1 and currentPosition <= self.neutral - self.amplitude:
+        elif self.direction == -1 and currentPosition <= self.min:
             return False
 
         return True
