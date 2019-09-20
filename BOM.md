@@ -17,7 +17,7 @@ All parts can be found on Amazon, AliExpress, Ebay etc. Make sure the items you'
 * [[Dual 18650 V8] Power Board](images/bom/18650v8.jpg) ($5)
 * [2.54m pitch [male breakable pin header] connector strip](images/bom/header.jpg) ($2)
     * You'll only need 14 of them
-* [2x 18650 3000mah recharable batteries](images/bom/18650.jpg) $(6)
+* [2x 18650 3000mah recharable batteries](images/bom/18650.jpg) ($6)
     * There are many 18650 batteries, not all of them are good. I've had good experience with LiitoKala HG2, but YMMV.
 * [[40MM 3W Ultra-thin Speaker] 4ohm](images/bom/speaker.jpg) ($3)
 * [[10cm Female-To-Female Dupont] Jumper Wire x20](images/bom/dupont.jpg) ($1)
