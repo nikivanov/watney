@@ -2,9 +2,9 @@
 ## Notes
 None of the 3D printed parts require supports. I recommend printing in PETG, or at least Tough PLA. Tires need to be printed in TPU. In most cases, you need to drive M3 bolts directly into the holes in plastic. If you're having trouble getting the bolt to go in when securing a part, prime the hole with a bolt for a few millimeters and then try again. Don't overtighten.
 ## Base Part
-<a href="images/assembly/charger.jpg"><img src="images/assembly/charger.jpg" height="256"></a>
-<a href="images/assembly/wireless_client.jpg"><img src="images/assembly/wireless_client.jpg" height="256"></a>
-<a href="images/assembly/motors.jpg"><img src="images/assembly/motors.jpg" height="256"></a>
+<a href="images/assembly/charger.jpg"><img src="images/assembly/charger.jpg" height="200"></a>
+<a href="images/assembly/wireless_client.jpg"><img src="images/assembly/wireless_client.jpg" height="200"></a>
+<a href="images/assembly/motors.jpg"><img src="images/assembly/motors.jpg" height="200"></a>
 
 1. Break off 6 pairs of pin headers and solder them to the Dual 18650 board
 1. Insert 18650 batteries. Ensure the correct polarity, or you will burn out the board
