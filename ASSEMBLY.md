@@ -22,7 +22,7 @@ None of the 3D printed parts require supports. I recommend printing in PETG, or 
 1. Attach a pair of 30cm MF Dupont wires to the 12V and GND of L298N. Make sure you're not attaching to the 5V - it's an output.
 ## Cover
 <a href="images/assembly/audiojack1.jpg"><img src="images/assembly/audiojack1.jpg" height="200"></a>
-<a href="images/assembly/audiojack2.jpg"><img src="images/assembly/audiojack2.jpg" height="200"></a>
+<a href="images/assembly/audiojack2.jpg?"><img src="images/assembly/audiojack2.jpg?" height="200"></a>
 <a href="images/assembly/servo.jpg"><img src="images/assembly/servo.jpg" height="200"></a>
 <a href="images/assembly/camera.jpg"><img src="images/assembly/camera.jpg" height="200"></a>
 <a href="images/assembly/bucket.jpg"><img src="images/assembly/bucket.jpg" height="200"></a>
