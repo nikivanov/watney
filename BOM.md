@@ -3,6 +3,7 @@ All parts can be found on Amazon, AliExpress, Ebay etc. Make sure the items you'
 
 * [Raspberry Pi 3A+](images/bom/raspberrypi.jpg) ($20)
 * Micro SD Card 8GB or more ($5)
+* 2A USB Charger ($4)
 * [4x [Arduino Gear Motor]](images/bom/motors.jpg) ($4)
 * [[L298N]](images/bom/l298n.jpg) Dual H-Bridge ($2)
 * [[Raspberry Pi 160 fish eye] camera](images/bom/camera.jpg) ($15)
