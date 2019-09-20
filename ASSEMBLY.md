@@ -26,7 +26,7 @@ None of the 3D printed parts require supports. I recommend printing in PETG, or 
 <a href="images/assembly/servo.jpg"><img src="images/assembly/servo.jpg" height="200"></a>
 <a href="images/assembly/camera.jpg"><img src="images/assembly/camera.jpg" height="200"></a>
 <a href="images/assembly/bucket.jpg"><img src="images/assembly/bucket.jpg" height="200"></a>
-<a href="images/assembly/charger_attached.jpg"><img src="images/assembly/charger_attached.jpg" height="200"></a>
+<a href="images/assembly/charger_attached.jpg?"><img src="images/assembly/charger_attached.jpg?" height="200"></a>
 
 1. Print out cover.stl, servo holder.stl, camera bucket.stl, power board standoff.stl, camera body.stl, camera door.stl
 1. Solder 2 single pin headers to the audio jack of the raspberry pi, as shown in pictures. You will need to scrape off some plastic for one of them.
@@ -50,5 +50,6 @@ None of the 3D printed parts require supports. I recommend printing in PETG, or 
 1. Insert the door into the camera body.
 1. Use a 8mm bolt to attach the bucket to the top of the cover.
 1. Take the batteries out of the board, place the standoff onto the bottom of the board and use 12mm bolts to attach it to the top of the cover.
+1. Place the batteries back in. Connect 5V and GND from the power board to GPIO board pins 2 and 6 with 10CM Dupont wires.
 
 
