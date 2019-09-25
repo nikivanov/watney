@@ -17,8 +17,7 @@
     font-size: 32px;
 }
 
-div#powerButton {
-    position: relative;
+div#powerButton, div#resetButton {
     color: darkred;
 }
 

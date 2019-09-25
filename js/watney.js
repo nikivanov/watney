@@ -212,6 +212,27 @@ $(document).ready(function () {
         });
     });
 
+    $("#resetButton").click(function (event) {
+        $("#restart-confirm").dialog({
+            resizable: false,
+            height: "auto",
+            width: "auto",
+            modal: true,
+            buttons: {
+                "Restart": function () {
+                    $(this).dialog("close");
+                    $.ajax({
+                        url: '/restart',
+                        type: "POST"
+                    });
+                },
+                Cancel: function () {
+                    $(this).dialog("close");
+                }
+            }
+        });
+    });
+
     $("#infoButton").click(function (event) {
         if ($("#info").is(":visible")) {
             $("#info").fadeOut(200);

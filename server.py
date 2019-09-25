@@ -59,6 +59,10 @@ async def setCommand(request):
 async def shutDown(request):
     call("sudo halt", shell=True)
 
+@routes.post("/restart")
+async def shutDown(request):
+    call("sudo reboot", shell=True)
+
 
 @routes.post("/sendTTS")
 async def sendTTS(request):
