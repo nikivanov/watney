@@ -54,9 +54,9 @@ class ServoController:
             # go neutral first
             self.pwmControl.ChangeDutyCycle(self.neutral)
             await asyncio.sleep(initialSleep)
-            self.pwmControl.ChangeDutyCycle(self.max * 0.8)
+            self.pwmControl.ChangeDutyCycle(self.max)
             await asyncio.sleep(initialSleep)
-            self.pwmControl.ChangeDutyCycle(self.min * 0.8)
+            self.pwmControl.ChangeDutyCycle(self.min)
             await asyncio.sleep(initialSleep)
             self.pwmControl.ChangeDutyCycle(self.neutral)
             await asyncio.sleep(initialSleep)
