@@ -1,6 +1,6 @@
 # Assembly
 ## Notes
-None of the 3D printed parts require supports. I recommend printing in PETG, or at least Tough PLA. Tires need to be printed in TPU. In most cases, you need to drive M3 bolts directly into the holes in plastic. If you're having trouble getting the bolt to go in when securing a part, prime the hole with a bolt for a few millimeters and then try again. Don't overtighten. When connecting wires to the Raspberry Pi, use [this image](images/pi-gpio.png) for reference.
+None of the 3D printed parts require supports. I recommend printing in PETG, or at least Tough PLA. Tires need to be printed in TPU. In most cases, you need to drive M3 bolts directly into the holes in plastic. If you're having trouble getting the bolt to go in when securing a part, prime the hole with a bolt for a few millimeters and then try again. Don't overtighten. When connecting wires to the Raspberry Pi, use <a href="https://raw.githubusercontent.com/nikivanov/watney/2wayaudio/images/pi-gpio.png">this image</a> for reference.
 ## Base
 <a href="images/assembly/charger.jpg"><img src="images/assembly/charger.jpg" height="200"></a>
 <a href="images/assembly/wireless_client.jpg"><img src="images/assembly/wireless_client.jpg" height="200"></a>
@@ -19,7 +19,7 @@ None of the 3D printed parts require supports. I recommend printing in PETG, or 
 1. Place each motor into its slot, as shown in the picture. Place a motor holder over each motor and align the holes. Use 8mm bolts from the outside to pull each holder to the wall. Make sure all motors are in held in place.
 1. Insert the motor wire leads into L298N H-Bridge. Polarity here doesn't matter much because we'll be able to set it in the config later.
 1. Gently place L298N onto the mounting holes in the bottom and secure it with 6mm bolts. You should only need to use 2 bolts.
-1. Attach a pair of 30cm MF Dupont wires to the 12V and GND of L298N. Make sure you're not attaching to the 5V - it's an output.
+1. Attach a pair of 30cm MF Dupont wires to the 12V (VCC) and GND of L298N. Make sure you're not attaching to the 5V - it's an output.
 ## Cover
 <a href="images/assembly/audiojack1.jpg"><img src="images/assembly/audiojack1.jpg" height="200"></a>
 <a href="images/assembly/audiojack2.jpg?"><img src="images/assembly/audiojack2.jpg?" height="200"></a>
@@ -45,11 +45,46 @@ None of the 3D printed parts require supports. I recommend printing in PETG, or 
 1. Take the long servo arm and cut it below the second hole so it aligns with the indentation in the camera body. Secure it to the camera body with one of the provided screws.
 1. Attach the camera body to the servo so the body is vertical.
 1. Thread the camera cable through its slot and attach it to the camera port on the raspberry pi.
-1. Place the camera into the camera body, then insert the camera bucket over the camera body and the servo. Be careful not to push onto the camera body too much, or you risk damaging the servo.
+1. Place the camera into the camera body, then insert the camera bucket over the camera body and the servo. Be careful not to push onto the camera body too much, or you risk damaging the servo. You will need to keep the camera lens inserted half-way into the camera body to put the bucket over it.
 1. Use a 6mm bolt to attach the other side of the camera body.
-1. Insert the door into the camera body.
+1. Insert the door into the camera body. You can gently pull on the lens to make sure the camera board is lined up.
 1. Use a 8mm bolt to attach the bucket to the top of the cover.
 1. Take the batteries out of the board, place the standoff onto the bottom of the board and use 12mm bolts to attach it to the top of the cover.
 1. Place the batteries back in. Connect 5V and GND from the power board to GPIO board pins 2 and 6 with 10CM Dupont wires.
+## Audio Bonnet
+<a href="images/assembly/bonnet-1.jpg"><img src="images/assembly/bonnet-1.jpg" height="200"></a>
+<a href="images/assembly/bonnet-2.jpg"><img src="images/assembly/bonnet-2.jpg" height="200"></a>
+<a href="images/assembly/audio-connection.jpg"><img src="images/assembly/audio-connection.jpg" height="200"></a>
+<a href="images/assembly/audio-connection-2.jpg"><img src="images/assembly/audio-connection-2.jpg" height="200"></a>
+<a href="images/assembly/bonnet-all-connected.jpg"><img src="images/assembly/bonnet-all-connected.jpg" height="200"></a>
+<a href="images/assembly/bonnet-all-connected-2.jpg"><img src="images/assembly/bonnet-all-connected-2.jpg" height="200"></a>
+1. Print out audio bonnet.stl, speaker holder.stl, microphone holder.stl and microphone wire holder.stl
+1. Make sure the mounting holes in the amplifier and the microphone are big enough for M3 screws. If not, drill them out as you did with the raspberry pi.
+1. Solder the headers onto the amplifier and the microphone.
+1. Solder the amplifier to the speaker using about 8CM of wire.
+1. Attach the amplifier to the bonnet with 6mm bolts. Place the speaker into place, line up the speaker holder behind it and secure it with 6mm bolts. Don't overtighten, but make sure the speaker does not move around.
+1. Make sure the microphone hole is clear. Attach the microphone board to the bonnet using the microphone holder and secure it with 6mm bolts.
+1. Attach 10CM dupont wires to Vin and GND of the amplifier and the microphone. Attach 20CM wires to the rest of the pins. 
+1. Secure the 20CM microphone wires with the wire holder as shown in the picture. This will prevent them from falling out.
+1. I highly recommend writing down pin name, wire color, target pin, and taking a picture for reference. In the pictures above, the pinout is as follows:
+    * Amplifier:
+        * GND Blue GND
+        * Vin Green 5V
+        * SD Purple Pin 37 (GPIO 26)
+        * A- Gray Audio Jack Front Pin
+        * A+ White Audio Jack Back Pin
+    * Microphone:
+        * 3V White 3V
+        * GND Black GND
+        * BCLK Green Pin 12 (GPIO 18)
+        * DOUT Yellow Pin 38 (GPIO 20)
+        * LRCL Orange Pin 35 (GPIO 19)
+        * SEL Red Pin 39 (GND)
+1. At this point, you can either test your system by hooking up the wires as specified above, or keep going with assembly.
+1. Put the extender cable from the charger client through the hole in the cover and attach it to the charge port of the power board.
+1. Attach the 30CM wires from the L298N to 5V / Gnd of the power board.
+1. Slowly lower the bonnet onto the cover, making sure not to pinch any wires. Secure it to the cover with 8mm bolts.
+1. Remove ENA / ENB jumpers from the L298N
+
 
 
