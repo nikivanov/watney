@@ -58,7 +58,7 @@ None of the 3D printed parts require supports. I recommend printing in PETG, or 
 <a href="images/assembly/audio-connection-2.jpg"><img src="images/assembly/audio-connection-2.jpg" height="200"></a>
 <a href="images/assembly/bonnet-all-connected.jpg"><img src="images/assembly/bonnet-all-connected.jpg" height="200"></a>
 <a href="images/assembly/bonnet-all-connected-2.jpg"><img src="images/assembly/bonnet-all-connected-2.jpg" height="200"></a>
-1. Print out audio bonnet.stl, speaker holder.stl, microphone holder.stl and microphone wire holder.stl
+1. Print out audio bonnet.stl, speaker holder.stl, i2s mic holder.stl and mic wire holder.stl
 1. Make sure the mounting holes in the amplifier and the microphone are big enough for M3 screws. If not, drill them out as you did with the raspberry pi.
 1. Solder the headers onto the amplifier and the microphone.
 1. Solder the amplifier to the speaker using about 8CM of wire.
@@ -84,7 +84,15 @@ None of the 3D printed parts require supports. I recommend printing in PETG, or 
 1. Put the extender cable from the charger client through the hole in the cover and attach it to the charge port of the power board.
 1. Attach the 30CM wires from the L298N to 5V / Gnd of the power board.
 1. Slowly lower the bonnet onto the cover, making sure not to pinch any wires. Secure it to the cover with 8mm bolts.
-1. Remove ENA / ENB jumpers from the L298N
-
+1. Remove ENA / ENB jumpers from the L298N, attach 20CM dupont wires to the pins and hook them up as follows:
+    * ENA Pin 8 (GPIO 14)
+    * IN1 Pin 10 (GPIO 15)
+    * IN2 Pin 16 (GPIO 23)
+    * IN3 PIN 18 (GPIO 24)
+    * IN4 Pin 22 (GPIO 25)
+    * ENB Pin 24 (GPIO 8)
+1. Place the cover onto the bottom, align the tabs and snap it closed. You can use a 16mm bolt in the back and a 6mm bolt on the bottom of the basked to secure the pieces further.
+## Wireless charger
+Print out dock.stl. I recommend using sticky tape or hot glue to attach the charger to the dock, so it doesn't move.
 
 
