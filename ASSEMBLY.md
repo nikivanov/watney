@@ -62,6 +62,7 @@ None of the 3D printed parts require supports. I recommend printing in PETG, or 
 1. Make sure the mounting holes in the amplifier and the microphone are big enough for M3 screws. If not, drill them out as you did with the raspberry pi.
 1. Solder the headers onto the amplifier and the microphone.
 1. Solder the amplifier to the speaker using about 8CM of wire.
+1. The amplifier has a built in volume trim potentiometer that needs to be adjusted before it's set in place. Connect the amplifier to the raspberry pi as outlined in a few steps below, power it on, SSH into it and use "speaker-test" command while adjusting the volume trim. I recommend setting it close to max and then using Watney's built in volume control to turn it down.
 1. Attach the amplifier to the bonnet with 6mm bolts. Place the speaker into place, line up the speaker holder behind it and secure it with 6mm bolts. Don't overtighten, but make sure the speaker does not move around.
 1. Make sure the microphone hole is clear. Attach the microphone board to the bonnet using the microphone holder and secure it with 6mm bolts.
 1. Attach 10CM dupont wires to Vin and GND of the amplifier and the microphone. Attach 20CM wires to the rest of the pins. 
