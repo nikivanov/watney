@@ -57,7 +57,6 @@ None of the 3D printed parts require supports. I recommend printing in PETG, or 
 <a href="images/assembly/audio-connection.jpg"><img src="images/assembly/audio-connection.jpg" height="200"></a>
 <a href="images/assembly/audio-connection-2.jpg"><img src="images/assembly/audio-connection-2.jpg" height="200"></a>
 <a href="images/assembly/bonnet-all-connected.jpg"><img src="images/assembly/bonnet-all-connected.jpg" height="200"></a>
-<a href="images/assembly/bonnet-all-connected-2.jpg"><img src="images/assembly/bonnet-all-connected-2.jpg" height="200"></a>
 <a href="images/assembly/hbridge-attached.jpg"><img src="images/assembly/hbridge-attached.jpg" height="200"></a>
 1. Print out audio bonnet.stl, speaker holder.stl, i2s mic holder.stl and mic wire holder.stl
 1. Make sure the mounting holes in the amplifier and the microphone are big enough for M3 screws. If not, drill them out as you did with the raspberry pi.
