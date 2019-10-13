@@ -10,7 +10,7 @@ None of the 3D printed parts require supports. I recommend printing in PETG, or 
 1. Break off 6 pairs of pin headers and solder them to the Dual 18650 board.
 1. Insert 18650 batteries. Ensure the correct polarity, or you will burn out the board.
 1. Connect the wireless charger to a 2A USB power supply.
-1. Connect the wireless client to the extension cable, and then plug the cable into the charging port of the board. Place the client onto the charger and make sure it starts charging.
+1. Connect the wireless client to the extension cable, and then plug the cable into the charging port of the board. Place the client onto the charger and make sure it starts charging. Once you verified that wireless charging works, plug the power supply into the power board directly to charge the batteries.
 1. Turn on the power board and use MF Dupont wire to test each motor by connecting its contacts to one of the 5V ports.
 1. Place the charger client onto the bottom and place the charger client holder on top of it. Push the holder into the bottom and secure it with 6mm bolts.
 1. Attach the Micro USB extension cable to the charger client.

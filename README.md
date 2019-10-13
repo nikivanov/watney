@@ -39,4 +39,5 @@ Watney has no authentication / security. If you'd like to set it up for remote a
 * **Better browser compatibility.** There's no reason it can't work in all major browsers.
 * **Mobile-optimized control.** You'll be able to control your watney from your phone / tablet, especially in tandem with Remote Access.
 * **Better volume scaling.** The volume slider is only usable at the top range - anything below 70% is barely audible. The slider should be scaled to control only the usable range instead.
+* **Timing Belts.** Coupling each pair of motors via a timing belt should greatly improve driving over very rough terrain.
 
