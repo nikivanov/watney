@@ -20,6 +20,7 @@ None of the 3D printed parts require supports. I recommend printing in PETG, or 
 1. Insert the motor wire leads into L298N H-Bridge. Polarity here doesn't matter much because we'll be able to set it in the config later.
 1. Gently place L298N onto the mounting holes in the bottom and secure it with 6mm bolts. You should only need to use 2 bolts.
 1. Attach a pair of 30cm MF Dupont wires to the 12V (VCC) and GND of L298N. Make sure you're not attaching to the 5V - it's an output.
+1. Mount the tires onto the wheels. Make sure you mount them in the correct orientation, since you probably won't be able to take them off. The orientation is mostly decorative.
 ## Cover
 <a href="images/assembly/audiojack1.jpg"><img src="images/assembly/audiojack1.jpg" height="200"></a>
 <a href="images/assembly/audiojack2.jpg?"><img src="images/assembly/audiojack2.jpg?" height="200"></a>
@@ -94,6 +95,6 @@ None of the 3D printed parts require supports. I recommend printing in PETG, or 
     * ENB Pin 24 (GPIO 8)
 1. Place the cover onto the bottom, align the tabs and snap it closed. You can use a 16mm bolt in the back and a 6mm bolt on the bottom of the basked to secure the pieces further.
 ## Wireless charger
-Print out dock.stl. I recommend using sticky tape or hot glue to attach the charger to the dock, so it doesn't move.
+Print out dock.stl. I recommend using sticky tape or hot glue to attach the charger to the dock, so it doesn't move. Power it with a USB 2A power adapter (1A won't work).
 
 
