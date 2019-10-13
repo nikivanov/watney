@@ -10,13 +10,13 @@ None of the 3D printed parts require supports. I recommend printing in PETG, or 
 1. Break off 6 pairs of pin headers and solder them to the Dual 18650 board.
 1. Insert 18650 batteries. Ensure the correct polarity, or you will burn out the board.
 1. Connect the wireless charger to a 2A USB power supply.
-1. Connect the wireless client to the extension cable, and then plug the cable into the charging port of the board. Place the cient onto the charger and make sure it starts charging.
+1. Connect the wireless client to the extension cable, and then plug the cable into the charging port of the board. Place the client onto the charger and make sure it starts charging.
 1. Turn on the power board and use MF Dupont wire to test each motor by connecting its contacts to one of the 5V ports.
 1. Place the charger client onto the bottom and place the charger client holder on top of it. Push the holder into the bottom and secure it with 6mm bolts.
 1. Attach the Micro USB extension cable to the charger client.
 1. Solder about 15cm of wire to each motor and then connect the other ends in parallel. Make sure not to reverse polarity, or the motors will spin in different directions. I recommend soldering with wires pointing towards the axle.
 1. Drive an M3 nut into slots of each motor holder, 8 total.
-1. Place each motor into its slot, as shown in the picture. Place a motor holder over each motor and align the holes. Use 8mm bolts from the outside to pull each holder to the wall. Make sure all motors are in held in place.
+1. Place each motor into its slot, as shown in the picture. Place a motor holder over each motor and align the holes. Use 8mm bolts from the outside to pull each holder to the wall. Make sure all motors are held tightly in place.
 1. Insert the motor wire leads into L298N H-Bridge. Polarity here doesn't matter much because we'll be able to set it in the config later.
 1. Gently place L298N onto the mounting holes in the bottom and secure it with 6mm bolts. You should only need to use 2 bolts.
 1. Attach a pair of 30cm MF Dupont wires to the 12V (VCC) and GND of L298N. Make sure you're not attaching to the 5V - it's an output.
@@ -33,7 +33,6 @@ None of the 3D printed parts require supports. I recommend printing in PETG, or 
 1. Solder 2 single pin headers to the audio jack of the raspberry pi, as shown in pictures. You will need to scrape off some plastic for one of them.
 1. M3 bolts are a bit too big for Raspberry Pi mounting holes. Run a 1/8" drill bit through them, file them, or just put an M3 bolt through them carefully to expand them a bit.
 1. Download the latest Watney SD Card Image from the Releases page and burn it onto the SD card Insert the card into the Raspberry Pi.
-1. Print out 
 1. SG90 Servo connector layout isn't compatible with Raspberry Pi. Lift the small plastic pieces that hold the Dupont connectors in the socket of the servo connector body. Do the same thing to 2 Dupont wires, so you have 3 single Dupont connector plastic pieces. Insert the servo's connectors into those pieces.
 1. Connect 5V and GND from the power board to GPIO board pins 2 and 6.
 1. Connect the servo to the Raspberry Pi:
@@ -59,6 +58,7 @@ None of the 3D printed parts require supports. I recommend printing in PETG, or 
 <a href="images/assembly/audio-connection-2.jpg"><img src="images/assembly/audio-connection-2.jpg" height="200"></a>
 <a href="images/assembly/bonnet-all-connected.jpg"><img src="images/assembly/bonnet-all-connected.jpg" height="200"></a>
 <a href="images/assembly/bonnet-all-connected-2.jpg"><img src="images/assembly/bonnet-all-connected-2.jpg" height="200"></a>
+<a href="images/assembly/hbridge-attached.jpg"><img src="images/assembly/hbridge-attached.jpg" height="200"></a>
 1. Print out audio bonnet.stl, speaker holder.stl, i2s mic holder.stl and mic wire holder.stl
 1. Make sure the mounting holes in the amplifier and the microphone are big enough for M3 screws. If not, drill them out as you did with the raspberry pi.
 1. Solder the headers onto the amplifier and the microphone.
@@ -69,30 +69,43 @@ None of the 3D printed parts require supports. I recommend printing in PETG, or 
 1. Attach 10CM dupont wires to Vin and GND of the amplifier and the microphone. Attach 20CM wires to the rest of the pins. 
 1. Secure the 20CM microphone wires with the wire holder as shown in the picture. This will prevent them from falling out.
 1. I highly recommend writing down pin name, wire color, target pin, and taking a picture for reference. In the pictures above, the pinout is as follows:
-    * Amplifier:
-        * GND Blue GND
-        * Vin Green 5V
-        * SD Purple Pin 37 (GPIO 26)
-        * A- Gray Audio Jack Front Pin
-        * A+ White Audio Jack Back Pin
-    * Microphone:
-        * 3V White 3V
-        * GND Black GND
-        * BCLK Green Pin 12 (GPIO 18)
-        * DOUT Yellow Pin 38 (GPIO 20)
-        * LRCL Orange Pin 35 (GPIO 19)
-        * SEL Red Pin 39 (GND)
-1. At this point, you can either test your system by hooking up the wires as specified above, or keep going with assembly.
+    
+    **Amplifier:**
+    
+    | Amplifier Pin | Wire Color | Target Pin |
+    | ------------- | ---------- | ---------------- |
+    | GND | Blue | Power Board GND |
+    | Vin | Green | Power Board 5V |
+    | SD | Purple | Pin 37 (GPIO 26) |
+    | A- | Gray | Audio Jack Front Pin |
+    | A+ | White | Audio Jack Back Pin
+
+    **Microphone:**
+
+    | Microphone Pin | Wire Color | Raspberry Pi Pin |
+    | ------------- | ---------- | ---------------- |
+    | 3V | White | Power Board 3V |
+    | GND | Black | Power Board GND |
+    | BCLK | Green | Pin 12 (GPIO 18) |
+    | DOUT | Yellow | Pin 38 (GPIO 20) |
+    | LRCL | Orange | Pin 35 (GPIO 19) |
+    | SEL | Red | Pin 39 (GND) |
+
+1. At this point, you can either test your system by hooking up the wires as specified above, or keep going with the assembly.
 1. Put the extender cable from the charger client through the hole in the cover and attach it to the charge port of the power board.
 1. Attach the 30CM wires from the L298N to 5V / Gnd of the power board.
 1. Slowly lower the bonnet onto the cover, making sure not to pinch any wires. Secure it to the cover with 8mm bolts.
 1. Remove ENA / ENB jumpers from the L298N, attach 20CM dupont wires to the pins and hook them up as follows:
-    * ENA Pin 8 (GPIO 14)
-    * IN1 Pin 10 (GPIO 15)
-    * IN2 Pin 16 (GPIO 23)
-    * IN3 PIN 18 (GPIO 24)
-    * IN4 Pin 22 (GPIO 25)
-    * ENB Pin 24 (GPIO 8)
+
+    | L298N Pin | Wire Color | Target Pin |
+    | ------------- | ---------- | ---------------- |
+    | ENA | Brown | Pin 8 (GPIO 14) |
+    | IN1 | Black | Pin 10 (GPIO 15) |
+    | IN2 | White | Pin 16 (GPIO 23) |
+    | IN3 | Gray | PIN 18 (GPIO 24) |
+    | IN4 | Purple | Pin 22 (GPIO 25) |
+    | ENB | Blue | Pin 24 (GPIO 8) |
+
 1. Place the cover onto the bottom, align the tabs and snap it closed. You can use a 16mm bolt in the back and a 6mm bolt on the bottom of the basked to secure the pieces further.
 ## Wireless charger
 Print out dock.stl. I recommend using sticky tape or hot glue to attach the charger to the dock, so it doesn't move. Power it with a USB 2A power adapter (1A won't work).
