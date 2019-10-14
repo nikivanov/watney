@@ -23,7 +23,7 @@ Detailed [assembly instructions](ASSEMBLY.md) can be found here. One of the goal
 # Configuration
 Upon startup, Watney will detect if it's connected to a Wi-Fi hotspot. If not, it will host its own hotspot "Watney4".
 Once you connect to the hotspot, you can control it directly by going to https://192.168.4.1:5000, or connect it to a Wi-Fi
-hotspot by going to http://192.168.4.1
+hotspot by going to http://192.168.4.1 Once you specify your WiFi credentials, Watney will take some time to reboot. Once you hear the startup sound, you're good to go!
 
 Default SSH credentials for Watney are pi / watney4. Watney's mDNS name is watney4.local.
 
@@ -45,5 +45,5 @@ Watney has no authentication / security. If you'd like to set it up for remote a
 * **Better browser compatibility.** There's no reason it can't work in all major browsers.
 * **Mobile-optimized control.** You'll be able to control your watney from your phone / tablet, especially in tandem with Remote Access.
 * **Better volume scaling.** The volume slider is only usable at the top range - anything below 70% is barely audible. The slider should be scaled to control only the usable range instead.
-* **Timing Belts.** Coupling each pair of motors via a timing belt should greatly improve driving over very rough terrain.
+* **Timing Belts.** Coupling each pair of motors with a timing belt should greatly improve driving over very rough terrain.
 
