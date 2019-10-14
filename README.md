@@ -37,6 +37,7 @@ and ReversePin
 Watney has no authentication / security. If you'd like to set it up for remote access, I recommend using [Zerotier](https://www.zerotier.com/). Adding Watney and your client computer to the same Zerotier network will make it appear as if they are on the same local network.
 
 # Troubleshooting
+* Raspberry Pi has no ADC which means there's no way to read battery voltage without additional circuitry. However, an easy way to verify that your Watney is charging is to place the dock near a wall - you should be able to see the reflection of the glow from the charger via Watney's video feed.
 * When camera moves up and down, you may notice stuttering / jitter. This happens because servo's PWM signal is generated in software. Since PWM is used for audio and PCM is used for I2S microphone, there are no more hardware interrupts for hardware-timed PWM signal generation. See Future Improvements for additional info.
 * If you find your Watney randomly restarting when you move the camera, that means that the servo is drawing too much power from the Raspberry Pi. You can hook up the amplifier to one of the 3V outputs of the power board instead, and power the servo from the 5V output that was previously used by the amplifier.
 * Watney works best with Chrome. Other browsers may not work well, or at all.
