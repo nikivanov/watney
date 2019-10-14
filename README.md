@@ -37,6 +37,7 @@ and ReversePin
 Watney has no authentication / security. If you'd like to set it up for remote access, I recommend using [Zerotier](https://www.zerotier.com/). Adding Watney and your client computer to the same Zerotier network will make it appear as if they are on the same local network.
 
 # Troubleshooting
+* When camera moves up and down, you may notice stuttering / jitter. This happens because servo's PWM signal is generated in software. Since PWM is used for audio and PCM is used for I2S microphone, there are no more hardware interrupts for hardware-timed PWM signal generation. See Future Improvements for additional info.
 * If you find your Watney randomly restarting when you move the camera, that means that the servo is drawing too much power from the Raspberry Pi. You can hook up the amplifier to one of the 3V outputs of the power board instead, and power the servo from the 5V output that was previously used by the amplifier.
 * Watney works best with Chrome. Other browsers may not work well, or at all.
 * Feel free to file an issue on GitHub if you have questions!
@@ -45,5 +46,6 @@ Watney has no authentication / security. If you'd like to set it up for remote a
 * **Better browser compatibility.** There's no reason it can't work in all major browsers.
 * **Mobile-optimized control.** You'll be able to control your watney from your phone / tablet, especially in tandem with Remote Access.
 * **Better volume scaling.** The volume slider is only usable at the top range - anything below 70% is barely audible. The slider should be scaled to control only the usable range instead.
+* **Hardware-timed PWM.** Currently, PWM signal for motors and the camera servo are generated in software, which is the cause for the servo jitter. [pigpio](http://abyz.me.uk/rpi/pigpio/) is capable of generating very accurate hardware-timed PWM signals on any GPIO pin, but it needs either hardware PWM or PCM, both of which are used for audio. However, we only use one PWM channel for audio, so it may be possible to use the second channel for pigpio.
 * **Timing Belts.** Coupling each pair of motors with a timing belt should greatly improve driving over very rough terrain.
 
