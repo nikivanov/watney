@@ -1,3 +1,9 @@
+
+<p align="center">
+<a href="https://www.youtube.com/watch?v=a-NR-ddZKII"><img src="https://img.youtube.com/vi/a-NR-ddZKII/0.jpg" height="300"></img></a>
+<img src="images/cad.png" height="300">
+</p>
+
 # Watney Rover
 Watney is a low-cost, open source, Raspberry Pi-enabled telepresence rover made of readily available parts.
 Non-electronic parts of Watney are 3D printable.
