@@ -1,105 +1,118 @@
-import pigpio
-from threading import Thread, Condition
+import asyncio
 import time
+import RPi.GPIO as GPIO
+from events import Events
 
 
 class ServoController:
 
-    def __init__(self, pi, pwmPin):
-        self.pwmPin = pwmPin
-        self.neutral = 75000
-        self.amplitude = 25000
-        self.frequency = 50
-        self.speed_per_sec = 30000
-        self.resolution = 0.03
-        self.shuttingDown = False
+    def __init__(self, config):
+        Events.getInstance().janusFirstConnect.append(lambda: self.onJanusConnected())
 
+        servoConfig = config["SERVO"]
+        self.pwmPin = int(servoConfig["PWMPin"])
+        self.neutral = float(servoConfig["Neutral"])
+        self.min = float(servoConfig["Min"])
+        self.max = float(servoConfig["Max"])
+
+        self.frequency = 50
+
+        self.changeVelocityPerSec = 2
         # 1 is forward, -1 is backward, 0 is stop
         self.direction = 0
+        self.timingLock = asyncio.Condition()
+        self.task = None
+        self.pwmControl = None
+        self.startServo()
 
-        self.pi = pi
 
-        self.timingLock = Condition()
-        self.timingThread = Thread(daemon=True, target=self.timingLoop)
-        self.timingThread.start()
-
-    def forward(self):
-        with self.timingLock:
+    async def forward(self):
+        async with self.timingLock:
             self.direction = 1
             self.timingLock.notify()
 
-    def backward(self):
-        with self.timingLock:
+    async def backward(self):
+        async with self.timingLock:
             self.direction = -1
             self.timingLock.notify()
 
-    def lookStop(self):
-        with self.timingLock:
-            self.direction = 0
-            self.timingLock.notify()
+    async def lookStop(self):
+        async with self.timingLock:
+            if self.direction != 0:
+                self.direction = 0
+                self.timingLock.notify()
 
-    def stop(self):
-        with self.timingLock:
-            print("Waiting for servo to stop...")
-            self.shuttingDown = True
-            self.timingLock.notify()
+    def onJanusConnected(self):
+        loop = asyncio.get_event_loop()
+        self.task = loop.create_task(self.timingLoop())
 
-        print("Joining the timing thread")
-        self.timingThread.join()
-        print("Servo thread stopped")
-
-    def timingLoop(self):
+    async def timingLoop(self):
         print("Servo starting...")
-        initialSleep = 0.25
-        # go neutral first
-        self.pi.hardware_PWM(self.pwmPin, self.frequency, self.neutral)
-        time.sleep(initialSleep)
-        self.pi.hardware_PWM(self.pwmPin, self.frequency, self.neutral + int(self.amplitude / 2))
-        time.sleep(initialSleep)
-        self.pi.hardware_PWM(self.pwmPin, self.frequency, self.neutral - int(self.amplitude / 2))
-        time.sleep(initialSleep)
-        self.pi.hardware_PWM(self.pwmPin, self.frequency, self.neutral)
-        time.sleep(initialSleep)
-        self.pi.hardware_PWM(self.pwmPin, self.frequency, 0)
 
-        currentPosition = self.neutral
-        lastChangeTime = -1
+        try:
+            initialSleep = 0.25
+            # go neutral first
+            self.pwmControl.ChangeDutyCycle(self.neutral)
+            await asyncio.sleep(initialSleep)
+            self.pwmControl.ChangeDutyCycle(self.max)
+            await asyncio.sleep(initialSleep)
+            self.pwmControl.ChangeDutyCycle(self.min)
+            await asyncio.sleep(initialSleep)
+            self.pwmControl.ChangeDutyCycle(self.neutral)
+            await asyncio.sleep(initialSleep)
+            self.pwmControl.ChangeDutyCycle(0)
 
-        while True:
-            with self.timingLock:
-                if not self.__shouldBeMoving(currentPosition):
-                    self.pi.hardware_PWM(self.pwmPin, self.frequency, 0)
-                    print("Servo idling...")
-                    self.timingLock.wait()
-                    print("Servo woke up...")
+            currentPosition = self.neutral
+            lastChangeTime = None
+            while True:
+                async with self.timingLock:
+                    if not self.__shouldBeMoving(currentPosition):
+                        self.stopServo()
+                        lastChangeTime = None
+                        await self.timingLock.wait()
+                        self.startServo()
 
-                if self.shuttingDown:
-                    break
-
-                if lastChangeTime == -1:
-                    changeDelta = self.speed_per_sec * self.resolution
+                if not lastChangeTime:
+                    changeDelta = 0
                 else:
                     timeDelta = time.time() - lastChangeTime
-                    changeDelta = self.speed_per_sec * timeDelta
+                    changeDelta = self.changeVelocityPerSec * timeDelta
+
+                lastChangeTime = time.time()
 
                 if self.direction == 1:
-                    currentPosition = int(min(currentPosition + changeDelta, self.neutral + self.amplitude))
+                    currentPosition = min(currentPosition + changeDelta, self.max)
                 elif self.direction == -1:
-                    currentPosition = int(max(currentPosition - changeDelta, self.neutral - self.amplitude))
+                    currentPosition = max(currentPosition - changeDelta, self.min)
 
-            # print("Pin {} frequency {} position {}".format(self.pwmPin, self.frequency, currentPosition))
-            self.pi.hardware_PWM(self.pwmPin, self.frequency, currentPosition)
-            time.sleep(self.resolution)
-
-        print("Servo stopping...")
-        self.pi.hardware_PWM(self.pwmPin, self.frequency, 0)
+                self.changeServo(currentPosition)
+                await asyncio.sleep(0.05)
+        except asyncio.CancelledError:
+            self.stopServo()
+            print("Servo stopped")
+        except Exception as e:
+            print("Unexpected exception in servo: " + str(e))
 
     def __shouldBeMoving(self, currentPosition):
         if self.direction == 0:
             return False
-        elif self.direction == 1 and currentPosition >= self.neutral + self.amplitude:
+        elif self.direction == 1 and currentPosition >= self.max:
             return False
-        elif self.direction == -1 and currentPosition <= self.neutral - self.amplitude:
+        elif self.direction == -1 and currentPosition <= self.min:
             return False
 
         return True
+
+    def startServo(self):
+        GPIO.setup(self.pwmPin, GPIO.OUT)
+        self.pwmControl = GPIO.PWM(self.pwmPin, self.frequency)
+        self.pwmControl.start(0)
+
+    def stopServo(self):
+        if self.pwmControl is not None:
+            self.pwmControl.stop()
+            self.pwmControl = None
+        GPIO.setup(self.pwmPin, GPIO.IN)
+
+    def changeServo(self, val):
+        self.pwmControl.ChangeDutyCycle(val)

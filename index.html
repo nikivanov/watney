@@ -3,141 +3,73 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
     <title>Watney-4 Rover</title>
     <script type="text/javascript" src="js/jquery.min.js"></script>
     <script type="text/javascript" src="js/ui/jquery-ui.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="js/all.css">
+    <link rel="stylesheet" type="text/css" href="js/material.css">
+    <link rel="stylesheet" type="text/css" href="js/watney.css">
     <link rel="stylesheet" type="text/css" href="js/ui/jquery-ui.min.css">
+    <script type="text/javascript" src="js/cookies.js"></script>
+    <script type="text/javascript" src="js/virtualjoystick.js"></script>
+    <script type="text/javascript" src="js/watney_joystick.js"></script>
+    <script type="text/javascript" src="js/lodash.js"></script>
+    <script type="text/javascript" src="js/adapter-latest.js"></script>
     <script type="text/javascript" src="js/janus.js"></script>
-    <script type="text/javascript" src="js/adapter.min.js"></script>
     <script type="text/javascript" src="js/watney_janus.js"></script>
     <script type="text/javascript" src="js/watney.js"></script>
-
-    <style>
-        #vid {
-            object-fit: contain;
-        }
-
-        div#powerButton {
-            position: relative;
-        }
-
-        div#powerButton::before {
-            content: "";
-            display: block;
-            width: 20px;
-            height: 20px;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-
-            border: 2px solid white;
-            border-radius: 50%;
-        }
-
-        div#powerButton::after {
-            content: "";
-            display: block;
-            width: 3px;
-            height: 10px;
-            position: absolute;
-            background-color: white;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
-
-        div#infoButton {
-            text-align: center;
-            vertical-align: middle;
-            line-height: 36px;
-            color: white;
-        }
-
-        div.wButton {
-            display: table-cell;
-            width: 36px;
-            height: 36px;
-            background-color: rgba(255, 255, 255, 0.2);
-            box-sizing: border-box;
-            border: 1px solid white;
-        }
-
-        div.wButton:hover {
-            background-color: rgba(255, 255, 255, 0.5);
-            cursor: pointer;
-        }
-
-        div#buttonPanel {
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            position: fixed;
-            display: table;
-            border-collapse: separate;
-            border-spacing: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        div#buttonPanel>div {
-            display: table-row;
-        }
-
-        div#info {
-            background-color: rgba(255, 255, 255, 0.7);;
-            z-index: 100;
-            position: fixed;
-            bottom: 120px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 10px;
-        }
-
-        div#wifiInfo {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            background: white;
-            min-width: 200px;
-            
-            padding: 5px;
-            color: white;
-            font-family: "Helvetica Neue", Arial, sans-serif;
-            font-weight: 100;
-            -webkit-font-smoothing: antialiased;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: table;
-            border-collapse: separate;
-            border-spacing: 2px;
-        }
-        div#wifiInfo > div {
-            display: table-row;
-        }
-        div#wifiInfo > div > div {
-            display: table-cell;
-        }
-        
-    </style>
 </head>
 
 <body style="margin: 0; background-color: black">
-    <video style="width: auto; height: 100vh; position: fixed; top: 0; left: 50%; transform: translateX(-50%); background:black; "
-        id="vid" autoplay playsinline="true" webkit-playsinline="true" muted="muted"></video>
+    <div id="joystickContainer"></div>
+    <video id="vid" autoplay></video>
+    <button id="playButton" style="display: none;"><i class="material-icons">play_arrow</i></button>
     <div id="buttonPanel">
         <div>
-            <div id="infoButton" title="Help" class="wButton">i</div>
-            <div id="powerButton" title="Shutdown" class="wButton"></div>
+            <div id="infoButton" title="Help" class="wButton">
+                <i class="material-icons">info</i>
+            </div>
+            <div id="ttsButton" title="Text to Speech (S)" class="wButton">
+                <i class="material-icons">chat_bubble_outline</i>
+            </div>
+            <div id="micButton" title="Local mic on/off. Push-to-talk (V)" class="wButton">
+                <i class="material-icons">mic_none</i>
+            </div>
+            <div id="volumeSlider" class="wButton noHover" title="Remote Volume (-/+)">
+                <i class="material-icons">
+                    volume_down
+                </i>
+                <input type="range" value=0 min=0 max=100 />
+                <i class="material-icons">
+                    volume_up
+                </i>
+            </div>
+            <div id="deviceSelectSection" class="wButton noHover" title="Audio Input Device">
+                <select id="deviceSelector"></select>
+            </div>
+            <div id="resetButton" title="Reset" class="wButton">
+                <i class="material-icons">refresh</i>
+            </div>
+            <div id="powerButton" title="Shutdown" class="wButton">
+                <i class="material-icons">power_settings_new</i>
+            </div>
         </div>
     </div>
     <div id="shutdown-confirm" title="Shut down Watney?" style="display:none">
         <p>Are you sure you want to shut down Watney?</p>
     </div>
+    <div id="restart-confirm" title="Restart Watney?" style="display:none">
+        <p>Are you sure you want to restart Watney?</p>
+    </div>
     <div id="info" tabindex="-1" style="display: none">
         <pre>Controls:
     Arrow keys: move the rover
+    Shift: slow movement
     A: look up
-    Z: look down</pre>
+    Z: look down
+    S: Text to speech
+    V: Push-to-talk</pre>
     </div>
     <div id="wifiInfo" tabindex="-1">
         <div>
@@ -152,7 +84,13 @@
             <div>Signal:</div>
             <div><span id="wifi_signal"></span></div>
         </div>
-        
+        <div>
+            <div>CPU:</div>
+            <div><span id="cpuUsage"></span>%</div>
+        </div>
+    </div>
+    <div id="ttsSection" style="display: none;">
+        <input type="text" id="ttsInput" placeholder="Enter to send, ESC to cancel" />
     </div>
 </body>
 
