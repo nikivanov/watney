@@ -1,6 +1,6 @@
 # Assembly
 ## Notes
-None of the 3D printed parts require supports. I recommend printing in PETG, or at least Tough PLA. Tires need to be printed in TPU. Large parts contain built-in pads to prevent curling - simply remove them after the print is complete. In most cases, you need to drive M3 bolts directly into the holes in plastic. If you're having trouble getting the bolt to go in when securing a part, prime the hole with a bolt for a few millimeters and then try again. Don't overtighten. When connecting wires to the Raspberry Pi, use <a href="https://raw.githubusercontent.com/nikivanov/watney/2wayaudio/images/pi-gpio.png">this image</a> for reference.
+None of the 3D printed parts require supports. I recommend printing in PETG, or at least Tough PLA. Tires need to be printed in TPU. Large parts contain built-in pads to prevent curling - simply remove them after the print is complete. In most cases, you need to drive M3 bolts directly into the holes in plastic. If you're having trouble getting the bolt to go in when securing a part, prime the hole with a bolt for a few millimeters and then try again. Don't overtighten. When connecting wires to the Raspberry Pi, use <a href="https://raw.githubusercontent.com/nikivanov/watney/master/images/pi-gpio.png">this image</a> for reference.
 ## Base
 <a href="images/assembly/charger.jpg"><img src="images/assembly/charger.jpg" height="200"></a>
 <a href="images/assembly/wireless_client.jpg"><img src="images/assembly/wireless_client.jpg" height="200"></a>
