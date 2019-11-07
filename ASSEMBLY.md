@@ -65,7 +65,8 @@ None of the 3D printed parts require supports. I recommend printing in PETG, or 
 1. The amplifier has a built in volume trim potentiometer that needs to be adjusted before it's set in place. Connect the amplifier to the raspberry pi as outlined in a few steps below, power it on, SSH into it and use "speaker-test" command while adjusting the volume trim. I recommend setting it close to max and then using Watney's built in volume control to turn it down.
 1. Attach the amplifier to the bonnet with 6mm bolts. Place the speaker into place, line up the speaker holder behind it and secure it with 6mm bolts. Don't overtighten, but make sure the speaker does not move around.
 1. Make sure the microphone hole is clear. Attach the microphone board to the bonnet using the microphone holder and secure it with 6mm bolts.
-1. Attach 10CM dupont wires to Vin and GND of the amplifier and the microphone. Attach 20CM wires to the rest of the pins. 
+1. Attach 10CM dupont wires to Vin and GND of the amplifier and the microphone. Attach 20CM wires to the rest of the pins, except SEL of the microphone.
+_**NOTE**: The pictures show microphone SEL pin hooked up to GND of Raspberry Pi. SEL pin is used to tell the microphone which channel it should use, GND / 3V SELecting Left or Right. Later, however, I found that leaving the pin unplugged provides better sound quality from the microphone, as the GND is rather floating and may cause noise._
 1. Secure the 20CM microphone wires with the wire holder as shown in the picture. This will prevent them from falling out.
 1. I highly recommend writing down pin name, wire color, target pin, and taking a picture for reference. In the pictures above, the pinout is as follows:
     
@@ -88,7 +89,7 @@ None of the 3D printed parts require supports. I recommend printing in PETG, or 
     | BCLK | Green | Pin 12 (GPIO 18) |
     | DOUT | Yellow | Pin 38 (GPIO 20) |
     | LRCL | Orange | Pin 35 (GPIO 19) |
-    | SEL | Red | Pin 39 (GND) |
+    | SEL | - | Not Connected |
 
 1. At this point, you can either test your system by hooking up the wires as specified above, or keep going with the assembly.
 1. Put the extender cable from the charger client through the hole in the cover and attach it to the charge port of the power board.
