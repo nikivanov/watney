@@ -16,6 +16,7 @@ All parts can be found on Amazon, AliExpress, Ebay etc. Make sure the items you'
 * [[PAM8302] Audio Amplifier](images/bom/amplifier.jpg) ($2)
 * [[SPH0645] I2S MEMS Microphone](images/bom/mic.jpg) ($7)
 * [[Dual 18650 V8] Power Board](images/bom/18650v8.jpg) ($5)
+   * Make sure to double-check the board you are buying! It should have a full sized USB port on one end and a Micro-USB on the other. Other similar boards may not support pass-through charging and will cause Watney to reboot when going on and off the charger. For example, [this board will not work](images/bom/18650v8_bad.jpg)
 * [2.54m pitch [male breakable pin header] connector strip](images/bom/header.jpg) ($2)
     * You'll only need 14 of them
 * [2x 18650 3000mah recharable batteries](images/bom/18650.jpg) ($6)
