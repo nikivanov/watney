@@ -50,3 +50,132 @@ Watney has no authentication / security. If you'd like to set it up for remote a
 * **Hardware-timed PWM.** Currently, PWM signal for motors and the camera servo are generated in software, which is the cause for the servo jitter. [pigpio](http://abyz.me.uk/rpi/pigpio/) is capable of generating very accurate hardware-timed PWM signals on any GPIO pin, but it needs either hardware PWM or PCM, both of which are used for audio. However, we only use one PWM channel for audio, so it may be possible to use the second channel for pigpio.
 * **Timing Belts.** Coupling each pair of motors with a timing belt should greatly improve driving over very rough terrain.
 
+# Setting up Remote Access with a TURN Server
+
+_The following steps detail how to control the rover, runnning on your local network behind a firewal, from an external IP by relaying traffic through a TURN server._
+
+Note: In examples some values will be enclosed with angle brackets (i.e. `<` and `>`). When replacing these values with your own you should replace the brackets as well. So the follwing...
+```shell
+ssh ubuntu@<YOUR IP ADDRESS>
+```
+should be...
+```shell
+ssh ubuntu@192.168.0.1
+```
+
+##  DDNS Configuration
+
+_Will need to work with Drew to fill this in_
+
+##  Setting up the TURN Server
+
+_These instructions were taken directly from [How to Install Coturn - Buddhika Jayawardhana](https://meetrix.io/blog/webrtc/coturn/installation.html). They are reproduced here with slight modifications for fear of links breaking..._
+
+_This guide assumes that you already have an AWS account and know how to deploy EC2 servers._
+
+### Setting up the TURN Server
+
+#### Deploying the EC2 Instance
+
+1. From the EC2 Dashboard, select "Launch an Instance"
+2. For the AMI choose Ubuntu (v20.04 LTS at the time of writing this guide)
+3. For the instance type, a **t2.micro** should be sufficient.
+4. Launch the server with key pairs that you have access to. You will need to use these later to SSH into the instance.
+5. Nagivate back to the main instance dashboard. In the description tab in the bottom pane you should see a link for the instance's security group (e.g. 'launch-wizard-1'). Click this link.
+6. Under "Inbound Rules" click "Edit Inbound Rules". Add the following rules.
+
+| Port Range    | Transport Protocol | Notes                                |
+|---------------|--------------------|--------------------------------------|
+| 80            | TCP                | If you need to setup coturn with SSL |
+| 443           | TCP                | If you need to setup coturn with SSL |
+| 3478          | UDP                |                                      |
+| 10000 - 20000 | UDP                |                                      |
+
+
+#### Attaching an Elastic IP to the EC2 Instance
+
+_If you're planning on communcating with your TURN server for longer than a day or so then you're going to want to configure an Elastic IP. This will allow you to swap the underlying EC2 instance without having to modify the IP address in Janus._
+
+1. From the main EC2 dashboard click on the "Elastic IPs" link on the lefthand side (under Network and Security).
+2. Click "Allocate Elastic IP Address"
+3. Select "Amazon's pool of IPv4 addresses"
+5. Click "Associate Elastic IP Address" and use the following values:
+    - Resource Type: Instance
+    - Instance: The ID of the instance you deployed in the previous step
+    - Private IP Address: The private address of the instance you deployed
+    - Reassociation: True
+
+#### Installing Coturn on the server
+
+1. SSH into the server
+    
+    _Use the elastic IP address that you associated in the previous step to test that it worked._
+
+    ```shell
+    ssh -i <YOUR PRIVATE KEY> ubuntu@<ELASTIC IP ADDRESS>
+    ```
+
+2. Install [Coturn](https://github.com/coturn/coturn) by running the following commands:
+    ```shell
+    sudo apt-get -y update
+    sudo apt-get -y install coturn
+    ```
+3. Uncomment the following line in `/etc/default/coturn` (will need to edit with `sudo`)
+    ```shell
+    TURNSERVER_ENABLED=1
+    ```
+4. Configure the access credentials for your server by editing `/etc/turnserver.conf`. You may have to create this file. Add the following entries or replace existing values if they already exist.
+
+    ```plaintext
+    realm=<CUSTOM REALM NAME>
+    fingerprint
+    listening-ip=0.0.0.0
+    external-ip=<EXTERNAL_IP>/<INTERNAL_IP> #or just the external ip
+    listening-port=3478
+    min-port=10000
+    max-port=20000
+    log-file=/var/log/turnserver.log
+    verbose
+
+    user=<TURN_CUSTOM_USERNAME>:<TURN_CUSTOM_PASSWORD>
+    lt-cred-mech
+    ```
+
+    - The `CUSTOM REALM NAME` can be anything you want. I would stay way from weird characters and just use periods and alphanumeric chars.
+    - `EXTERNAL IP` will be the Elastic IP address of your EC2 server.
+    - `INTERNAL IP` can be found in the "Description" tab for your EC2 instance in the dashboard. It will be listed as `Private IPs` there.
+5. Restart the service for your changes to take effect.
+    ```shell
+    sudo service coturn restart
+    ```
+
+## Configuring Janus on the Watney Server
+
+1. SSH into your Watney rover.
+2. Run the following commands create a symbolic link to the config file in our watney folder.
+
+    ```shell
+    #   Backup the current Janus config in case we mess something up
+    sudo mv /opt/janus/etc/janus/janus.jcfg /opt/janus/etc/janus/janus/janus.jcfg.bak
+
+    #   Create a symbolic link to the janus configuration in the Watney server.
+    #   Any changes made there will now have an effect.
+    sudo ln -s ~/watney/janus/janus.jcfg /opt/janus/etc/janus/janus.jcfg
+    ```
+
+2. Set the following values in `~/watney/janus/janus.jcfg`. These will be the same values you set in the previous section when setting up your EC2 TURN server.
+    ```plaintext
+    turn_server = "<YOUR ELASTIC IP ADDRESS>"
+    turn_port = 3478
+    turn_type = "udp"
+    turn_user = "<TURN_CUSTOM_USERNAME>"
+    turn_pwd = "<TURN_CUSTOM_PASSWORD>"
+    ```
+3. Also set these values in `~/watney/js/watney_janus.js`:
+    ```javascript
+    const iceServers = [{
+        urls: "turn:<YOUR ELASTIC IP ADDRESS>",
+        username: "<TURN_CUSTOM_USERNAME>",
+        credential: "<TURN_CUSTOM_PASSWORD>"
+    }] 
+    ```

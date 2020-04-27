@@ -52,8 +52,15 @@ function connectJanus() {
     else
         server = "https://" + window.location.hostname + ":8089/janus";
 
+    const iceServers = [{
+        urls: "turn:<YOUR ELASTIC IP ADDRESS>",
+        username: "<TURN_CUSTOM_USERNAME>",
+        credential: "<TURN_CUSTOM_PASSWORD>"
+    }] 
+
     janusConnection = new Janus({
         server: server,
+        iceServers: iceServers,
         success: function () {
             onJanusConnect();
         },
