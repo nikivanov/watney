@@ -21,7 +21,7 @@ Head over to [Bill of Materials](BOM.md) for a list of components you need to pu
 Detailed [assembly instructions](ASSEMBLY.md) can be found here. One of the goals of developing Watney is to make it easy to assemble - like IKEA furniture of electronics. Go slow and double-check your work. Take extra caution not to reverse polarity when hooking up components, as most of them will burn out if hooked up in reverse. You'll be working with LiPol batteries - please be careful not to puncture or short them, as they can become a fire hazard if used improperly. **You assume all responsibility for damages that may be caused by your Watney, whether it's assembled correctly or otherwise.**
 
 # Raspberry Pi 3A+ Image
-A pre-compiled SD card image can be found in [Releases](releases). Find the latest release, expand "Assets" and download the large .zip file.
+A pre-compiled SD card image can be found in [Releases](/releases). Find the latest release, expand "Assets" and download the large .zip file.
 
 # Configuration
 Upon startup, Watney will detect if it's connected to a Wi-Fi hotspot. If not, it will host its own hotspot "Watney4".
