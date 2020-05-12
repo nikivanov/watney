@@ -10,7 +10,7 @@ Non-electronic parts of Watney are 3D printable.
 Watney provides a low-latency HD video feed as well as bi-directional audio.
 Watney uses a wireless charging dock with passthrough charging so it can be left on indefinitely.
 
-Watney uses the [Janus WebRTC Server](https://janus.conf.meetecho.com/) and [Raspberry Pi Turnkey](https://github.com/schollz/raspberry-pi-turnkey) 
+Watney uses [Janus WebRTC Server](https://janus.conf.meetecho.com/) and [Raspberry Pi Turnkey](https://github.com/schollz/raspberry-pi-turnkey) 
  
 
 # Components
