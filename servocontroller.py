@@ -1,12 +1,12 @@
 import asyncio
 import time
-import RPi.GPIO as GPIO
+import pigpio
 from events import Events
 
 
 class ServoController:
 
-    def __init__(self, config):
+    def __init__(self, gpio, config):
         Events.getInstance().janusFirstConnect.append(lambda: self.onJanusConnected())
 
         servoConfig = config["SERVO"]
@@ -15,6 +15,8 @@ class ServoController:
         self.min = float(servoConfig["Min"])
         self.max = float(servoConfig["Max"])
 
+        self.gpio = gpio
+
         self.frequency = 50
 
         self.changeVelocityPerSec = 2
@@ -22,7 +24,6 @@ class ServoController:
         self.direction = 0
         self.timingLock = asyncio.Condition()
         self.task = None
-        self.pwmControl = None
         self.startServo()
 
 
@@ -52,15 +53,15 @@ class ServoController:
         try:
             initialSleep = 0.25
             # go neutral first
-            self.pwmControl.ChangeDutyCycle(self.neutral)
+            self.gpio.set_PWM_dutycycle(self.pwmPin, self.neutral)
             await asyncio.sleep(initialSleep)
-            self.pwmControl.ChangeDutyCycle(self.max)
+            self.gpio.set_PWM_dutycycle(self.pwmPin, self.max)
             await asyncio.sleep(initialSleep)
-            self.pwmControl.ChangeDutyCycle(self.min)
+            self.gpio.set_PWM_dutycycle(self.pwmPin, self.min)
             await asyncio.sleep(initialSleep)
-            self.pwmControl.ChangeDutyCycle(self.neutral)
+            self.gpio.set_PWM_dutycycle(self.pwmPin, self.neutral)
             await asyncio.sleep(initialSleep)
-            self.pwmControl.ChangeDutyCycle(0)
+            self.gpio.set_PWM_dutycycle(self.pwmPin, 0)
 
             currentPosition = self.neutral
             lastChangeTime = None
@@ -104,15 +105,13 @@ class ServoController:
         return True
 
     def startServo(self):
-        GPIO.setup(self.pwmPin, GPIO.OUT)
-        self.pwmControl = GPIO.PWM(self.pwmPin, self.frequency)
-        self.pwmControl.start(0)
+        self.gpio.set_PWM_frequency(self.pwmPin, self.frequency)
+        self.gpio.set_PWM_range(self.pwmPin, 100)
+        self.gpio.set_PWM_dutycycle(self.pwmPin, 0)
 
     def stopServo(self):
-        if self.pwmControl is not None:
-            self.pwmControl.stop()
-            self.pwmControl = None
-        GPIO.setup(self.pwmPin, GPIO.IN)
+        self.gpio.set_PWM_dutycycle(self.pwmPin, 0)
+        self.gpio.set_mode(self.pwmPin, pigpio.INPUT)
 
     def changeServo(self, val):
-        self.pwmControl.ChangeDutyCycle(val)
+        self.gpio.set_PWM_dutycycle(self.pwmPin, val)

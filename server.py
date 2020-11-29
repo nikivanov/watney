@@ -4,7 +4,7 @@ from servocontroller import ServoController
 from heartbeat import Heartbeat
 from subprocess import call
 import os
-import RPi.GPIO as GPIO
+import pigpio
 from configparser import ConfigParser
 from alsa import Alsa
 import ssl
@@ -60,7 +60,7 @@ async def shutDown(request):
     call("sudo halt", shell=True)
 
 @routes.post("/restart")
-async def shutDown(request):
+async def restart(request):
     call("sudo reboot", shell=True)
 
 
@@ -117,10 +117,8 @@ if __name__ == "__main__":
     homePath = os.path.dirname(os.path.abspath(__file__))
     sslctx = createSSLContext(os.path.dirname(homePath))
 
-    GPIO.setwarnings(False)
-
-    GPIO.setmode(GPIO.BCM)
-
+    gpio = pigpio.pi()
+    
     config = ConfigParser()
     config.read(os.path.join(homePath, "rover.conf"))
     audioConfig = config["AUDIO"]
@@ -129,11 +127,11 @@ if __name__ == "__main__":
     loop = asyncio.get_event_loop()
     loop.set_exception_handler(loopExceptionHandler)
 
-    motorController = MotorController(config)
+    motorController = MotorController(config, gpio)
 
-    alsa = Alsa(config)
+    alsa = Alsa(gpio, config)
 
-    servoController = ServoController(config)
+    servoController = ServoController(gpio, config)
 
     tts = TTSSpeaker(config, alsa)
 
@@ -155,4 +153,5 @@ if __name__ == "__main__":
     web.run_app(app, host='0.0.0.0', port=5000, ssl_context=sslctx)
 
     alsa.stop()
+    gpio.stop()
 

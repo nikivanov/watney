@@ -1,30 +1,38 @@
 from motor import Motor
-import RPi.GPIO as GPIO
+import pigpio
 
 
 class MotorController:
     validBearings = ["n", "ne", "e", "se", "s", "sw", "w", "nw", "0"]
 
-    def __init__(self, config):
+    def __init__(self, config, gpio):
         driverConfig = config["DRIVER"]
         leftMotorConfig = config["LEFTMOTOR"]
         rightMotorConfig = config["RIGHTMOTOR"]
 
-        leftMotor = Motor(int(leftMotorConfig["ForwardPin"]),
-                          int(leftMotorConfig["ReversePin"]),
-                          float(leftMotorConfig["Trim"]))
+        leftMotor = Motor(
+            gpio,
+            int(leftMotorConfig["ForwardPin"]),
+            int(leftMotorConfig["ReversePin"]),
+            float(leftMotorConfig["Trim"])
+        )
 
-        rightMotor = Motor(int(rightMotorConfig["ForwardPin"]),
-                           int(rightMotorConfig["ReversePin"]),
-                           float(rightMotorConfig["Trim"]))
+        rightMotor = Motor(
+            gpio,
+            int(rightMotorConfig["ForwardPin"]),
+            int(rightMotorConfig["ReversePin"]),
+            float(rightMotorConfig["Trim"])
+        )
 
         self.leftMotor = leftMotor
         self.rightMotor = rightMotor
         self.halfTurnSpeed = float(driverConfig["HalfTurnSpeed"])
         self.slowSpeed = float(driverConfig["SlowSpeed"])
         self.enablePin = int(driverConfig["EnablePin"])
-        GPIO.setup(self.enablePin, GPIO.OUT)
-        GPIO.output(self.enablePin, GPIO.LOW)
+        self.gpio = gpio
+
+        self.gpio.set_mode(self.enablePin, pigpio.OUTPUT)
+        self.gpio.write(self.enablePin, pigpio.LOW)
 
     def getTargetMotorDCs(self, targetBearing, slow):
         if targetBearing == "0":
@@ -71,6 +79,6 @@ class MotorController:
         leftActive = self.leftMotor.setMotion(leftDC)
         rightActive = self.rightMotor.setMotion(rightDC)
         if leftActive or rightActive:
-            GPIO.output(self.enablePin, GPIO.HIGH)
+            self.gpio.write(self.enablePin, pigpio.HIGH)
         else:
-            GPIO.output(self.enablePin, GPIO.LOW)
+            self.gpio.write(self.enablePin, pigpio.LOW)
