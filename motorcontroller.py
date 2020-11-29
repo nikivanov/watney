@@ -1,4 +1,5 @@
 from motor import Motor
+import RPi.GPIO as GPIO
 
 
 class MotorController:
@@ -9,13 +10,11 @@ class MotorController:
         leftMotorConfig = config["LEFTMOTOR"]
         rightMotorConfig = config["RIGHTMOTOR"]
 
-        leftMotor = Motor(int(leftMotorConfig["PWMPin"]),
-                          int(leftMotorConfig["ForwardPin"]),
+        leftMotor = Motor(int(leftMotorConfig["ForwardPin"]),
                           int(leftMotorConfig["ReversePin"]),
                           float(leftMotorConfig["Trim"]))
 
-        rightMotor = Motor(int(rightMotorConfig["PWMPin"]),
-                           int(rightMotorConfig["ForwardPin"]),
+        rightMotor = Motor(int(rightMotorConfig["ForwardPin"]),
                            int(rightMotorConfig["ReversePin"]),
                            float(rightMotorConfig["Trim"]))
 
@@ -23,6 +22,9 @@ class MotorController:
         self.rightMotor = rightMotor
         self.halfTurnSpeed = float(driverConfig["HalfTurnSpeed"])
         self.slowSpeed = float(driverConfig["SlowSpeed"])
+        self.enablePin = int(driverConfig["EnablePin"])
+        GPIO.setup(self.enablePin, GPIO.OUT)
+        GPIO.output(self.enablePin, GPIO.LOW)
 
     def getTargetMotorDCs(self, targetBearing, slow):
         if targetBearing == "0":
@@ -66,5 +68,9 @@ class MotorController:
             raise ValueError("Invalid bearing: {}".format(bearing))
 
         leftDC, rightDC = self.getTargetMotorDCs(bearing, slow)
-        self.leftMotor.setMotion(leftDC)
-        self.rightMotor.setMotion(rightDC)
+        leftActive = self.leftMotor.setMotion(leftDC)
+        rightActive = self.rightMotor.setMotion(rightDC)
+        if leftActive or rightActive:
+            GPIO.output(self.enablePin, GPIO.HIGH)
+        else:
+            GPIO.output(self.enablePin, GPIO.LOW)
