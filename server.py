@@ -118,6 +118,9 @@ if __name__ == "__main__":
     sslctx = createSSLContext(os.path.dirname(homePath))
 
     gpio = pigpio.pi()
+    if not gpio.connected:
+        print('GPIO not connected')
+        exit()
     
     config = ConfigParser()
     config.read(os.path.join(homePath, "rover.conf"))
@@ -138,13 +141,13 @@ if __name__ == "__main__":
     heartbeat = Heartbeat(config, servoController, motorController, alsa)
     heartbeat.start()
 
-    janus = ExternalProcess(videoConfig["JanusStartCommand"], False, False, "janus.log")
-    videoStream = ExternalProcess(videoConfig["GStreamerStartCommand"], True, False, "video.log")
-    audioStream = ExternalProcess(audioConfig["GStreamerStartCommand"], True, False, "audio.log")
-    audioSink = ExternalProcess(audioConfig["AudioSinkCommand"], True, True, "audiosink.log")
+    #janus = ExternalProcess(videoConfig["JanusStartCommand"], False, False, "janus.log")
+    #videoStream = ExternalProcess(videoConfig["GStreamerStartCommand"], True, False, "video.log")
+    #audioStream = ExternalProcess(audioConfig["GStreamerStartCommand"], True, False, "audio.log")
+    #audioSink = ExternalProcess(audioConfig["AudioSinkCommand"], True, True, "audiosink.log")
 
-    janusMonitor = JanusMonitor()
-    janusMonitor.start()
+    #janusMonitor = JanusMonitor()
+    #janusMonitor.start()
 
     app = web.Application()
     app.add_routes(routes)
@@ -153,5 +156,6 @@ if __name__ == "__main__":
     web.run_app(app, host='0.0.0.0', port=5000, ssl_context=sslctx)
 
     alsa.stop()
+    servoController.stop()
     gpio.stop()
 
