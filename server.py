@@ -1,6 +1,7 @@
 from aiohttp import web
 from motorcontroller import MotorController
 from servocontroller import ServoController
+from lightscontroller import LightsController
 from heartbeat import Heartbeat
 from subprocess import call
 import os
@@ -135,6 +136,7 @@ if __name__ == "__main__":
     alsa = Alsa(gpio, config)
 
     servoController = ServoController(gpio, config)
+    lightsController = LightsController(gpio, config)
 
     tts = TTSSpeaker(config, alsa)
 
