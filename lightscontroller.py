@@ -9,6 +9,7 @@ class LightsController:
         self.gpio = gpio
         self.lights = apa102.APA102(num_led=8, order='rgb')
         self.lights.set_global_brightness(31)
+        self.lightsOn()
 
     def onJanusConnected(self):
         pass
