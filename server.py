@@ -159,5 +159,6 @@ if __name__ == "__main__":
 
     alsa.stop()
     servoController.stop()
+    lightsController.stop()
     gpio.stop()
 
