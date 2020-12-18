@@ -2,13 +2,13 @@
   "variables": {},
   "builders": [{
     "type": "arm",
-    "file_urls" : ["https://downloads.raspberrypi.org/raspios_lite_arm64/images/raspios_lite_arm64-2020-08-24/2020-08-20-raspios-buster-arm64-lite.zip"],
-    "file_checksum_url": "https://downloads.raspberrypi.org/raspios_lite_arm64/images/raspios_lite_arm64-2020-08-24/2020-08-20-raspios-buster-arm64-lite.zip.sha256",
+    "file_urls" : ["https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2020-12-04/2020-12-02-raspios-buster-armhf-lite.zip"],
+    "file_checksum_url": "https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2020-12-04/2020-12-02-raspios-buster-armhf-lite.zip.sha256",
     "file_checksum_type": "sha256",
     "file_target_extension": "zip",
-    "image_build_method": "reuse",
-    "image_path": "raspios-arm64.img",
-    "image_size": "2G",
+    "image_build_method": "resize",
+    "image_path": "watney.img",
+    "image_size": "4G",
     "image_type": "dos",
     "image_partitions": [
       {
@@ -36,7 +36,64 @@
     {
       "type": "shell",
       "inline": [
-        "touch /tmp/test"
+        "# Initial Raspberry Pi Config",
+        "echo 'LC_CTYPE=\"en_GB.UTF-8\"' >> /etc/default/locale",
+        "echo 'LC_ALL=\"en_GB.UTF-8\"' >> /etc/default/locale",
+        "echo 'LANG=\"en_GB.UTF-8\"' >> /etc/default/locale",
+        "raspi-config nonint do_camera 0",
+        "#raspi-config nonint do_spi 0 FIXME",
+        "touch /boot/ssh",
+        "apt-get -y update",
+        "apt-get -y upgrade"
+      ]
+    },
+    {
+      "type": "file",
+      "source": "/home/nik/test.save",
+      "destination": "/boot/wpa_supplicant.conf"
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "# Watney dependencies",
+        "apt-get -y install git python3-pip pigpio python3-pigpio",
+        "systemctl enable pigpiod",
+        "pip3 install aiohttp apa102-pi psutil pyalsaaudio"
+      ]
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "# Clone and set up Watney FIXME branch",
+        "cd /home/pi",
+        "git clone -b watney5 https://github.com/nikivanov/watney.git",
+        "cp /home/pi/watney/key.pem /home/pi",
+        "cp /home/pi/watney/cert.pem /home/pi"
+      ]
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "apt-get -y install libmicrohttpd-dev libjansson-dev libssl-dev libsrtp-dev libsofia-sip-ua-dev libglib2.0-dev libopus-dev libogg-dev libcurl4-openssl-dev liblua5.3-dev libconfig-dev pkg-config gengetopt libtool automake libnice-dev",
+        "cd /home/pi",
+        "wget https://github.com/cisco/libsrtp/archive/v2.3.0.tar.gz",
+        "tar xfv v2.3.0.tar.gz",
+        "cd libsrtp-2.3.0",
+        "./configure --prefix=/usr --enable-openssl",
+        "make shared_library && make install",
+        "cd ..",
+        "git clone https://github.com/meetecho/janus-gateway.git",
+        "cd janus-gateway",
+        "sh autogen.sh",
+        "./configure --prefix=/opt/janus",
+        "make",
+        "make install"
+      ]
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "apt-get -y install gstreamer1.0-tools gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-alsa"
       ]
     }
   ]
