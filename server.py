@@ -86,6 +86,16 @@ async def onHeartbeat(request):
     stats = heartbeat.onHeartbeatReceived()
     return web.json_response(stats)
 
+@routes.post("/lights")
+async def onLights(request):
+    lightsObj = await request.json()
+    on = bool(lightsObj['on'])
+    if on:
+        lightsController.lightsOn()
+    else:
+        lightsController.lightsOff()
+    return web.Response(text="OK")
+
 
 # Python 3.7 is overly wordy about self-signed certificates, so we'll suppress the error here
 def loopExceptionHandler(loop, context):

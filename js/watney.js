@@ -5,6 +5,7 @@ var right = false;
 var lookUp = false;
 var lookDown = false;
 var slow = false;
+var lights = false;
 
 var lastBearing = -1;
 var lastLook = 0;
@@ -72,6 +73,19 @@ function sendKeys() {
 
 }
 
+function sendLights() {
+    var lightsObj = {
+        on: lights
+    };
+    $.ajax({
+        url: '/lights',
+        type: "POST",
+        data: JSON.stringify(lightsObj),
+        contentType: "application/json; charset=utf-8",
+        dataType: "json"
+    });
+}
+
 $(document).ready(function () {
     const setVolume_throttled = _.throttle(setVolume, 500, {leading: true});
 
@@ -117,6 +131,11 @@ $(document).ready(function () {
                 $("div#volumeSlider input").val(currentVolume).trigger("input");
                 event.preventDefault();
                 return;
+            }
+
+            if (event.keyCode == 76) {
+                lights = !lights;
+                sendLights();
             }
 
             if (event.keyCode == 38) {
