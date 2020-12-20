@@ -45,6 +45,7 @@
         "raspi-config nonint do_camera 0",
         "raspi-config nonint do_spi 0",
         "sed -i 's/^dtparam=audio=on/#dtparam=audio=on/g' /boot/config.txt",
+        "echo 'disable_camera_led=1' >> /boot/config.txt",
         "touch /boot/ssh"
       ]
     },

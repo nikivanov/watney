@@ -16,7 +16,7 @@ class ServoController:
 
         self.gpio = gpio
 
-        self.changeVelocityPerSec = 2000
+        self.changeVelocityPerSec = 1000
         # 1 is forward, -1 is backward, 0 is stop
         self.direction = 0
         self.timingLock = asyncio.Condition()
@@ -76,9 +76,9 @@ class ServoController:
                 lastChangeTime = time.time()
 
                 if self.direction == 1:
-                    currentPosition = min(currentPosition + changeDelta, self.max)
-                elif self.direction == -1:
                     currentPosition = max(currentPosition - changeDelta, self.min)
+                elif self.direction == -1:
+                    currentPosition = min(currentPosition + changeDelta, self.max)
 
                 self.changeServo(currentPosition)
                 await asyncio.sleep(0.05)
@@ -91,9 +91,9 @@ class ServoController:
     def __shouldBeMoving(self, currentPosition):
         if self.direction == 0:
             return False
-        elif self.direction == 1 and currentPosition >= self.max:
+        elif self.direction == 1 and currentPosition <= self.min:
             return False
-        elif self.direction == -1 and currentPosition <= self.min:
+        elif self.direction == -1 and currentPosition >= self.max:
             return False
 
         return True
@@ -102,7 +102,7 @@ class ServoController:
         self.gpio.set_servo_pulsewidth(self.pwmPin, 0)
 
     def changeServo(self, val):
-        self.gpio.set_servo_pulsewidth(self.pwmPin, 0)
+        self.gpio.set_servo_pulsewidth(self.pwmPin, val)
 
     def stop(self):
         self.stopServo()
