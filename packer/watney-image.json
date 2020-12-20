@@ -108,7 +108,7 @@
       "type": "shell",
       "inline": [
         "# Set Janus folder owner to Pi",
-        "chown -R /opt/janus"
+        "chown -R pi /opt/janus"
       ]
     },
     {
