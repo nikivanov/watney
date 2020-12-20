@@ -102,7 +102,7 @@ class ServoController:
         self.gpio.set_servo_pulsewidth(self.pwmPin, 0)
 
     def changeServo(self, val):
-        self.gpio.set_PWM_dutycycle(self.pwmPin, val)
+        self.gpio.set_servo_pulsewidth(self.pwmPin, 0)
 
     def stop(self):
         self.stopServo()

@@ -156,7 +156,7 @@ if __name__ == "__main__":
     janus = ExternalProcess(videoConfig["JanusStartCommand"], False, False, "janus.log")
     videoStream = ExternalProcess(videoConfig["GStreamerStartCommand"], True, False, "video.log")
     #audioStream = ExternalProcess(audioConfig["GStreamerStartCommand"], True, False, "audio.log")
-    audioSink = ExternalProcess(audioConfig["AudioSinkCommand"], True, True, "audiosink.log")
+    #audioSink = ExternalProcess(audioConfig["AudioSinkCommand"], True, True, "audiosink.log")
 
     janusMonitor = JanusMonitor()
     janusMonitor.start()
