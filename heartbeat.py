@@ -30,7 +30,9 @@ class Heartbeat:
     lastHeartbeatData = {
         "SSID": "-",
         "Quality": "-",
-        "Signal": "-"
+        "Signal": "-",
+        "Power": 0,
+        "Volume": 0,
     }
 
     def start(self):
@@ -99,14 +101,17 @@ class Heartbeat:
                 "SSID": "-",
                 "Quality": "-",
                 "Signal": "-",
-                "Volume": 0
+                "Volume": 0,
+                "Power": 0
             }
 
     def getPower(self):
         try:
-            return self.ina.power()
+            v = self.ina.voltage()
+            a = self.ina.current()
+            return v * a
         except DeviceRangeError as e:
-            print(e)
+            print("Failed to obtain power reading: " + str(e))
             return 0
 
     def onHeartbeatReceived(self):

@@ -5,9 +5,6 @@ import pigpio
 
 class Alsa:
     def __init__(self, gpio, config):
-        audioConfig = config["AUDIO"]
-        mutePin = int(audioConfig["MutePin"])
-        self.isMuted = False
         self.gpio = gpio
         try:
             if len(alsaaudio.mixers()) > 0:
@@ -16,11 +13,6 @@ class Alsa:
                 self.mixer = None
         except alsaaudio.ALSAAudioError:
             self.mixer = None
-
-        self.mutePin = mutePin
-        self.gpio.set_mode(self.mutePin, pigpio.OUTPUT)
-        
-        self.mute()
 
         Events.getInstance().sessionStarted.append(lambda: self.onSessionStarted())
         Events.getInstance().sessionEnded.append(lambda: self.onSessionEnded())
@@ -43,18 +35,10 @@ class Alsa:
         return 0
 
     def onSessionStarted(self):
-        self.unmute()
+        pass
 
     def onSessionEnded(self):
-        self.mute()
+        pass
 
     def stop(self):
-        self.mute()
-
-    def mute(self):
-        self.gpio.write(self.mutePin, pigpio.LOW)
-        self.isMuted = True
-
-    def unmute(self):
-        self.gpio.write(self.mutePin, pigpio.HIGH)
-        self.isMuted = False
+        pass
