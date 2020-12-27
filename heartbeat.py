@@ -3,12 +3,18 @@ import time
 import asyncio
 import sys
 import psutil
+from ina219 import INA219
+from ina219 import DeviceRangeError
+SHUNT_OHMS = 0.05
 
 
 class Heartbeat:
     def __init__(self, config, servoController, motorController, alsa):
         driverConfig = config["DRIVER"]
         self.heartbeatInterval = float(driverConfig["MaxHeartbeatInvervalS"])
+
+        self.ina = INA219(SHUNT_OHMS)
+        self.ina.configure()
 
         self.servoController = servoController
         self.motorController = motorController
@@ -77,12 +83,15 @@ class Heartbeat:
 
             cpuIdle = psutil.cpu_percent()
 
+            power = self.getPower()
+
             return {
                 "SSID": ssid,
                 "Quality": quality,
                 "Signal": signal,
                 "Volume": volume,
-                "CPU": cpuIdle
+                "CPU": cpuIdle,
+                "Power": power,
             }
         except Exception as ex:
             print(str(ex), file=sys.stderr)
@@ -92,6 +101,13 @@ class Heartbeat:
                 "Signal": "-",
                 "Volume": 0
             }
+
+    def getPower(self):
+        try:
+            return self.ina.power()
+        except DeviceRangeError as e:
+            print(e)
+            return 0
 
     def onHeartbeatReceived(self):
         self.lastHeartbeat = time.time()
