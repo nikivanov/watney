@@ -48,6 +48,7 @@
         "sed -i 's/^dtparam=audio=on/#dtparam=audio=on/g' /boot/config.txt",
         "echo 'disable_camera_led=1' >> /boot/config.txt",
         "echo 'dtoverlay=googlevoicehat-soundcard' >> /boot/config.txt",
+        "hostname watney",
         "touch /boot/ssh"
       ]
     },
