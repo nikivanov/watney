@@ -44,7 +44,6 @@
         "apt-get -y upgrade",
         "raspi-config nonint do_camera 0",
         "raspi-config nonint do_spi 0",
-        "raspi-config nonint do_i2c 0",
         "sed -i 's/^dtparam=audio=on/#dtparam=audio=on/g' /boot/config.txt",
         "echo 'disable_camera_led=1' >> /boot/config.txt",
         "echo 'dtoverlay=googlevoicehat-soundcard' >> /boot/config.txt",
@@ -64,7 +63,7 @@
         "apt-get -y install git python3-pip pigpio python3-pigpio",
         "systemctl enable pigpiod",
         "sed -i 's:^ExecStart=/usr/bin/pigpiod -l:ExecStart=/usr/bin/pigpiod -l -t 0:g' /lib/systemd/system/pigpiod.service",
-        "pip3 install aiohttp apa102-pi psutil pyalsaaudio pi-ina219"
+        "pip3 install aiohttp apa102-pi psutil pyalsaaudio"
       ]
     },
     {
