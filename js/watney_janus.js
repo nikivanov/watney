@@ -168,7 +168,7 @@ function attachVideoroomPlugin() {
             videoroom_onMessage(msg, jsep);
         },
         oncleanup: function() {
-            publishOwnFeed(false);
+            publishOwnFeed();
         }
     });
 }
@@ -189,7 +189,7 @@ function videoroom_onMessage(msg, jsep) {
             publisherId = msg["id"];
             mypvtid = msg["private_id"];
             Janus.log("Successfully joined room " + msg["room"] + " with ID " + publisherId);
-            publishOwnFeed(true);
+            publishOwnFeed();
             
         } else if(event === "destroyed") {
             // The room has been destroyed
@@ -212,7 +212,7 @@ function videoroom_onMessage(msg, jsep) {
     }
 }
 
-function publishOwnFeed(firstTime) {
+function publishOwnFeed() {
     const deviceId = getCookie("defaultDevice");
     navigator.mediaDevices.enumerateDevices().then(devices => {
         const device = devices.find(d => d.deviceId === deviceId);

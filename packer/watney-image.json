@@ -8,7 +8,7 @@
     "file_target_extension": "zip",
     "image_build_method": "resize",
     "image_path": "watney.img",
-    "image_size": "4G",
+    "image_size": "5G",
     "image_type": "dos",
     "image_partitions": [
       {
@@ -75,6 +75,23 @@
         "cp /home/pi/watney/key.pem /home/pi",
         "cp /home/pi/watney/cert.pem /home/pi",
         "chown -R pi /home/pi/watney"
+      ]
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "# Compile Mimic",
+        "apt-get -y install gcc make pkg-config automake libtool libicu-dev libpcre2-dev libasound2-dev",
+        "cd /home/pi",
+        "git clone https://github.com/MycroftAI/mimic.git",
+        "cd mimic",
+        "git checkout 255213684c9cb877c8b7017a8dc0cedcf9cf695b",
+        "./autogen.sh",
+        "./configure --prefix=\"/usr/local\"",
+        "make",
+        "make install",
+        "cd /home/pi",
+        "rm -rf mimic"
       ]
     },
     {
