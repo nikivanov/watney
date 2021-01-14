@@ -1,0 +1,19 @@
+state.sndrpigooglevoi {
+        control.1 {
+                iface MIXER
+                name PCM
+                value.0 180
+                value.1 180
+                comment {
+                        access 'read write user'
+                        type INTEGER
+                        count 2
+                        range '0 - 255'
+                        tlv '0000000100000008ffffec1400000014'
+                        dbmin -5100
+                        dbmax 0
+                        dbvalue.0 -1500
+                        dbvalue.1 -1500
+                }
+        }
+}

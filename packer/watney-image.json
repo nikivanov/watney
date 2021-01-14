@@ -34,6 +34,21 @@
   }],
   "provisioners": [
     {
+      "type": "file",
+      "source": "/home/nik/test.save",
+      "destination": "/boot/wpa_supplicant.conf"
+    },
+    {
+      "type": "file",
+      "source": "asound.conf",
+      "destination": "/etc/asound.conf"
+    },
+    {
+      "type": "file",
+      "source": "asound.state",
+      "destination": "/var/lib/alsa/asound.state"
+    },
+    {
       "type": "shell",
       "inline": [
         "# Initial Raspberry Pi Config",
@@ -50,18 +65,12 @@
         "echo 'dtoverlay=i2s-mmap' >> /boot/config.txt",
         "raspi-config nonint do_hostname watney",
         "echo \"watney5\\nwatney5\" | passwd pi",
-        "touch /boot/ssh"
+        "touch /boot/ssh",
+        "chown root /etc/asound.conf",
+        "chmod u=rw,g=r,o=r /etc/asound.conf",
+        "chown root /var/lib/alsa/asound.state",
+        "chmod u=rw,g=r,o=r /var/lib/alsa/asound.state"
       ]
-    },
-    {
-      "type": "file",
-      "source": "/home/nik/test.save",
-      "destination": "/boot/wpa_supplicant.conf"
-    },
-    {
-      "type": "file",
-      "source": "asound.conf",
-      "destination": "/etc/asound.conf"
     },
     {
       "type": "shell",
