@@ -44,20 +44,7 @@ class ServoController:
 
     async def timingLoop(self):
         print("Servo starting...")
-
         try:
-            initialSleep = 0.25
-            # go neutral first
-            self.changeServo(self.neutral)
-            await asyncio.sleep(initialSleep)
-            self.changeServo(self.max)
-            await asyncio.sleep(initialSleep)
-            self.changeServo(self.min)
-            await asyncio.sleep(initialSleep)
-            self.changeServo(self.neutral)
-            await asyncio.sleep(initialSleep)
-            self.stopServo()
-
             currentPosition = self.neutral
             lastChangeTime = None
             while True:

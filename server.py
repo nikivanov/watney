@@ -14,6 +14,7 @@ from externalrunner import ExternalProcess
 import asyncio
 from janusmonitor import JanusMonitor
 from tts import TTSSpeaker
+from startupSequence import StartupSequenceController
 
 routes = web.RouteTableDef()
 
@@ -23,6 +24,7 @@ heartbeat = None
 signalingServer = None
 alsa = None
 tts = None
+startupController = None
 
 
 @routes.get("/")
@@ -150,13 +152,15 @@ if __name__ == "__main__":
 
     tts = TTSSpeaker(config, alsa)
 
+    startupController = StartupSequenceController(config, servoController, lightsController, tts)
+
     heartbeat = Heartbeat(config, servoController, motorController, alsa)
     heartbeat.start()
 
     janus = ExternalProcess(videoConfig["JanusStartCommand"], False, False, "janus.log")
     videoStream = ExternalProcess(videoConfig["GStreamerStartCommand"], True, False, "video.log")
-    #audioStream = ExternalProcess(audioConfig["GStreamerStartCommand"], True, False, "audio.log")
-    #audioSink = ExternalProcess(audioConfig["AudioSinkCommand"], True, True, "audiosink.log")
+    audioStream = ExternalProcess(audioConfig["GStreamerStartCommand"], True, False, "audio.log")
+    audioSink = ExternalProcess(audioConfig["AudioSinkCommand"], True, True, "audiosink.log")
 
     janusMonitor = JanusMonitor()
     janusMonitor.start()
