@@ -47,8 +47,9 @@
         "sed -i 's/^dtparam=audio=on/#dtparam=audio=on/g' /boot/config.txt",
         "echo 'disable_camera_led=1' >> /boot/config.txt",
         "echo 'dtoverlay=googlevoicehat-soundcard' >> /boot/config.txt",
+        "echo 'dtoverlay=i2s-mmap' >> /boot/config.txt",
         "raspi-config nonint do_hostname watney",
-        "echo \"watney5\" | passwd --stdin pi",
+        "echo \"watney5\\nwatney5\" | passwd pi",
         "touch /boot/ssh"
       ]
     },
@@ -56,6 +57,11 @@
       "type": "file",
       "source": "/home/nik/test.save",
       "destination": "/boot/wpa_supplicant.conf"
+    },
+    {
+      "type": "file",
+      "source": "asound.conf",
+      "destination": "/etc/asound.conf"
     },
     {
       "type": "shell",
