@@ -154,7 +154,7 @@ if __name__ == "__main__":
 
     startupController = StartupSequenceController(config, servoController, lightsController, tts)
 
-    heartbeat = Heartbeat(config, servoController, motorController, alsa)
+    heartbeat = Heartbeat(config, servoController, motorController, alsa, lightsController)
     heartbeat.start()
 
     janus = ExternalProcess(videoConfig["JanusStartCommand"], False, False, "janus.log")

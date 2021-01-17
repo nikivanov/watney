@@ -6,7 +6,7 @@ import psutil
 
 
 class Heartbeat:
-    def __init__(self, config, servoController, motorController, alsa):
+    def __init__(self, config, servoController, motorController, alsa, lightsController):
         driverConfig = config["DRIVER"]
         self.heartbeatInterval = float(driverConfig["MaxHeartbeatInvervalS"])
 
@@ -18,6 +18,7 @@ class Heartbeat:
         self.signalRegex = re.compile(r"Signal level=(.*? dBm)")
         self.lastHeartbeat = time.time()
         self.task = None
+        self.lightsController = lightsController
 
     lastHeartbeat = -1
     heartbeatStop = False
@@ -25,8 +26,9 @@ class Heartbeat:
         "SSID": "-",
         "Quality": "-",
         "Signal": "-",
-        "Power": 0,
         "Volume": 0,
+        "CPU": "-",
+        "Lights": False
     }
 
     def start(self):
@@ -85,6 +87,7 @@ class Heartbeat:
                 "Signal": signal,
                 "Volume": volume,
                 "CPU": cpuIdle,
+                "Lights": self.lightsController.lightsStatus
             }
         except Exception as ex:
             print(str(ex), file=sys.stderr)
@@ -93,6 +96,8 @@ class Heartbeat:
                 "Quality": "-",
                 "Signal": "-",
                 "Volume": 0,
+                "CPU": "-",
+                "Lights": False
             }
 
     def onHeartbeatReceived(self):

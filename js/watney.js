@@ -134,8 +134,7 @@ $(document).ready(function () {
             }
 
             if (event.keyCode == 76) {
-                lights = !lights;
-                sendLights();
+                toggleLights();
             }
 
             if (event.keyCode == 38) {
@@ -312,6 +311,10 @@ $(document).ready(function () {
         }
     });
 
+    $("#lightsButton").click(function (event) {
+        toggleLights();
+    });
+
     $("div#volumeSlider input").on("input", function () {
         setVolume_throttled(this.value);
     });
@@ -333,7 +336,7 @@ $(document).ready(function () {
     doConnect();
 });
 
-var doVolumeSet = true;
+var doInitialSet = true;
 function doHeartbeat() {
     $.ajax({
         url: '/heartbeat',
@@ -344,9 +347,11 @@ function doHeartbeat() {
         $("#wifi_quality").text(data.Quality);
         $("#wifi_signal").text(data.Signal);
         $("#cpuUsage").text(data.CPU);
-        if (doVolumeSet) {
+        if (doInitialSet) {
             $("div#volumeSlider input").val(data.Volume);
-            doVolumeSet = false;
+            lights = data.Lights;
+            syncLights();
+            doInitialSet = false;
         }
     }).always(function () {
         setTimeout(doHeartbeat, 1000);
@@ -371,4 +376,18 @@ function setVolume(volume) {
         contentType: "application/json; charset=utf-8",
         dataType: "json"
     });
+}
+
+function toggleLights() {
+    lights = !lights;
+    sendLights();
+    syncLights();
+}
+
+function syncLights() {
+    if (lights) {
+        $("div#lightsButton > i").text("flash_on");
+    } else {
+        $("div#lightsButton > i").text("flash_off");
+    }
 }
