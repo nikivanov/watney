@@ -2,6 +2,7 @@ from aiohttp import web
 from motorcontroller import MotorController
 from servocontroller import ServoController
 from lightscontroller import LightsController
+from batterymonitor import BatteryMonitor
 from heartbeat import Heartbeat
 from subprocess import call
 import os
@@ -152,9 +153,11 @@ if __name__ == "__main__":
 
     tts = TTSSpeaker(config, alsa)
 
+    batteryMonitor = BatteryMonitor()
+
     startupController = StartupSequenceController(config, servoController, lightsController, tts)
 
-    heartbeat = Heartbeat(config, servoController, motorController, alsa, lightsController)
+    heartbeat = Heartbeat(config, servoController, motorController, alsa, lightsController, batteryMonitor)
     heartbeat.start()
 
     janus = ExternalProcess(videoConfig["JanusStartCommand"], False, False, "janus.log")

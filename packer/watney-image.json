@@ -59,8 +59,10 @@
         "apt-get -y upgrade",
         "raspi-config nonint do_camera 0",
         "raspi-config nonint do_spi 0",
+        "raspi-config nonint do_i2c 0",
         "sed -i 's/^dtparam=audio=on/#dtparam=audio=on/g' /boot/config.txt",
         "echo 'disable_camera_led=1' >> /boot/config.txt",
+        "echo 'dtoverlay=i2c-gpio,bus=3,i2c_gpio_delay_us=1,i2c_gpio_sda=6,i2c_gpio_scl=26' >> /boot/config.txt",
         "echo 'dtoverlay=googlevoicehat-soundcard' >> /boot/config.txt",
         "echo 'dtoverlay=i2s-mmap' >> /boot/config.txt",
         "raspi-config nonint do_hostname watney",
@@ -76,10 +78,10 @@
       "type": "shell",
       "inline": [
         "# Watney dependencies",
-        "apt-get -y install git python3-pip pigpio python3-pigpio",
+        "apt-get -y install git python3-pip pigpio python3-pigpio python-smbus i2c-tools",
         "systemctl enable pigpiod",
         "sed -i 's:^ExecStart=/usr/bin/pigpiod -l:ExecStart=/usr/bin/pigpiod -l -t 0:g' /lib/systemd/system/pigpiod.service",
-        "pip3 install aiohttp apa102-pi psutil pyalsaaudio"
+        "pip3 install aiohttp apa102-pi psutil pyalsaaudio Adafruit_ADS1x15"
       ]
     },
     {
