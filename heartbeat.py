@@ -30,7 +30,8 @@ class Heartbeat:
         "Volume": 0,
         "CPU": "-",
         "Lights": False,
-        "Battery": 0
+        "BattV": 0,
+        "BattPercent": 0
     }
 
     def start(self):
@@ -82,6 +83,9 @@ class Heartbeat:
             volume = int(self.alsa.getVolume())
 
             cpuIdle = psutil.cpu_percent()
+            battery = self.batteryMonitor.getVoltageAndPercentage()
+            voltage = battery[0]
+            percentage = battery[1]
 
             return {
                 "SSID": ssid,
@@ -90,7 +94,8 @@ class Heartbeat:
                 "Volume": volume,
                 "CPU": cpuIdle,
                 "Lights": self.lightsController.lightsStatus,
-                "Battery": round(self.batteryMonitor.getVoltage(), 2)
+                "BattV": "{:0.2f}".format(voltage),
+                "BattPercent": round(percentage)
             }
         except Exception as ex:
             print(str(ex), file=sys.stderr)
@@ -101,7 +106,8 @@ class Heartbeat:
                 "Volume": 0,
                 "CPU": "-",
                 "Lights": False,
-                "Battery": 0
+                "BattV": 0,
+                "BattPercent": 0
             }
 
     def onHeartbeatReceived(self):

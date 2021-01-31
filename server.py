@@ -153,7 +153,7 @@ if __name__ == "__main__":
 
     tts = TTSSpeaker(config, alsa)
 
-    batteryMonitor = BatteryMonitor()
+    batteryMonitor = BatteryMonitor(config)
 
     startupController = StartupSequenceController(config, servoController, lightsController, tts)
 

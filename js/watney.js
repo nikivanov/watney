@@ -347,7 +347,8 @@ function doHeartbeat() {
         $("#wifi_quality").text(data.Quality);
         $("#wifi_signal").text(data.Signal);
         $("#cpuUsage").text(data.CPU);
-        $("#battery").text(data.Battery);
+        $("#battPercent").text(data.BattPercent);
+        $("#battV").text(data.BattV);
         if (doInitialSet) {
             $("div#volumeSlider input").val(data.Volume);
             lights = data.Lights;
