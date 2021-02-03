@@ -2,8 +2,8 @@ state.sndrpigooglevoi {
         control.1 {
                 iface MIXER
                 name PCM
-                value.0 180
-                value.1 180
+                value.0 191
+                value.1 191
                 comment {
                         access 'read write user'
                         type INTEGER
