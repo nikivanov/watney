@@ -46,27 +46,26 @@ function audioDeviceChange() {
 }
 
 function connectJanus() {
-    var server = null;
-    if (window.location.protocol === 'http:')
-        server = "http://" + window.location.hostname + ":8088/janus";
-    else
-        server = "https://" + window.location.hostname + ":8089/janus";
-
+    var server = "https://" + window.location.hostname + ":8089/janus";
+    
     janusConnection = new Janus({
         server: server,
         success: function () {
             onJanusConnect();
         },
         error: function (error) {
-            alert("Janus server error: " + error);
+            $("#reconnecting").show();
+            setTimeout(connectJanus, 5000);
         },
         destroyed: function () {
 
-        }
+        },
+        keepAlivePeriod: 5000
     });
 }
 
 function onJanusConnect() {
+    $("#reconnecting").hide();
     attachStreamingPlugin();
     attachVideoroomPlugin();
 }

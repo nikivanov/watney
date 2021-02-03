@@ -146,3 +146,15 @@ div#buttonPanel > div > div > i {
     margin-left: 5px;
     margin-right: 5px;
 }
+
+div#reconnecting {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.6);
+    vertical-align: middle;
+    text-align: center;
+    font-size: 20pt;
+    color: white;
+    line-height: 100vh;
+}

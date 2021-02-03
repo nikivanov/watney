@@ -4,6 +4,9 @@ After=multi-user.target
 
 [Service]
 Type=idle
+User=pi
+Restart=always
+RestartSec=1
 ExecStart=/usr/bin/python3 -u /home/pi/watney/server.py
 WorkingDirectory=/home/pi/watney
 

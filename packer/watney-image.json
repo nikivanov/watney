@@ -49,6 +49,11 @@
       "destination": "/var/lib/alsa/asound.state"
     },
     {
+      "type": "file",
+      "source": "watney.service",
+      "destination": "/etc/systemd/system/watney.service"
+    },
+    {
       "type": "shell",
       "inline": [
         "# Initial Raspberry Pi Config",
@@ -92,7 +97,8 @@
         "git clone -b watney5 https://github.com/nikivanov/watney.git",
         "cp /home/pi/watney/key.pem /home/pi",
         "cp /home/pi/watney/cert.pem /home/pi",
-        "chown -R pi /home/pi/watney"
+        "chown -R pi /home/pi/watney",
+        "systemctl enable watney"
       ]
     },
     {
