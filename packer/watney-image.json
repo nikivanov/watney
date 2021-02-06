@@ -110,14 +110,14 @@
         "cp config/dnsmasq.conf /etc/dnsmasq.conf",
         "cp config/hostapd.conf /etc/hostapd/hostapd.conf",
         "# Ensure wifi is not soft blocked before starting hostapd",
-        "sed -i '/^ExecStart=.*/a ExecStartPre=/home/pi/unblock_wifi.sh' /usr/lib/systemd/system/hostapd.service",
+        "chmod +x /home/pi/unblock_wifi.sh",
+        "sed -i '/^ExecStart=.*/a ExecStartPre=/bin/bash /home/pi/unblock_wifi.sh' /usr/lib/systemd/system/hostapd.service",
         "systemctl enable hostapd",
         "echo '{\"status\": \"hostapd\"}' > status.json",
         "cp turnkey.service /etc/systemd/system/turnkey.service",
         "systemctl enable turnkey"
       ]
     },
-
     {
       "type": "shell",
       "inline": [
