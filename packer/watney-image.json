@@ -35,8 +35,8 @@
   "provisioners": [
     {
       "type": "file",
-      "source": "/home/nik/test.save",
-      "destination": "/boot/wpa_supplicant.conf"
+      "source": "unblock_wifi.sh",
+      "destination": "/home/pi/unblock_wifi.sh"
     },
     {
       "type": "file",
@@ -57,9 +57,9 @@
       "type": "shell",
       "inline": [
         "# Initial Raspberry Pi Config",
-        "echo 'LC_CTYPE=\"en_GB.UTF-8\"' >> /etc/default/locale",
-        "echo 'LC_ALL=\"en_GB.UTF-8\"' >> /etc/default/locale",
-        "echo 'LANG=\"en_GB.UTF-8\"' >> /etc/default/locale",
+        "echo 'LC_CTYPE=\"en_US.UTF-8\"' >> /etc/default/locale",
+        "echo 'LC_ALL=\"en_US.UTF-8\"' >> /etc/default/locale",
+        "echo 'LANG=\"en_US.UTF-8\"' >> /etc/default/locale",
         "apt-get -y update",
         "apt-get -y upgrade",
         "raspi-config nonint do_camera 0",
@@ -82,16 +82,11 @@
     {
       "type": "shell",
       "inline": [
-        "# Watney dependencies",
-        "apt-get -y install git python3-pip pigpio python3-pigpio python-smbus i2c-tools python3-numpy",
+        "# Watney",
+        "apt-get -y install git python3-pip pigpio python3-pigpio python3-rpi.gpio python-smbus i2c-tools python3-numpy",
         "systemctl enable pigpiod",
         "sed -i 's:^ExecStart=/usr/bin/pigpiod -l:ExecStart=/usr/bin/pigpiod -l -t 0:g' /lib/systemd/system/pigpiod.service",
-        "pip3 install aiohttp apa102-pi psutil pyalsaaudio Adafruit_ADS1x15"
-      ]
-    },
-    {
-      "type": "shell",
-      "inline": [
+        "pip3 install aiohttp apa102-pi psutil pyalsaaudio Adafruit_ADS1x15",
         "# Clone and set up Watney FIXME branch",
         "cd /home/pi",
         "git clone -b watney5 https://github.com/nikivanov/watney.git",
@@ -101,6 +96,28 @@
         "systemctl enable watney"
       ]
     },
+    {
+      "type": "shell",
+      "inline": [
+        "# Turnkey",
+        "cd /home/pi",
+        "git clone https://github.com/nikivanov/raspberry-pi-turnkey.git",
+        "apt-get install -y dnsmasq hostapd python3-flask python3-requests",
+        "pip3 install wpasupplicantconf",
+        "cd /home/pi/raspberry-pi-turnkey",
+        "cp config/hostapd /etc/default/hostapd",
+        "cp config/dhcpcd.conf /etc/dhcpcd.conf",
+        "cp config/dnsmasq.conf /etc/dnsmasq.conf",
+        "cp config/hostapd.conf /etc/hostapd/hostapd.conf",
+        "# Ensure wifi is not soft blocked before starting hostapd",
+        "sed -i '/^ExecStart=.*/a ExecStartPre=/home/pi/unblock_wifi.sh' /usr/lib/systemd/system/hostapd.service",
+        "systemctl enable hostapd",
+        "echo '{\"status\": \"hostapd\"}' > status.json",
+        "cp turnkey.service /etc/systemd/system/turnkey.service",
+        "systemctl enable turnkey"
+      ]
+    },
+
     {
       "type": "shell",
       "inline": [

@@ -9,6 +9,7 @@ Restart=always
 RestartSec=1
 ExecStart=/usr/bin/python3 -u /home/pi/watney/server.py
 WorkingDirectory=/home/pi/watney
+TimeoutStopSec=5s
 
 [Install]
 WantedBy=multi-user.target
