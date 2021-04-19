@@ -347,8 +347,12 @@ function doHeartbeat() {
         $("#wifi_quality").text(data.Quality);
         $("#wifi_signal").text(data.Signal);
         $("#cpuUsage").text(data.CPU);
-        $("#battPercent").text(data.BattPercent);
-        $("#battV").text(data.BattV);
+        $("#batteryPercent").text(data.BatteryPercent);
+        if (data.BatteryCharging) {
+            $("#batteryCharging").show();
+        } else {
+            $("#batteryCharging").hide();
+        }
         if (doInitialSet) {
             $("div#volumeSlider input").val(data.Volume);
             lights = data.Lights;
