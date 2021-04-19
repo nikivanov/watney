@@ -25,8 +25,8 @@ class Motor:
         self.stop()
         if dutyCycle != 0:
             targetDC = int(abs(dutyCycle * self.trim))
-            # below 20 DC, the motor will stall, which isn't good for anybody
-            if targetDC > 20:
+            # below 10 DC, the motor will stall, which isn't good for anybody
+            if targetDC >= 10:
                 if dutyCycle >= 0:
                     self.gpio.set_PWM_dutycycle(self.forwardPin, targetDC)
                 else:

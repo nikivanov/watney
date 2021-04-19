@@ -83,7 +83,7 @@
         "apt-get -y install git python3-pip pigpio python3-pigpio python3-rpi.gpio python-smbus python3-numpy",
         "systemctl enable pigpiod",
         "sed -i 's:^ExecStart=/usr/bin/pigpiod -l:ExecStart=/usr/bin/pigpiod -l -t 0:g' /lib/systemd/system/pigpiod.service",
-        "pip3 install aiohttp apa102-pi psutil pyalsaaudio",
+        "pip3 install aiohttp apa102-pi psutil pyalsaaudio smbus",
         "# Clone and set up Watney FIXME branch",
         "cd /home/pi",
         "git clone -b watney5 https://github.com/nikivanov/watney.git",

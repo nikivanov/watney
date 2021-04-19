@@ -6,7 +6,7 @@ import psutil
 
 
 class Heartbeat:
-    def __init__(self, config, servoController, motorController, alsa, lightsController):
+    def __init__(self, config, servoController, motorController, alsa, lightsController, powerPlant):
         driverConfig = config["DRIVER"]
         self.heartbeatInterval = float(driverConfig["MaxHeartbeatInvervalS"])
 
@@ -19,7 +19,7 @@ class Heartbeat:
         self.lastHeartbeat = time.time()
         self.task = None
         self.lightsController = lightsController
-        self.batteryMonitor = batteryMonitor
+        self.powerPlant = powerPlant
 
     lastHeartbeat = -1
     heartbeatStop = False
@@ -84,6 +84,8 @@ class Heartbeat:
 
             cpuIdle = psutil.cpu_percent()
 
+            batteryInfo = self.powerPlant.getBatteryInfo()
+
             return {
                 "SSID": ssid,
                 "Quality": quality,
@@ -91,8 +93,8 @@ class Heartbeat:
                 "Volume": volume,
                 "CPU": cpuIdle,
                 "Lights": self.lightsController.lightsStatus,
-                "BatteryPercent": 0,
-                "BatteryCharging": False,
+                "BatteryPercent": batteryInfo[0],
+                "BatteryCharging": batteryInfo[1],
             }
         except Exception as ex:
             print(str(ex), file=sys.stderr)

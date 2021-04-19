@@ -1,3 +1,4 @@
+from powerplant import PowerPlant
 from aiohttp import web
 from motorcontroller import MotorController
 from servocontroller import ServoController
@@ -24,8 +25,8 @@ heartbeat = None
 signalingServer = None
 alsa = None
 tts = None
+powerPlant = None
 startupController = None
-
 
 @routes.get("/")
 async def getPageHTML(request):
@@ -152,9 +153,11 @@ if __name__ == "__main__":
 
     tts = TTSSpeaker(config, alsa)
 
+    powerPlant = PowerPlant()
+
     startupController = StartupSequenceController(config, servoController, lightsController, tts)
 
-    heartbeat = Heartbeat(config, servoController, motorController, alsa, lightsController)
+    heartbeat = Heartbeat(config, servoController, motorController, alsa, lightsController, powerPlant)
     heartbeat.start()
 
     janus = ExternalProcess(videoConfig["JanusStartCommand"], False, False, "janus.log")

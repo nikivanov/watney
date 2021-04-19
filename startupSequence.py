@@ -24,7 +24,7 @@ class StartupSequenceController:
 
     async def doSequence(self):
         self.lightsController.lightsOff()
-        await asyncio.sleep(1)
+        await asyncio.sleep(2)
         servoInterval = 0.25
         self.servoController.changeServo(self.neutral)
         await asyncio.sleep(servoInterval)
