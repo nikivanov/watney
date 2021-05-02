@@ -153,7 +153,7 @@ if __name__ == "__main__":
 
     tts = TTSSpeaker(config, alsa)
 
-    powerPlant = PowerPlant()
+    powerPlant = PowerPlant(config)
 
     startupController = StartupSequenceController(config, servoController, lightsController, tts)
 
