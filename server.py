@@ -1,3 +1,4 @@
+from audiomanager import AudioManager
 from powerplant import PowerPlant
 from aiohttp import web
 from motorcontroller import MotorController
@@ -27,6 +28,7 @@ alsa = None
 tts = None
 powerPlant = None
 startupController = None
+audioManager = None
 
 @routes.get("/")
 async def getPageHTML(request):
@@ -144,7 +146,9 @@ if __name__ == "__main__":
     loop = asyncio.get_event_loop()
     loop.set_exception_handler(loopExceptionHandler)
 
-    motorController = MotorController(config, gpio)
+    audioManager = AudioManager()
+
+    motorController = MotorController(config, gpio, audioManager)
 
     alsa = Alsa(gpio, config)
 
@@ -162,7 +166,7 @@ if __name__ == "__main__":
 
     janus = ExternalProcess(videoConfig["JanusStartCommand"], False, False, "janus.log")
     videoStream = ExternalProcess(videoConfig["GStreamerStartCommand"], True, False, "video.log")
-    audioStream = ExternalProcess(audioConfig["GStreamerStartCommand"], True, False, "audio.log")
+    # audioStream = ExternalProcess(audioConfig["GStreamerStartCommand"], True, False, "audio.log")
 
     janusMonitor = JanusMonitor()
     janusMonitor.start()
