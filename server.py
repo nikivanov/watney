@@ -8,6 +8,7 @@ from heartbeat import Heartbeat
 from subprocess import call
 import os
 import pigpio
+import threading
 from configparser import ConfigParser
 from alsa import Alsa
 import ssl
@@ -29,6 +30,7 @@ tts = None
 powerPlant = None
 startupController = None
 audioManager = None
+audioManagerThread = None
 
 @routes.get("/")
 async def getPageHTML(request):
@@ -147,6 +149,9 @@ if __name__ == "__main__":
     loop.set_exception_handler(loopExceptionHandler)
 
     audioManager = AudioManager()
+    audioManagerThread = threading.Thread(name='audioManagerLoop', target=audioManager.runLoop)
+    audioManagerThread.setDaemon(True)
+    audioManagerThread.start()
 
     motorController = MotorController(config, gpio, audioManager)
 

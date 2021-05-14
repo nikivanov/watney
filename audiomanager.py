@@ -1,6 +1,6 @@
 import gi 
 gi.require_version('Gst', '1.0')
-from gi.repository import Gst
+from gi.repository import Gst, GObject
 
 PIPELINE = '''
 rtpbin name=rtpbin latency=100 \
@@ -12,17 +12,33 @@ queue ! opusenc ! rtpopuspay ! udpsink host=127.0.0.1 port=8005
 '''
 
 class AudioManager:
-    def __init__(self):
+    def runLoop(self):
         Gst.init(None)
+        print('Starting audio pipeline')
         self.pipeline = Gst.parse_launch(PIPELINE)
+        bus = self.pipeline.get_bus()
+        bus.add_signal_watch()
+        bus.connect("message", self.on_message)
         self.pipeline.set_state(Gst.State.PLAYING)
-        self.vol1 = self.pipeline.get_by_name('vol1')
-        self.vol2 = self.pipeline.get_by_name('vol2')
+        print('Audio pipeline started')
+        GObject.threads_init()
+        mainloop = GObject.MainLoop().new(None, False) 
+        mainloop.run()
+
+    def on_message(self, bus, message):
+        t = message.type
+        if t == Gst.MessageType.EOS:
+            self.pipeline.set_state(Gst.State.NULL)
+            print('Audio pipeline EOS')
+        elif t == Gst.MessageType.ERROR:
+            self.pipeline.set_state(Gst.State.NULL)
+            err, debug = message.parse_error()
+            print('Audio pipeline error {} {}'.format(err, debug))
 
     def lowerVolume(self):
-        self.vol1.volume = 1
-        self.vol2.volume = 1
+        self.pipeline.get_by_name('vol1').set_property('volume', 1)
+        self.pipeline.get_by_name('vol2').set_property('volume', 1)
 
     def restoreVolume(self):
-        self.vol1.volume = 10
-        self.vol2.volume = 3
+        self.pipeline.get_by_name('vol1').set_property('volume', 10)
+        self.pipeline.get_by_name('vol2').set_property('volume', 3)
