@@ -10,7 +10,7 @@ rtpbin name=rtpbin latency=100 \
 udpsrc port=50000 caps="application/x-rtp, media=audio, encoding-name=OPUS, clock-rate=48000" ! rtpbin.recv_rtp_sink_0 \
 udpsrc port=50001 caps="application/x-rtcp" ! rtpbin.recv_rtcp_sink_0 \
 rtpbin. ! rtpopusdepay ! queue ! opusdec ! audioresample ! audio/x-raw,format=S16LE,layout=interleaved,rate=16000,channels=1 ! webrtcechoprobe name=echoprobe ! alsasink \
-alsasrc device=plughw:0,0 buffer-time=20000 ! audio/x-raw,format=S16LE,layout=interleaved,rate=16000,channels=1 ! webrtcdsp probe=echoprobe noise-suppression-level=high echo-suppression-level=high ! \
+alsasrc device=plughw:0,0 buffer-time=20000 ! audio/x-raw,format=S16LE,layout=interleaved,rate=16000,channels=1 ! webrtcdsp probe=echoprobe echo-suppression-level=high ! \
 volume name=vol1 volume=10 ! volume name=vol2 volume=3 ! queue ! opusenc ! rtpopuspay ! udpsink host=127.0.0.1 port=8005
 '''
 
