@@ -5,7 +5,7 @@ import pigpio
 class MotorController:
     validBearings = ["n", "ne", "e", "se", "s", "sw", "w", "nw", "0"]
 
-    def __init__(self, config, gpio):
+    def __init__(self, config, gpio, audioManager):
         driverConfig = config["DRIVER"]
         leftMotorConfig = config["LEFTMOTOR"]
         rightMotorConfig = config["RIGHTMOTOR"]
@@ -33,6 +33,9 @@ class MotorController:
 
         self.gpio.set_mode(self.enablePin, pigpio.OUTPUT)
         self.gpio.write(self.enablePin, pigpio.LOW)
+
+        self.audioManager = audioManager
+        self.audioToken = 'fe7a1846-a0bb-4a44-aa3e-5b080089d37a'
 
     def getTargetMotorDCs(self, targetBearing, slow):
         if targetBearing == "0":
@@ -80,5 +83,7 @@ class MotorController:
         rightActive = self.rightMotor.setMotion(rightDC)
         if leftActive or rightActive:
             self.gpio.write(self.enablePin, pigpio.HIGH)
+            self.audioManager.lowerVolume(self.audioToken)
         else:
             self.gpio.write(self.enablePin, pigpio.LOW)
+            self.audioManager.restoreVolume(self.audioToken)

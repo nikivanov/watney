@@ -4,8 +4,10 @@ from events import Events
 
 
 class TTSSpeaker:
-    def __init__(self, config, alsa):
+    def __init__(self, config, alsa, audioManager):
         self.alsa = alsa
+        self.audioManager = audioManager
+        self.audioToken = "08843f08-92aa-49b0-840f-74c6b38092ff"
         audioConfig = config["AUDIO"]
         self.ttsCommand = audioConfig["TTSCommand"]
         self.workQueue = asyncio.Queue()
@@ -22,9 +24,11 @@ class TTSSpeaker:
                 ttsText = await self.workQueue.get()
                 if ttsText:
                     print("Saying '{}'".format(ttsText))
+                    self.audioManager.lowerVolume(self.audioToken)
                     fullTTSCommand = self.ttsCommand.format(shlex.quote(ttsText))
                     process = await asyncio.create_subprocess_shell(fullTTSCommand, stdout=asyncio.subprocess.DEVNULL, stderr=asyncio.subprocess.DEVNULL)
                     await process.communicate()
+                    self.audioManager.restoreVolume(self.audioToken)
         except asyncio.CancelledError:
             print("TTS stopped")
 

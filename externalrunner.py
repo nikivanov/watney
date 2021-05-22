@@ -1,5 +1,4 @@
 from events import Events
-import shlex
 import asyncio
 import os
 import signal

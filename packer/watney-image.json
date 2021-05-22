@@ -174,7 +174,7 @@
       "type": "shell",
       "inline": [
         "# Install GStreamer",
-        "apt-get -y install gstreamer1.0-tools gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-alsa"
+        "apt-get -y install gstreamer1.0-tools gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-alsa python3-gst-1.0"
       ]
     }
   ]
