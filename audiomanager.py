@@ -4,6 +4,7 @@ from gi.repository import Gst, GObject
 import threading
 import concurrent
 import time
+from events import Events
 
 PIPELINE = '''
 rtpbin name=rtpbin latency=100 \
@@ -17,19 +18,29 @@ volume name=vol1 volume=10 ! volume name=vol2 volume=3 ! queue ! opusenc ! rtpop
 class AudioManager:
     def __init__(self, config):
         self.pause = float(config["AUDIO"]["VolumeRestoreDelay"])
+        Events.getInstance().sessionStarted.append(lambda: self.onSessionStarted())
+        Events.getInstance().sessionEnded.append(lambda: self.onSessionEnded())
+        self.pipelineReady = False
 
-    def start(self):
+    def onSessionStarted(self):
+        self.shuttingDown = False
         self.tokenSet = set()
         self.mutex = threading.Lock()
         self.delayedExecutor = concurrent.futures.ThreadPoolExecutor()
         
-        audioManagerThread = threading.Thread(name='audioManagerLoop', target=self.__runLoop)
-        audioManagerThread.setDaemon(True)
-        audioManagerThread.start()
+        self.audioManagerThread = threading.Thread(name='audioManagerLoop', target=self.__runLoop)
+        self.audioManagerThread.setDaemon(True)
+        self.audioManagerThread.start()
+
+    def onSessionEnded(self):
+        self.shuttingDown = True
+        self.destroyPipeline()
+        self.audioManagerThread.join()
+        self.audioManagerThread = None
 
     def __runLoop(self):
         Gst.init(None)
-        while True:
+        while not self.shuttingDown:
             print('Starting audio pipeline')
             self.pipeline = Gst.parse_launch(PIPELINE)
             bus = self.pipeline.get_bus()
@@ -38,8 +49,11 @@ class AudioManager:
             self.pipeline.set_state(Gst.State.PLAYING)
             print('Audio pipeline started')
             GObject.threads_init()
+            self.pipelineReady = True
             self.mainloop = GObject.MainLoop().new(None, False) 
             self.mainloop.run()
+        
+        self.pipelineReady = False
 
     def on_message(self, bus, message):
         t = message.type
@@ -52,11 +66,15 @@ class AudioManager:
             self.destroyPipeline()
 
     def destroyPipeline(self):
+        print("Stopping audio pipeline")
         self.pipeline.get_bus().remove_signal_watch()
         self.pipeline.set_state(Gst.State.NULL)
         self.mainloop.quit()
 
     def lowerVolume(self, token):
+        if not self.pipelineReady:
+            return
+        
         with self.mutex:
             if len(self.tokenSet) == 0:
                 self.pipeline.get_by_name('vol1').set_property('volume', 1)
@@ -65,6 +83,9 @@ class AudioManager:
 
 
     def restoreVolume(self, token):
+        if not self.pipelineReady:
+            return
+        
         with self.mutex:
             if token in self.tokenSet:
                 self.tokenSet.remove(token)

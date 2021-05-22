@@ -148,7 +148,6 @@ if __name__ == "__main__":
     loop.set_exception_handler(loopExceptionHandler)
 
     audioManager = AudioManager(config)
-    audioManager.start()
 
     motorController = MotorController(config, gpio, audioManager)
 
