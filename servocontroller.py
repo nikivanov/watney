@@ -5,7 +5,7 @@ from events import Events
 
 class ServoController:
 
-    def __init__(self, gpio, config):
+    def __init__(self, gpio, config, audioManager):
         Events.getInstance().janusFirstConnect.append(lambda: self.onJanusConnected())
 
         servoConfig = config["SERVO"]
@@ -13,6 +13,9 @@ class ServoController:
         self.neutral = int(servoConfig["Neutral"])
         self.min = int(servoConfig["Min"])
         self.max = int(servoConfig["Max"])
+
+        self.audioManager = audioManager
+        self.audioToken = "927dff95-b82b-433c-885c-6ac9ac13d8b0"
 
         self.gpio = gpio
 
@@ -51,9 +54,11 @@ class ServoController:
                 async with self.timingLock:
                     if not self.__shouldBeMoving(currentPosition):
                         self.stopServo()
+                        self.audioManager.restoreVolume(self.audioToken)
                         lastChangeTime = None
                         await self.timingLock.wait()
 
+                self.audioManager.lowerVolume(self.audioToken)
                 if not lastChangeTime:
                     changeDelta = 0
                 else:

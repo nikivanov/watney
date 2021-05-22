@@ -8,7 +8,6 @@ from heartbeat import Heartbeat
 from subprocess import call
 import os
 import pigpio
-import threading
 from configparser import ConfigParser
 from alsa import Alsa
 import ssl
@@ -148,19 +147,17 @@ if __name__ == "__main__":
     loop = asyncio.get_event_loop()
     loop.set_exception_handler(loopExceptionHandler)
 
-    audioManager = AudioManager()
-    audioManagerThread = threading.Thread(name='audioManagerLoop', target=audioManager.runLoop)
-    audioManagerThread.setDaemon(True)
-    audioManagerThread.start()
+    audioManager = AudioManager(config)
+    audioManager.start()
 
     motorController = MotorController(config, gpio, audioManager)
 
     alsa = Alsa(gpio, config)
 
-    servoController = ServoController(gpio, config)
+    servoController = ServoController(gpio, config, audioManager)
     lightsController = LightsController(gpio, config)
 
-    tts = TTSSpeaker(config, alsa)
+    tts = TTSSpeaker(config, alsa, audioManager)
 
     powerPlant = PowerPlant(config)
 
@@ -171,7 +168,6 @@ if __name__ == "__main__":
 
     janus = ExternalProcess(videoConfig["JanusStartCommand"], False, False, "janus.log")
     videoStream = ExternalProcess(videoConfig["GStreamerStartCommand"], True, False, "video.log")
-    # audioStream = ExternalProcess(audioConfig["GStreamerStartCommand"], True, False, "audio.log")
 
     janusMonitor = JanusMonitor()
     janusMonitor.start()
