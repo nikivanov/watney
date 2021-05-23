@@ -3,6 +3,7 @@ import time
 import asyncio
 import sys
 import psutil
+from events import Events
 
 
 class Heartbeat:
@@ -21,26 +22,34 @@ class Heartbeat:
         self.lightsController = lightsController
         self.powerPlant = powerPlant
 
+        self.resetHeartbeatData()
+
+        Events.getInstance().sessionStarted.append(lambda: self.onSessionStarted())
+        Events.getInstance().sessionEnded.append(lambda: self.onSessionEnded())
+
     lastHeartbeat = -1
     heartbeatStop = False
-    lastHeartbeatData = {
-        "SSID": "-",
-        "Quality": "-",
-        "Signal": "-",
-        "Volume": 0,
-        "CPU": "-",
-        "Lights": False,
-        "BatteryPercent": 0,
-        "BatteryCharging": False,
-    }
 
-    def start(self):
+    def resetHeartbeatData(self):
+        self.lastHeartbeatData = {
+            "SSID": "-",
+            "Quality": "-",
+            "Signal": "-",
+            "Volume": 0,
+            "CPU": "-",
+            "Lights": False,
+            "BatteryPercent": 0,
+            "BatteryCharging": False,
+        }
+
+    def onSessionStarted(self):
         loop = asyncio.get_event_loop()
         self.task = loop.create_task(self.heartbeatLoop())
 
-    def stop(self):
+    def onSessionEnded(self):
         if self.task:
             self.task.cancel()
+        self.resetHeartbeatData()
 
     async def heartbeatLoop(self):
         print("Heartbeat starting...")
