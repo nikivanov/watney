@@ -11,9 +11,9 @@ class TTSSpeaker:
         audioConfig = config["AUDIO"]
         self.ttsCommand = audioConfig["TTSCommand"]
         self.workQueue = asyncio.Queue()
-        Events.getInstance().janusFirstConnect.append(lambda: self.onJanusConnected())
+        self.startLoop()
 
-    def onJanusConnected(self):
+    def startLoop(self):
         loop = asyncio.get_event_loop()
         loop.create_task(self.queueLoop())
 

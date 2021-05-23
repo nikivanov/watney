@@ -14,7 +14,7 @@ import ssl
 import sys
 from externalrunner import ExternalProcess
 import asyncio
-from janusmonitor import JanusMonitor
+from januseventhandler import JanusEventHandler
 from tts import TTSSpeaker
 from startupSequence import StartupSequenceController
 
@@ -30,6 +30,7 @@ powerPlant = None
 startupController = None
 audioManager = None
 audioManagerThread = None
+janusEventHandler = None
 
 @routes.get("/")
 async def getPageHTML(request):
@@ -102,6 +103,14 @@ async def onLights(request):
         lightsController.lightsOff()
     return web.Response(text="OK")
 
+async def onJanusEvent(request):
+    try:
+        eventObj = await request.json()
+        janusEventHandler.handleEvent(eventObj)
+    except Exception as e:
+        print('Error handling janus event: {}'.format(e))
+    finally:
+        return web.Response(text="OK")
 
 # Python 3.7 is overly wordy about self-signed certificates, so we'll suppress the error here
 def loopExceptionHandler(loop, context):
@@ -128,6 +137,18 @@ def createSSLContext(homePath):
     sslctx.check_hostname = False
     sslctx.verify_mode = ssl.CERT_NONE
     return sslctx
+
+runners = []
+async def start_site(app, address, port, sslContext=None):
+    runner = web.AppRunner(app)
+    runners.append(runner)
+    await runner.setup()
+
+    if sslContext is not None:
+        site = web.TCPSite(runner, host=address, port=port, ssl_context=sslContext)
+    else:
+        site = web.TCPSite(runner, host=address, port=port)
+    await site.start()
 
 
 if __name__ == "__main__":
@@ -168,16 +189,29 @@ if __name__ == "__main__":
     janus = ExternalProcess(videoConfig["JanusStartCommand"], False, False, "janus.log")
     videoStream = ExternalProcess(videoConfig["GStreamerStartCommand"], True, False, "video.log")
 
-    janusMonitor = JanusMonitor()
-    janusMonitor.start()
+    janusEventHandler = JanusEventHandler()
 
-    app = web.Application()
-    app.add_routes(routes)
-    app.router.add_static('/js/', path=os.path.join(homePath, 'js'))
+    mainApp = web.Application()
+    mainApp.add_routes(routes)
+    mainApp.router.add_static('/js/', path=os.path.join(homePath, 'js'))
+    loop.create_task(start_site(mainApp, '0.0.0.0', 5000, sslctx))
 
-    web.run_app(app, host='0.0.0.0', port=5000, ssl_context=sslctx)
+    eventListenerApp = web.Application()
+    eventListenerApp.add_routes([web.post('/janusEvent', onJanusEvent)])
+    loop.create_task(start_site(eventListenerApp, 'localhost', 5001))
 
-    servoController.stop()
-    lightsController.stop()
-    gpio.stop()
+    try:
+        loop.run_forever()
+    except:
+        pass
+    finally:
+        servoController.stop()
+        lightsController.stop()
+        gpio.stop()
+        janus.endProcess()
+        videoStream.endProcess()
+        for runner in runners:
+            loop.run_until_complete(runner.cleanup())
+
+    
 

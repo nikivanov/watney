@@ -1,13 +1,9 @@
 import asyncio
 import time
-import pigpio
-from events import Events
 
 class ServoController:
 
     def __init__(self, gpio, config, audioManager):
-        Events.getInstance().janusFirstConnect.append(lambda: self.onJanusConnected())
-
         servoConfig = config["SERVO"]
         self.pwmPin = int(servoConfig["PWMPin"])
         self.neutral = int(servoConfig["Neutral"])
@@ -24,6 +20,7 @@ class ServoController:
         self.direction = 0
         self.timingLock = asyncio.Condition()
         self.task = None
+        self.startLoop()
 
     async def forward(self):
         async with self.timingLock:
@@ -41,7 +38,7 @@ class ServoController:
                 self.direction = 0
                 self.timingLock.notify()
 
-    def onJanusConnected(self):
+    def startLoop(self):
         loop = asyncio.get_event_loop()
         self.task = loop.create_task(self.timingLoop())
 

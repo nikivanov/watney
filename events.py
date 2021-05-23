@@ -4,7 +4,6 @@ instance = None
 class Events:
     sessionStarted = list()
     sessionEnded = list()
-    janusFirstConnect = list()
 
     @staticmethod
     def getInstance():
@@ -27,11 +26,4 @@ class Events:
                 eventFn()
             except Exception as e:
                 print("Exception on sessionEnded: {}".format(e))
-
-    def fireJanusFirstConnect(self):
-        for eventFn in self.janusFirstConnect:
-            try:
-                eventFn()
-            except Exception as e:
-                print("Exception on janusFirstConnect: {}".format(e))
 

@@ -1,12 +1,9 @@
 import asyncio
 import time
-import math
-from events import Events
 from lightscontroller import LED_COUNT
 
 class StartupSequenceController:
     def __init__(self, config, servoController, lightsController, tts):
-        Events.getInstance().janusFirstConnect.append(lambda: self.onJanusConnected())
         audioConfig = config["AUDIO"]
         servoConfig = config["SERVO"]
         self.greeting = audioConfig["Greeting"]
@@ -16,9 +13,10 @@ class StartupSequenceController:
         self.servoController = servoController
         self.lightsController = lightsController
         self.tts = tts
+        self.startLoop()
 
 
-    def onJanusConnected(self):
+    def startLoop(self):
         loop = asyncio.get_event_loop()
         self.task = loop.create_task(self.doSequence())
 
