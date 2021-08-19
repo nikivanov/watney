@@ -1,7 +1,7 @@
 import pigpio
 
 class Motor:
-    PWM_FREQUENCY = 200
+    PWM_FREQUENCY = 10000
 
     def __init__(self, gpio, forwardPin, reversePin, trim):
         self.gpio = gpio
@@ -24,15 +24,14 @@ class Motor:
     def setMotion(self, dutyCycle):
         self.stop()
         if dutyCycle != 0:
-            targetDC = int(abs(dutyCycle * self.trim))
             # below 10 DC, the motor will stall, which isn't good for anybody
-            if targetDC >= 10:
-                if dutyCycle >= 0:
-                    self.gpio.set_PWM_dutycycle(self.forwardPin, targetDC)
-                else:
-                    self.gpio.set_PWM_dutycycle(self.reversePin, targetDC)
-                return True
+            targetDC = max(int(abs(dutyCycle * self.trim)), 20)
+            if dutyCycle >= 0:
+                self.gpio.set_PWM_dutycycle(self.forwardPin, targetDC)
             else:
-                return False
+                self.gpio.set_PWM_dutycycle(self.reversePin, targetDC)
+            return True
+        else:
+            return False
             
             
