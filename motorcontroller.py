@@ -9,27 +9,41 @@ class MotorController:
         driverConfig = config["DRIVER"]
         leftMotorConfig = config["LEFTMOTOR"]
         rightMotorConfig = config["RIGHTMOTOR"]
+        
+        self.trim = float(driverConfig["Trim"])
+        self.pwmFrequency = int(driverConfig["PWMFrequency"])
 
         leftMotor = Motor(
             gpio,
+            self.pwmFrequency,
             int(leftMotorConfig["ForwardPin"]),
             int(leftMotorConfig["ReversePin"]),
-            float(leftMotorConfig["Trim"])
+            1 if self.trim >= 0 else 1 + self.trim,
+            'Left Motor'
         )
 
         rightMotor = Motor(
             gpio,
+            self.pwmFrequency,
             int(rightMotorConfig["ForwardPin"]),
             int(rightMotorConfig["ReversePin"]),
-            float(rightMotorConfig["Trim"])
+            1 if self.trim <= 0 else 1 - self.trim,
+            'Right Motor'
         )
 
         self.leftMotor = leftMotor
         self.rightMotor = rightMotor
-        self.halfTurnSpeed = float(driverConfig["HalfTurnSpeed"])
-        self.slowSpeed = float(driverConfig["SlowSpeed"])
-        self.enablePin = int(driverConfig["EnablePin"])
+
         self.gpio = gpio
+
+        self.straightaway = float(driverConfig["Straightaway"])
+        self.straightawaySlow = float(driverConfig["StraightawaySlow"])
+        self.halfTurnUndersteer = float(driverConfig["HalfTurnUndersteer"])
+        self.halfTurnSlowFactor = float(driverConfig["HalfTurnSlowFactor"])
+        self.tankTurnSpeed = float(driverConfig["TankTurnSpeed"])
+        self.tankTurnSpeedSlow = float(driverConfig["TankTurnSpeedSlow"])
+        
+        self.enablePin = int(driverConfig["EnablePin"])
 
         self.gpio.set_mode(self.enablePin, pigpio.OUTPUT)
         self.gpio.write(self.enablePin, pigpio.LOW)
@@ -42,35 +56,63 @@ class MotorController:
             leftDC = 0
             rightDC = 0
         elif targetBearing == "n":
-            leftDC = 100
-            rightDC = 100
+            if not slow:
+                leftDC = 100 * self.straightaway
+                rightDC = 100 * self.straightaway
+            else:
+                leftDC = 100 * self.straightawaySlow
+                rightDC = 100 * self.straightawaySlow
         elif targetBearing == "ne":
-            leftDC = 100
-            rightDC = 100 * self.halfTurnSpeed
+            if not slow:
+                leftDC = 100
+                rightDC = 100 * self.halfTurnUndersteer
+            else:
+                leftDC = 100 * self.halfTurnSlowFactor
+                rightDC = 100 * self.halfTurnUndersteer * self.halfTurnSlowFactor
         elif targetBearing == "e":
-            leftDC = 100
-            rightDC = -100
+            if not slow:
+                leftDC = 100 * self.tankTurnSpeed
+                rightDC = -100 * self.tankTurnSpeed
+            else:
+                leftDC = 100 * self.tankTurnSpeedSlow
+                rightDC = -100 * self.tankTurnSpeedSlow
         elif targetBearing == "se":
-            leftDC = -100
-            rightDC = -100 * self.halfTurnSpeed
+            if not slow:
+                leftDC = -100
+                rightDC = -100 * self.halfTurnUndersteer
+            else:
+                leftDC = -100 * self.halfTurnSlowFactor
+                rightDC = -100 * self.halfTurnUndersteer * self.halfTurnSlowFactor
         elif targetBearing == "s":
-            leftDC = -100
-            rightDC = -100
+            if not slow:
+                leftDC = -100 * self.straightaway
+                rightDC = -100 * self.straightaway
+            else:
+                leftDC = -100 * self.straightawaySlow
+                rightDC = -100 * self.straightawaySlow
         elif targetBearing == "sw":
-            leftDC = -100 * self.halfTurnSpeed
-            rightDC = -100
+            if not slow:
+                leftDC = -100 * self.halfTurnUndersteer
+                rightDC = -100  
+            else:
+                leftDC = -100 * self.halfTurnUndersteer * self.halfTurnSlowFactor
+                rightDC = -100 * self.halfTurnSlowFactor
         elif targetBearing == "w":
-            leftDC = -100
-            rightDC = 100
+            if not slow:
+                leftDC = -100 * self.tankTurnSpeed
+                rightDC = 100 * self.tankTurnSpeed
+            else:
+                leftDC = -100 * self.tankTurnSpeedSlow
+                rightDC = 100 * self.tankTurnSpeedSlow
         elif targetBearing == "nw":
-            leftDC = 100 * self.halfTurnSpeed
-            rightDC = 100
+            if not slow:
+                leftDC = 100 * self.halfTurnUndersteer
+                rightDC = 100
+            else:
+                leftDC = 100 * self.halfTurnUndersteer * self.halfTurnSlowFactor
+                rightDC = 100 * self.halfTurnSlowFactor
         else:
             raise Exception("Bad bearing: " + targetBearing)
-
-        if slow:
-            leftDC = leftDC * self.slowSpeed
-            rightDC = rightDC * self.slowSpeed
 
         return int(leftDC), int(rightDC)
 
