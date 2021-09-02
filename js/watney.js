@@ -353,11 +353,16 @@ function doHeartbeat() {
         } else {
             $("#batteryCharging").hide();
         }
+
         if (doInitialSet) {
             $("div#volumeSlider input").val(data.Volume);
             lights = data.Lights;
             syncLights();
             doInitialSet = false;
+        }
+
+        if (data.InvalidState) {
+            doInitialSet = true;
         }
     }).always(function () {
         setTimeout(doHeartbeat, 1000);

@@ -40,6 +40,7 @@ class Heartbeat:
             "Lights": False,
             "BatteryPercent": 0,
             "BatteryCharging": False,
+            "InvalidState": True,
         }
 
     def onSessionStarted(self):
@@ -107,16 +108,8 @@ class Heartbeat:
             }
         except Exception as ex:
             print(str(ex), file=sys.stderr)
-            return {
-                "SSID": "-",
-                "Quality": "-",
-                "Signal": "-",
-                "Volume": 0,
-                "CPU": "-",
-                "Lights": False,
-                "BatteryPercent": 0,
-                "BatteryCharging": False,
-            }
+            self.resetHeartbeatData()
+            return self.lastHeartbeatData
 
     def onHeartbeatReceived(self):
         self.lastHeartbeat = time.time()
