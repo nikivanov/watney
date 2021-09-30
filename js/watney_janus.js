@@ -58,7 +58,7 @@ function connectJanus() {
             setTimeout(connectJanus, 5000);
         },
         destroyed: function () {
-
+            console.log('Janus connection destroyed');
         },
         keepAlivePeriod: 5000
     });

@@ -5,6 +5,7 @@ import threading
 import concurrent
 import time
 from events import Events
+import uuid
 
 PIPELINE = '''
 rtpbin name=rtpbin latency=100 \
@@ -21,22 +22,33 @@ class AudioManager:
         Events.getInstance().sessionStarted.append(lambda: self.onSessionStarted())
         Events.getInstance().sessionEnded.append(lambda: self.onSessionEnded())
         self.pipelineReady = False
+        self.volumeLock = threading.Lock()
+
+        self.sessionLock = threading.Lock()
+        self.sessionCounter = 0
+
+        self.delayedExecutor = concurrent.futures.ThreadPoolExecutor()
+        self.tokenSet = set()
+        self.unmuteId = None
 
     def onSessionStarted(self):
-        self.shuttingDown = False
-        self.tokenSet = set()
-        self.mutex = threading.Lock()
-        self.delayedExecutor = concurrent.futures.ThreadPoolExecutor()
-        
-        self.audioManagerThread = threading.Thread(name='audioManagerLoop', target=self.__runLoop)
-        self.audioManagerThread.setDaemon(True)
-        self.audioManagerThread.start()
+        with self.sessionLock:
+            if self.sessionCounter == 0:
+                self.shuttingDown = False
+                self.tokenSet.clear()        
+                self.audioManagerThread = threading.Thread(name='audioManagerLoop', target=self.__runLoop)
+                self.audioManagerThread.setDaemon(True)
+                self.audioManagerThread.start()
+            self.sessionCounter = self.sessionCounter + 1
 
     def onSessionEnded(self):
-        self.shuttingDown = True
-        self.destroyPipeline()
-        self.audioManagerThread.join()
-        self.audioManagerThread = None
+        with self.sessionLock:
+            self.sessionCounter = self.sessionCounter - 1
+            if self.sessionCounter == 0:
+                self.shuttingDown = True
+                self.destroyPipeline()
+                self.audioManagerThread.join()
+                self.audioManagerThread = None
 
     def __runLoop(self):
         Gst.init(None)
@@ -75,7 +87,7 @@ class AudioManager:
         if not self.pipelineReady:
             return
         
-        with self.mutex:
+        with self.volumeLock:
             if len(self.tokenSet) == 0:
                 self.pipeline.get_by_name('vol1').set_property('volume', 1)
                 self.pipeline.get_by_name('vol2').set_property('volume', 1)
@@ -86,15 +98,18 @@ class AudioManager:
         if not self.pipelineReady:
             return
         
-        with self.mutex:
+        with self.volumeLock:
             if token in self.tokenSet:
                 self.tokenSet.remove(token)
                 if len(self.tokenSet) == 0:
-                    self.delayedExecutor.submit(self.__restoreVolume)
+                    unmuteId = uuid.uuid4()
+                    self.unmuteId = unmuteId
+                    self.delayedExecutor.submit(self.__restoreVolume, unmuteId)
 
-    def __restoreVolume(self):
+
+    def __restoreVolume(self, unmuteId):
         time.sleep(self.pause)
-        with self.mutex:
-            if len(self.tokenSet) == 0:
+        with self.volumeLock:
+            if len(self.tokenSet) == 0 and self.unmuteId == unmuteId:
                 self.pipeline.get_by_name('vol1').set_property('volume', 10)
                 self.pipeline.get_by_name('vol2').set_property('volume', 3) 
