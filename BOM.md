@@ -24,6 +24,7 @@ All parts can be found on Amazon, AliExpress, Ebay etc. Make sure the items you'
 | Micro USB male breakout plug |![microusbmale](/images/bom/microusbmale.jpg) | $2 | 
 | 10cm and 20cm Female-to-Female Dupont jumper wire |![dupont.jpg](/images/bom/dupont.jpg)  | $3
 | M3 Bolt Hex Socket Round Cap 6mm 8mm 12mm 16mm 20mm |![m3](/images/bom/m3.jpg) | $6 
+| 2.54m pitch male breakable pin header |![header](/images/bom/header.jpg) | $2 | You only need a few of these
 | | | **Total**: ~$170 |
 
 You'll also need general purpose hookup wire (in a pinch you can use jumper wire) and basic soldering equipment.
