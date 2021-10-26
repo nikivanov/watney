@@ -45,16 +45,24 @@ function audioDeviceChange() {
     }
 }
 
+let reconnecting = false;
 function connectJanus() {
     var server = "https://" + window.location.hostname + ":8089/janus";
     
     janusConnection = new Janus({
         server: server,
         success: function () {
-            onJanusConnect();
+            if (reconnecting) {
+                // Can't get the sound feed to re-establish on onJanusConnected so just refresh
+                location.reload();
+            } else {
+                onJanusConnect();
+            }
+            
         },
         error: function (error) {
             $("#reconnecting").show();
+            reconnecting = true;
             setTimeout(connectJanus, 5000);
         },
         destroyed: function () {

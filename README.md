@@ -16,6 +16,11 @@ Head over to [Bill of Materials](BOM.md) for a list of components you need to pu
 # UPS Firmware Update
 Before you start assembling your Watney, be sure to update the firmware of the UPS power supply. At the time of writing, the latest firmware is *v10* - all previous firmware versions suffered from occasional lockups. You can find [firmware update instructions here.](https://wiki.52pi.com/index.php/EP-0136#Method_2)
 
+# Printing the Parts
+You can find all 3D printable parts in the [STLs folder](https://github.com/nikivanov/watney/tree/master/STLs). I recommend printing everything but the tires in PETG (I used eSun PETG) or at least Tough PLA. I find regular PLA to be too brittle but YMMV. Print the tires in TPU - Hatchbox TPU worked great for me, but others will almost certainly work just as well.
+
+Print every part with 0.2mm layer height. No supports are needed. The base part includes tearaway lilypads to help with adhesion. Generally, the prints can take a long time but none of them are particularly challenging to print.
+
 
 # Assembly
 You'll be working with Lithium Ion batteries - please be careful not to puncture or short them, as they can become a fire hazard if used improperly. **You assume all responsibility for damages that may be caused by your Watney, whether it's assembled correctly or otherwise.**
