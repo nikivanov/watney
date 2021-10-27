@@ -16,7 +16,7 @@ Head over to [Bill of Materials](BOM.md) for a list of components you need to pu
 # UPS Firmware Update
 Before you start assembling your Watney, be sure to update the firmware of the UPS power supply. At the time of writing, the latest firmware is *v10* - all previous firmware versions suffered from occasional lockups. You can find [firmware update instructions here.](https://wiki.52pi.com/index.php/EP-0136#Method_2)
 
-# Printing the Parts
+# Printing the parts
 You can find all 3D printable parts in the [STLs folder](https://github.com/nikivanov/watney/tree/master/STLs). I recommend printing everything but the tires in PETG (I used eSun PETG) or at least Tough PLA. I find regular PLA to be too brittle but YMMV. Print the tires in TPU - Hatchbox TPU worked great for me, but others will almost certainly work just as well.
 
 Print every part with 0.2mm layer height. No supports are needed. The base part includes tearaway lilypads to help with adhesion. Generally, the prints can take a long time but none of them are particularly challenging to print.
@@ -46,6 +46,9 @@ and ReversePin
 
 # Remote Access
 Watney has no authentication / security. If you'd like to set it up for remote access, I recommend using [Zerotier](https://www.zerotier.com/). Adding Watney and your client computer to the same Zerotier network will make it appear as if they are on the same local network.
+
+# Building your own Watney image
+`packer-builder-arm` is used to build the Watney image. You can find the image build definition in [watney-image.json](packer/watney-image.json). [This article](https://linuxhit.com/build-a-raspberry-pi-image-packer-packer-builder-arm/#:~:text=Packer%2Dbuilder%2Darm%20is%20a,server%20or%20other%20x86%20hardware.) may help setting up `packer` and `packer-builder-arm` on your linux system.
 
 # Troubleshooting
 * Watney works best with Chrome. Other browsers may not work well, or at all.

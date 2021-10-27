@@ -2,8 +2,8 @@
   "variables": {},
   "builders": [{
     "type": "arm",
-    "file_urls" : ["https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2021-01-12/2021-01-11-raspios-buster-armhf-lite.zip"],
-    "file_checksum_url": "https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2021-01-12/2021-01-11-raspios-buster-armhf-lite.zip.sha256",
+    "file_urls" : ["https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2021-05-28/2021-05-07-raspios-buster-armhf-lite.zip"],
+    "file_checksum_url": "https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2021-05-28/2021-05-07-raspios-buster-armhf-lite.zip.sha256",
     "file_checksum_type": "sha256",
     "file_target_extension": "zip",
     "image_build_method": "resize",
