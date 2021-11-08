@@ -4,12 +4,6 @@ Non-electronic parts of Watney are 3D printable.
 Watney provides a low-latency HD video feed as well as bi-directional audio with echo cancellation.
 Watney uses a charging dock with passthrough charging for continuous operation.
 
-# Open Source Acknowledgements
-The following open source projects were used in development of Watney:
-* [Janus WebRTC Server](https://janus.conf.meetecho.com/)
-* [GStreamer](https://gstreamer.freedesktop.org/)
-* [Raspberry Pi Turnkey](https://github.com/schollz/raspberry-pi-turnkey) 
-
 # Components
 Head over to [Bill of Materials](BOM.md) for a list of components you need to purchase to build your own Watney. You'll also need a 3D printer, some PETG / Tough PLA as well as TPU filament. Lastly, you'll need a soldering iron and some wires, though most connections are made using standard breadboard jumper wire.
 
@@ -54,10 +48,14 @@ Watney has no authentication / security. If you'd like to set it up for remote a
 * Watney works best with Chrome. Other browsers may not work well, or at all.
 * Feel free to file an issue on GitHub if you have questions!
 
+# Open Source Acknowledgements
+The following open source projects were used in development of Watney:
+* [Janus WebRTC Server](https://janus.conf.meetecho.com/)
+* [GStreamer](https://gstreamer.freedesktop.org/)
+* [Raspberry Pi Turnkey](https://github.com/schollz/raspberry-pi-turnkey) 
+
 # Future Improvements
 ![Watneys](images/watneys.jpg)
 There have been numerous hardware iterations of Watney, starting from a humble line-follower built for a hackday work project, to the telepresence rover it is today. I'm not planning on adding new hardware iterations, as the latest version accomplishes everything I've envisioned for this project. That being said, there are still some software improvements to be made:
-* **Better browser compatibility.** There's no reason it can't work in all major browsers.
 * **Mobile-optimized control.** You'll be able to control your watney from your phone / tablet, especially in tandem with Remote Access.
-
-
+* **Better browser compatibility.** There's no reason it can't work in all major browsers.
