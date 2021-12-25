@@ -23,9 +23,9 @@ class Heartbeat:
         self.powerPlant = powerPlant
 
         self.resetHeartbeatData()
+        loop = asyncio.get_event_loop()
+        self.task = loop.create_task(self.heartbeatLoop())
 
-        Events.getInstance().sessionStarted.append(lambda: self.onSessionStarted())
-        Events.getInstance().sessionEnded.append(lambda: self.onSessionEnded())
 
     lastHeartbeat = -1
     heartbeatStop = False
@@ -43,15 +43,6 @@ class Heartbeat:
             "InvalidState": True,
         }
 
-    def onSessionStarted(self):
-        loop = asyncio.get_event_loop()
-        self.task = loop.create_task(self.heartbeatLoop())
-
-    def onSessionEnded(self):
-        if self.task:
-            self.task.cancel()
-        self.resetHeartbeatData()
-
     async def heartbeatLoop(self):
         print("Heartbeat starting...")
         try:
@@ -64,7 +55,14 @@ class Heartbeat:
                 else:
                     self.heartbeatStop = False
 
-                self.lastHeartbeatData = await self.collectHeartbeatData()
+                newHeartbeatData = await self.collectHeartbeatData()
+                if newHeartbeatData["BatteryCharging"] != self.lastHeartbeatData["BatteryCharging"]:
+                    if newHeartbeatData["BatteryCharging"]:
+                        Events.getInstance().fireOnCharger()
+                    else:
+                        Events.getInstance().fireOffCharger()
+
+                self.lastHeartbeatData = newHeartbeatData
                 await asyncio.sleep(0.5)
         except asyncio.CancelledError:
             print("Heartbeat stopped")

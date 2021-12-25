@@ -1,3 +1,4 @@
+from events import Events
 from motor import Motor
 import pigpio
 
@@ -126,6 +127,8 @@ class MotorController:
         if leftActive or rightActive:
             self.gpio.write(self.enablePin, pigpio.HIGH)
             self.audioManager.lowerVolume(self.audioToken)
+            Events.getInstance().fireMotionOn()
         else:
             self.gpio.write(self.enablePin, pigpio.LOW)
             self.audioManager.restoreVolume(self.audioToken)
+            Events.getInstance().fireMotionOff()

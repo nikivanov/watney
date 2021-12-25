@@ -22,8 +22,6 @@ You'll be working with Lithium Ion batteries - please be careful not to puncture
 Click on the [Releases](https://github.com/nikivanov/watney/releases) tab and download the latest Watney SD card image - it's the large .zip file found under *Assets*. Use [balenaEtcher](https://www.balena.io/etcher/) or similar to write the .img file onto the SD card.
 
 After that, follow the detailed assembly video below!
-
-TODO: Add video link
  
 # Configuration
 Upon startup, Watney will detect if it's connected to a Wi-Fi hotspot. If not, it will host its own hotspot "Watney".

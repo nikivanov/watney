@@ -1,4 +1,5 @@
 from audiomanager import AudioManager
+from offcharger import OffCharger
 from powerplant import PowerPlant
 from aiohttp import web
 from motorcontroller import MotorController
@@ -31,6 +32,7 @@ startupController = None
 audioManager = None
 audioManagerThread = None
 janusEventHandler = None
+offCharger = None
 
 @routes.get("/")
 async def getPageHTML(request):
@@ -184,6 +186,8 @@ if __name__ == "__main__":
     startupController = StartupSequenceController(config, servoController, lightsController, tts)
 
     heartbeat = Heartbeat(config, servoController, motorController, alsa, lightsController, powerPlant)
+
+    offCharger = OffCharger(config, tts, motorController)
 
     janus = ExternalProcess(videoConfig["JanusStartCommand"], False, False, "janus.log")
     videoStream = ExternalProcess(videoConfig["GStreamerStartCommand"], True, False, "video.log")
