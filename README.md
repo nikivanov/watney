@@ -36,6 +36,8 @@ Watney's configuration can be found in ~/watney/rover.conf:
 and ReversePin
 * Restart your Watney for configuration changes to take effect
 
+    ## Off Charger re-docking
+    Watney can detect when it is taken off the charger outside of its own movement and can attempt to re-dock by driving forward for one second. In my case, Watney occasionally gets knocked off the charger by my Roomba, so enabling this functionality ensures that Watney is always docked and charging. By default this functionality is disabled: I didn't want Watney to drive off someone's workbench while they are working on it. If you'd like to enable this functionality, set `Enabled=True` in the `OFFCHARGER` section of the config.
 # Remote Access
 Watney has no authentication / security. If you'd like to set it up for remote access, I recommend using [Zerotier](https://www.zerotier.com/). Adding Watney and your client computer to the same Zerotier network will make it appear as if they are on the same local network.
 

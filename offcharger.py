@@ -5,12 +5,12 @@ import time
 
 class OffCharger:
     def __init__(self, config, tts, motorController):
-        enabled = bool(config["OFFCHARGER"]["Enabled"])
+        enabled = config["OFFCHARGER"]["Enabled"]
         self.gracePeriod = int(config["OFFCHARGER"]["GracePeriod"])
         self.initialDelay = int(config["OFFCHARGER"]["InitialDelay"])
         self.tts = tts
         self.motorController = motorController
-        if enabled:
+        if enabled.lower() == "true":
             print("Starting Off Charger Monitoring...")
             Events.getInstance().motionOn.append(lambda: self.onMotion())
             Events.getInstance().motionOff.append(lambda: self.onMotion())
