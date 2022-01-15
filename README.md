@@ -28,7 +28,7 @@ Upon startup, Watney will detect if it's connected to a Wi-Fi hotspot. If not, i
 Once you connect to the hotspot, you can control it directly by going to https://192.168.4.1:5000, or connect it to a Wi-Fi
 hotspot by going to http://192.168.4.1 Once you specify your WiFi credentials, Watney will take some time to reboot. Once you hear the startup sound, you're good to go!
 
-Default SSH credentials for Watney are pi / watney5. Watney's mDNS name is watney.local.
+Default SSH credentials for Watney are pi / watney5. Watney's mDNS name is watney.local, so if your OS supports mDNS you can simply access it at https://watney.local:5000
 
 Watney's configuration can be found in ~/watney/rover.conf:
 * If you want to use different GPIO pins, you can specify them here
