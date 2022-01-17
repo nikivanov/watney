@@ -1,5 +1,5 @@
 # Watney Rover
-[![](images/teaser_thumbnail.png)](https://www.youtube.com/watch?v=aMklrTzA3JA)
+[![](images/teaser_thumbnail.png)](https://www.youtube.com/watch?v=ayU9SmKKkow)
 Watney is an open source, Raspberry Pi-enabled telepresence rover made of readily available parts.
 Non-electronic parts of Watney are 3D printable.
 Watney provides a low-latency HD video feed as well as bi-directional audio with echo cancellation.
