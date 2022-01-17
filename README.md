@@ -1,4 +1,5 @@
 # Watney Rover
+[![](images/teaser_thumbnail.png)](https://www.youtube.com/watch?v=aMklrTzA3JA)
 Watney is an open source, Raspberry Pi-enabled telepresence rover made of readily available parts.
 Non-electronic parts of Watney are 3D printable.
 Watney provides a low-latency HD video feed as well as bi-directional audio with echo cancellation.
@@ -22,6 +23,10 @@ You'll be working with Lithium Ion batteries - please be careful not to puncture
 Click on the [Releases](https://github.com/nikivanov/watney/releases) tab and download the latest Watney SD card image - it's the large .zip file found under *Assets*. Use [balenaEtcher](https://www.balena.io/etcher/) or similar to write the .img file onto the SD card.
 
 After that, follow the detailed assembly video below!
+
+Wiring diagrams that you see in the video can also be [found here](https://github.com/nikivanov/watney/tree/master/images/wiring).
+
+[![](images/detailed_assembly_thumbnail.png)](https://www.youtube.com/watch?v=wV26r6FtXRw)
  
 # Configuration
 Upon startup, Watney will detect if it's connected to a Wi-Fi hotspot. If not, it will host its own hotspot "Watney".

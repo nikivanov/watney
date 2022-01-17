@@ -86,7 +86,7 @@
         "pip3 install aiohttp apa102-pi psutil pyalsaaudio smbus",
         "# Clone and set up Watney FIXME branch",
         "cd /home/pi",
-        "git clone -b watney5 https://github.com/nikivanov/watney.git",
+        "git clone https://github.com/nikivanov/watney.git",
         "cp /home/pi/watney/key.pem /home/pi",
         "cp /home/pi/watney/cert.pem /home/pi",
         "chown -R pi /home/pi/watney",
