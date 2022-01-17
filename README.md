@@ -5,6 +5,8 @@ Non-electronic parts of Watney are 3D printable.
 Watney provides a low-latency HD video feed as well as bi-directional audio with echo cancellation.
 Watney uses a charging dock with passthrough charging for continuous operation.
 
+If you've enjoyed this project and want to buy me a beer (no pressure): [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/donate/?business=4LJKNBSN4MTAN&no_recurring=0&currency_code=USD)
+
 # Components
 Head over to [Bill of Materials](BOM.md) for a list of components you need to purchase to build your own Watney. You'll also need a 3D printer, some PETG / Tough PLA as well as TPU filament. Lastly, you'll need a soldering iron and some wires, though most connections are made using standard breadboard jumper wire.
 
