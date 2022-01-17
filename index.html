@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-    <title>Watney-4 Rover</title>
+    <title>Watney Rover</title>
     <script type="text/javascript" src="js/jquery.min.js"></script>
     <script type="text/javascript" src="js/ui/jquery-ui.min.js"></script>
     <link rel="stylesheet" type="text/css" href="js/all.css">
@@ -12,8 +12,6 @@
     <link rel="stylesheet" type="text/css" href="js/watney.css">
     <link rel="stylesheet" type="text/css" href="js/ui/jquery-ui.min.css">
     <script type="text/javascript" src="js/cookies.js"></script>
-    <script type="text/javascript" src="js/virtualjoystick.js"></script>
-    <script type="text/javascript" src="js/watney_joystick.js"></script>
     <script type="text/javascript" src="js/lodash.js"></script>
     <script type="text/javascript" src="js/adapter-latest.js"></script>
     <script type="text/javascript" src="js/janus.js"></script>
@@ -30,6 +28,9 @@
             <div id="infoButton" title="Help" class="wButton">
                 <i class="material-icons">info</i>
             </div>
+            <div id="lightsButton" title="Headlights (L)" class="wButton">
+                <i class="material-icons">flash_off</i>
+            </div>
             <div id="ttsButton" title="Text to Speech (S)" class="wButton">
                 <i class="material-icons">chat_bubble_outline</i>
             </div>
@@ -40,7 +41,7 @@
                 <i class="material-icons">
                     volume_down
                 </i>
-                <input type="range" value=0 min=0 max=100 />
+                <input type="range" value=0 min=0 max=5 />
                 <i class="material-icons">
                     volume_up
                 </i>
@@ -69,7 +70,8 @@
     A: look up
     Z: look down
     S: Text to speech
-    V: Push-to-talk</pre>
+    V: Push-to-talk
+    L: Headlights</pre>
     </div>
     <div id="wifiInfo" tabindex="-1">
         <div>
@@ -88,9 +90,16 @@
             <div>CPU:</div>
             <div><span id="cpuUsage"></span>%</div>
         </div>
+        <div>
+            <div>Battery:</div>
+            <div><span id="batteryPercent"></span>% <span style="display: none;" id="batteryCharging">(charging)</span></div>
+        </div>
     </div>
     <div id="ttsSection" style="display: none;">
         <input type="text" id="ttsInput" placeholder="Enter to send, ESC to cancel" />
+    </div>
+    <div id="reconnecting" style="display: none;">
+       Reconnecting...
     </div>
 </body>
 

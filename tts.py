@@ -4,37 +4,31 @@ from events import Events
 
 
 class TTSSpeaker:
-    def __init__(self, config, alsa):
+    def __init__(self, config, alsa, audioManager):
         self.alsa = alsa
+        self.audioManager = audioManager
+        self.audioToken = "08843f08-92aa-49b0-840f-74c6b38092ff"
         audioConfig = config["AUDIO"]
         self.ttsCommand = audioConfig["TTSCommand"]
-        self.greeting = audioConfig["Greeting"]
         self.workQueue = asyncio.Queue()
-        Events.getInstance().janusFirstConnect.append(lambda: self.onJanusConnected())
+        self.startLoop()
 
-    def onJanusConnected(self):
+    def startLoop(self):
         loop = asyncio.get_event_loop()
         loop.create_task(self.queueLoop())
-        if self.greeting:
-            self.workQueue.put_nowait(self.greeting)
 
     async def queueLoop(self):
         print("Starting TTS...")
-        await asyncio.sleep(2)  # let the servo spin
         try:
             while True:
                 ttsText = await self.workQueue.get()
                 if ttsText:
                     print("Saying '{}'".format(ttsText))
+                    self.audioManager.lowerVolume(self.audioToken)
                     fullTTSCommand = self.ttsCommand.format(shlex.quote(ttsText))
-                    mute = False
-                    if self.alsa.isMuted:
-                        self.alsa.unmute()
-                        mute = True
                     process = await asyncio.create_subprocess_shell(fullTTSCommand, stdout=asyncio.subprocess.DEVNULL, stderr=asyncio.subprocess.DEVNULL)
                     await process.communicate()
-                    if mute:
-                        self.alsa.mute()
+                    self.audioManager.restoreVolume(self.audioToken)
         except asyncio.CancelledError:
             print("TTS stopped")
 

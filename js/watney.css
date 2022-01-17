@@ -147,13 +147,14 @@ div#buttonPanel > div > div > i {
     margin-right: 5px;
 }
 
-#joystickContainer {
-    width		: 100vw;
-    height		: 100vh;
-    overflow	: hidden;
-    padding		: 0;
-    margin		: 0;
-    -webkit-user-select	: none;
-    -moz-user-select	: none;
-    z-index: 5;
+div#reconnecting {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.6);
+    vertical-align: middle;
+    text-align: center;
+    font-size: 20pt;
+    color: white;
+    line-height: 100vh;
 }

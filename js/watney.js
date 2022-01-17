@@ -5,6 +5,7 @@ var right = false;
 var lookUp = false;
 var lookDown = false;
 var slow = false;
+var lights = false;
 
 var lastBearing = -1;
 var lastLook = 0;
@@ -72,6 +73,19 @@ function sendKeys() {
 
 }
 
+function sendLights() {
+    var lightsObj = {
+        on: lights
+    };
+    $.ajax({
+        url: '/lights',
+        type: "POST",
+        data: JSON.stringify(lightsObj),
+        contentType: "application/json; charset=utf-8",
+        dataType: "json"
+    });
+}
+
 $(document).ready(function () {
     const setVolume_throttled = _.throttle(setVolume, 500, {leading: true});
 
@@ -117,6 +131,10 @@ $(document).ready(function () {
                 $("div#volumeSlider input").val(currentVolume).trigger("input");
                 event.preventDefault();
                 return;
+            }
+
+            if (event.keyCode == 76) {
+                toggleLights();
             }
 
             if (event.keyCode == 38) {
@@ -293,6 +311,10 @@ $(document).ready(function () {
         }
     });
 
+    $("#lightsButton").click(function (event) {
+        toggleLights();
+    });
+
     $("div#volumeSlider input").on("input", function () {
         setVolume_throttled(this.value);
     });
@@ -309,14 +331,12 @@ $(document).ready(function () {
         $("#vid")[0].play();
     });
 
-    setupJoystick();
-
     doHeartbeat();
 
     doConnect();
 });
 
-var doVolumeSet = true;
+var doInitialSet = true;
 function doHeartbeat() {
     $.ajax({
         url: '/heartbeat',
@@ -327,9 +347,22 @@ function doHeartbeat() {
         $("#wifi_quality").text(data.Quality);
         $("#wifi_signal").text(data.Signal);
         $("#cpuUsage").text(data.CPU);
-        if (doVolumeSet) {
+        $("#batteryPercent").text(data.BatteryPercent);
+        if (data.BatteryCharging) {
+            $("#batteryCharging").show();
+        } else {
+            $("#batteryCharging").hide();
+        }
+
+        if (doInitialSet) {
             $("div#volumeSlider input").val(data.Volume);
-            doVolumeSet = false;
+            lights = data.Lights;
+            syncLights();
+            doInitialSet = false;
+        }
+
+        if (data.InvalidState) {
+            doInitialSet = true;
         }
     }).always(function () {
         setTimeout(doHeartbeat, 1000);
@@ -354,4 +387,18 @@ function setVolume(volume) {
         contentType: "application/json; charset=utf-8",
         dataType: "json"
     });
+}
+
+function toggleLights() {
+    lights = !lights;
+    sendLights();
+    syncLights();
+}
+
+function syncLights() {
+    if (lights) {
+        $("div#lightsButton > i").text("flash_on");
+    } else {
+        $("div#lightsButton > i").text("flash_off");
+    }
 }

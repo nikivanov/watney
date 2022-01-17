@@ -45,28 +45,35 @@ function audioDeviceChange() {
     }
 }
 
+let reconnecting = false;
 function connectJanus() {
-    var server = null;
-    if (window.location.protocol === 'http:')
-        server = "http://" + window.location.hostname + ":8088/janus";
-    else
-        server = "https://" + window.location.hostname + ":8089/janus";
-
+    var server = "https://" + window.location.hostname + ":8089/janus";
+    
     janusConnection = new Janus({
         server: server,
         success: function () {
-            onJanusConnect();
+            if (reconnecting) {
+                // Can't get the sound feed to re-establish on onJanusConnected so just refresh
+                location.reload();
+            } else {
+                onJanusConnect();
+            }
+            
         },
         error: function (error) {
-            alert("Janus server error: " + error);
+            $("#reconnecting").show();
+            reconnecting = true;
+            setTimeout(connectJanus, 5000);
         },
         destroyed: function () {
-
-        }
+            console.log('Janus connection destroyed');
+        },
+        keepAlivePeriod: 5000
     });
 }
 
 function onJanusConnect() {
+    $("#reconnecting").hide();
     attachStreamingPlugin();
     attachVideoroomPlugin();
 }
@@ -168,7 +175,7 @@ function attachVideoroomPlugin() {
             videoroom_onMessage(msg, jsep);
         },
         oncleanup: function() {
-            publishOwnFeed(false);
+            publishOwnFeed();
         }
     });
 }
@@ -189,7 +196,7 @@ function videoroom_onMessage(msg, jsep) {
             publisherId = msg["id"];
             mypvtid = msg["private_id"];
             Janus.log("Successfully joined room " + msg["room"] + " with ID " + publisherId);
-            publishOwnFeed(true);
+            publishOwnFeed();
             
         } else if(event === "destroyed") {
             // The room has been destroyed
@@ -212,7 +219,7 @@ function videoroom_onMessage(msg, jsep) {
     }
 }
 
-function publishOwnFeed(firstTime) {
+function publishOwnFeed() {
     const deviceId = getCookie("defaultDevice");
     navigator.mediaDevices.enumerateDevices().then(devices => {
         const device = devices.find(d => d.deviceId === deviceId);

@@ -24,5 +24,7 @@ hs_err_pid*
 
 __pycache__
 .vscode*
-*.img
 venv/*
+
+packer/packer_cache/*
+packer/*.img

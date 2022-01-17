@@ -1,0 +1,181 @@
+{
+  "variables": {},
+  "builders": [{
+    "type": "arm",
+    "file_urls" : ["https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2021-05-28/2021-05-07-raspios-buster-armhf-lite.zip"],
+    "file_checksum_url": "https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2021-05-28/2021-05-07-raspios-buster-armhf-lite.zip.sha256",
+    "file_checksum_type": "sha256",
+    "file_target_extension": "zip",
+    "image_build_method": "resize",
+    "image_path": "watney.img",
+    "image_size": "5G",
+    "image_type": "dos",
+    "image_partitions": [
+      {
+        "name": "boot",
+        "type": "c",
+        "start_sector": "8192",
+        "filesystem": "vfat",
+        "size": "256M",
+        "mountpoint": "/boot"
+      },
+      {
+        "name": "root",
+        "type": "83",
+        "start_sector": "532480",
+        "filesystem": "ext4",
+        "size": "0",
+        "mountpoint": "/"
+      }
+    ],
+    "image_chroot_env": ["PATH=/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin"],
+    "qemu_binary_source_path": "/usr/bin/qemu-aarch64-static",
+    "qemu_binary_destination_path": "/usr/bin/qemu-aarch64-static"
+  }],
+  "provisioners": [
+    {
+      "type": "file",
+      "source": "unblock_wifi.sh",
+      "destination": "/home/pi/unblock_wifi.sh"
+    },
+    {
+      "type": "file",
+      "source": "asound.conf",
+      "destination": "/etc/asound.conf"
+    },
+    {
+      "type": "file",
+      "source": "asound.state",
+      "destination": "/var/lib/alsa/asound.state"
+    },
+    {
+      "type": "file",
+      "source": "watney.service",
+      "destination": "/etc/systemd/system/watney.service"
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "# Initial Raspberry Pi Config",
+        "raspi-config nonint do_change_locale en_US.UTF-8",
+        "apt-get -y update",
+        "apt-get -y upgrade",
+        "raspi-config nonint do_camera 0",
+        "raspi-config nonint do_spi 0",
+        "raspi-config nonint do_i2c 0",
+        "sed -i 's/^dtparam=audio=on/#dtparam=audio=on/g' /boot/config.txt",
+        "echo 'disable_camera_led=1' >> /boot/config.txt",
+        "echo 'dtoverlay=googlevoicehat-soundcard' >> /boot/config.txt",
+        "echo 'dtoverlay=i2s-mmap' >> /boot/config.txt",
+        "raspi-config nonint do_hostname watney",
+        "echo \"watney5\\nwatney5\" | passwd pi",
+        "touch /boot/ssh",
+        "chown root /etc/asound.conf",
+        "chmod u=rw,g=r,o=r /etc/asound.conf",
+        "chown root /var/lib/alsa/asound.state",
+        "chmod u=rw,g=r,o=r /var/lib/alsa/asound.state"
+      ]
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "# Watney",
+        "apt-get -y install git python3-pip pigpio python3-pigpio python3-rpi.gpio python-smbus python3-numpy",
+        "systemctl enable pigpiod",
+        "sed -i 's:^ExecStart=/usr/bin/pigpiod -l:ExecStart=/usr/bin/pigpiod -l -t 0:g' /lib/systemd/system/pigpiod.service",
+        "pip3 install aiohttp apa102-pi psutil pyalsaaudio smbus",
+        "# Clone and set up Watney FIXME branch",
+        "cd /home/pi",
+        "git clone https://github.com/nikivanov/watney.git",
+        "cp /home/pi/watney/key.pem /home/pi",
+        "cp /home/pi/watney/cert.pem /home/pi",
+        "chown -R pi /home/pi/watney",
+        "systemctl enable watney"
+      ]
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "# Turnkey",
+        "cd /home/pi",
+        "git clone https://github.com/nikivanov/raspberry-pi-turnkey.git",
+        "apt-get install -y dnsmasq hostapd python3-flask python3-requests",
+        "pip3 install wpasupplicantconf",
+        "cd /home/pi/raspberry-pi-turnkey",
+        "cp config/hostapd /etc/default/hostapd",
+        "cp config/dhcpcd.conf /etc/dhcpcd.conf",
+        "cp config/dnsmasq.conf /etc/dnsmasq.conf",
+        "cp config/hostapd.conf /etc/hostapd/hostapd.conf",
+        "# Ensure wifi is not soft blocked before starting hostapd",
+        "chmod +x /home/pi/unblock_wifi.sh",
+        "sed -i '/^ExecStart=.*/a ExecStartPre=/bin/bash /home/pi/unblock_wifi.sh' /usr/lib/systemd/system/hostapd.service",
+        "systemctl enable hostapd",
+        "echo '{\"status\": \"hostapd\"}' > status.json",
+        "cp turnkey.service /etc/systemd/system/turnkey.service",
+        "systemctl enable turnkey"
+      ]
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "# Compile Mimic",
+        "apt-get -y install gcc make pkg-config automake libtool libicu-dev libpcre2-dev libasound2-dev",
+        "cd /home/pi",
+        "git clone https://github.com/MycroftAI/mimic.git",
+        "cd mimic",
+        "git checkout 255213684c9cb877c8b7017a8dc0cedcf9cf695b",
+        "./autogen.sh",
+        "./configure --prefix=\"/usr/local\"",
+        "make",
+        "make install",
+        "cd /home/pi",
+        "rm -rf mimic"
+      ]
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "# Compile Janus and dependencies",
+        "apt-get -y install libmicrohttpd-dev libjansson-dev libssl-dev libsrtp-dev libsofia-sip-ua-dev libglib2.0-dev libopus-dev libogg-dev libcurl4-openssl-dev liblua5.3-dev libconfig-dev pkg-config gengetopt libtool automake libnice-dev libssl-dev",
+        "cd /home/pi",
+        "wget https://github.com/cisco/libsrtp/archive/v2.3.0.tar.gz",
+        "tar xfv v2.3.0.tar.gz",
+        "cd libsrtp-2.3.0",
+        "./configure --prefix=/usr --enable-openssl",
+        "make shared_library && make install",
+        "cd ..",
+        "rm -rf libsrtp-2.3.0",
+        "rm v2.3.0.tar.gz",
+        "git clone https://github.com/meetecho/janus-gateway.git",
+        "cd janus-gateway",
+        "# Janus recommends building from master, but this will lock the Watney release to a specific commit",
+        "git checkout 5ec8568709c483ae89b1aa77e127d14c3b59428c",
+        "sh autogen.sh",
+        "./configure --prefix=/opt/janus --disable-aes-gcm",
+        "make",
+        "make install",
+        "cd ..",
+        "rm -rf janus-gateway"
+      ]
+    },
+    {
+      "type": "file",
+      "source": "../janus/",
+      "destination": "/opt/janus/etc/janus/"
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "# Set Janus folder owner to Pi",
+        "chown -R pi /opt/janus"
+      ]
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "# Install GStreamer",
+        "apt-get -y install gstreamer1.0-tools gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-alsa python3-gst-1.0"
+      ]
+    }
+  ]
+}

@@ -1,30 +1,26 @@
 import asyncio
 import time
-import RPi.GPIO as GPIO
-from events import Events
-
 
 class ServoController:
 
-    def __init__(self, config):
-        Events.getInstance().janusFirstConnect.append(lambda: self.onJanusConnected())
-
+    def __init__(self, gpio, config, audioManager):
         servoConfig = config["SERVO"]
         self.pwmPin = int(servoConfig["PWMPin"])
-        self.neutral = float(servoConfig["Neutral"])
-        self.min = float(servoConfig["Min"])
-        self.max = float(servoConfig["Max"])
+        self.neutral = int(servoConfig["Neutral"])
+        self.min = int(servoConfig["Min"])
+        self.max = int(servoConfig["Max"])
 
-        self.frequency = 50
+        self.audioManager = audioManager
+        self.audioToken = "927dff95-b82b-433c-885c-6ac9ac13d8b0"
 
-        self.changeVelocityPerSec = 2
+        self.gpio = gpio
+
+        self.changeVelocityPerSec = 1000
         # 1 is forward, -1 is backward, 0 is stop
         self.direction = 0
         self.timingLock = asyncio.Condition()
         self.task = None
-        self.pwmControl = None
-        self.startServo()
-
+        self.startLoop()
 
     async def forward(self):
         async with self.timingLock:
@@ -42,36 +38,24 @@ class ServoController:
                 self.direction = 0
                 self.timingLock.notify()
 
-    def onJanusConnected(self):
+    def startLoop(self):
         loop = asyncio.get_event_loop()
         self.task = loop.create_task(self.timingLoop())
 
     async def timingLoop(self):
         print("Servo starting...")
-
         try:
-            initialSleep = 0.25
-            # go neutral first
-            self.pwmControl.ChangeDutyCycle(self.neutral)
-            await asyncio.sleep(initialSleep)
-            self.pwmControl.ChangeDutyCycle(self.max)
-            await asyncio.sleep(initialSleep)
-            self.pwmControl.ChangeDutyCycle(self.min)
-            await asyncio.sleep(initialSleep)
-            self.pwmControl.ChangeDutyCycle(self.neutral)
-            await asyncio.sleep(initialSleep)
-            self.pwmControl.ChangeDutyCycle(0)
-
             currentPosition = self.neutral
             lastChangeTime = None
             while True:
                 async with self.timingLock:
                     if not self.__shouldBeMoving(currentPosition):
                         self.stopServo()
+                        self.audioManager.restoreVolume(self.audioToken)
                         lastChangeTime = None
                         await self.timingLock.wait()
-                        self.startServo()
 
+                self.audioManager.lowerVolume(self.audioToken)
                 if not lastChangeTime:
                     changeDelta = 0
                 else:
@@ -81,9 +65,9 @@ class ServoController:
                 lastChangeTime = time.time()
 
                 if self.direction == 1:
-                    currentPosition = min(currentPosition + changeDelta, self.max)
-                elif self.direction == -1:
                     currentPosition = max(currentPosition - changeDelta, self.min)
+                elif self.direction == -1:
+                    currentPosition = min(currentPosition + changeDelta, self.max)
 
                 self.changeServo(currentPosition)
                 await asyncio.sleep(0.05)
@@ -96,23 +80,18 @@ class ServoController:
     def __shouldBeMoving(self, currentPosition):
         if self.direction == 0:
             return False
-        elif self.direction == 1 and currentPosition >= self.max:
+        elif self.direction == 1 and currentPosition <= self.min:
             return False
-        elif self.direction == -1 and currentPosition <= self.min:
+        elif self.direction == -1 and currentPosition >= self.max:
             return False
 
         return True
 
-    def startServo(self):
-        GPIO.setup(self.pwmPin, GPIO.OUT)
-        self.pwmControl = GPIO.PWM(self.pwmPin, self.frequency)
-        self.pwmControl.start(0)
-
     def stopServo(self):
-        if self.pwmControl is not None:
-            self.pwmControl.stop()
-            self.pwmControl = None
-        GPIO.setup(self.pwmPin, GPIO.IN)
+        self.gpio.set_servo_pulsewidth(self.pwmPin, 0)
 
     def changeServo(self, val):
-        self.pwmControl.ChangeDutyCycle(val)
+        self.gpio.set_servo_pulsewidth(self.pwmPin, val)
+
+    def stop(self):
+        self.stopServo()

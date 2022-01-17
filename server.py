@@ -1,18 +1,23 @@
+from audiomanager import AudioManager
+from offcharger import OffCharger
+from powerplant import PowerPlant
 from aiohttp import web
 from motorcontroller import MotorController
 from servocontroller import ServoController
+from lightscontroller import LightsController
 from heartbeat import Heartbeat
 from subprocess import call
 import os
-import RPi.GPIO as GPIO
+import pigpio
 from configparser import ConfigParser
 from alsa import Alsa
 import ssl
 import sys
 from externalrunner import ExternalProcess
 import asyncio
-from janusmonitor import JanusMonitor
+from januseventhandler import JanusEventHandler
 from tts import TTSSpeaker
+from startupSequence import StartupSequenceController
 
 routes = web.RouteTableDef()
 
@@ -22,7 +27,12 @@ heartbeat = None
 signalingServer = None
 alsa = None
 tts = None
-
+powerPlant = None
+startupController = None
+audioManager = None
+audioManagerThread = None
+janusEventHandler = None
+offCharger = None
 
 @routes.get("/")
 async def getPageHTML(request):
@@ -60,7 +70,7 @@ async def shutDown(request):
     call("sudo halt", shell=True)
 
 @routes.post("/restart")
-async def shutDown(request):
+async def restart(request):
     call("sudo reboot", shell=True)
 
 
@@ -85,6 +95,24 @@ async def onHeartbeat(request):
     stats = heartbeat.onHeartbeatReceived()
     return web.json_response(stats)
 
+@routes.post("/lights")
+async def onLights(request):
+    lightsObj = await request.json()
+    on = bool(lightsObj['on'])
+    if on:
+        lightsController.lightsOn()
+    else:
+        lightsController.lightsOff()
+    return web.Response(text="OK")
+
+async def onJanusEvent(request):
+    try:
+        eventObj = await request.json()
+        janusEventHandler.handleEvent(eventObj)
+    except Exception as e:
+        print('Error handling janus event: {}'.format(e))
+    finally:
+        return web.Response(text="OK")
 
 # Python 3.7 is overly wordy about self-signed certificates, so we'll suppress the error here
 def loopExceptionHandler(loop, context):
@@ -112,15 +140,28 @@ def createSSLContext(homePath):
     sslctx.verify_mode = ssl.CERT_NONE
     return sslctx
 
+runners = []
+async def start_site(app, address, port, sslContext=None):
+    runner = web.AppRunner(app)
+    runners.append(runner)
+    await runner.setup()
+
+    if sslContext is not None:
+        site = web.TCPSite(runner, host=address, port=port, ssl_context=sslContext)
+    else:
+        site = web.TCPSite(runner, host=address, port=port)
+    await site.start()
+
 
 if __name__ == "__main__":
     homePath = os.path.dirname(os.path.abspath(__file__))
     sslctx = createSSLContext(os.path.dirname(homePath))
 
-    GPIO.setwarnings(False)
-
-    GPIO.setmode(GPIO.BCM)
-
+    gpio = pigpio.pi()
+    if not gpio.connected:
+        print('GPIO not connected')
+        exit()
+    
     config = ConfigParser()
     config.read(os.path.join(homePath, "rover.conf"))
     audioConfig = config["AUDIO"]
@@ -129,30 +170,51 @@ if __name__ == "__main__":
     loop = asyncio.get_event_loop()
     loop.set_exception_handler(loopExceptionHandler)
 
-    motorController = MotorController(config)
+    audioManager = AudioManager(config)
 
-    alsa = Alsa(config)
+    motorController = MotorController(config, gpio, audioManager)
 
-    servoController = ServoController(config)
+    alsa = Alsa(gpio, config)
 
-    tts = TTSSpeaker(config, alsa)
+    servoController = ServoController(gpio, config, audioManager)
+    lightsController = LightsController(gpio, config)
 
-    heartbeat = Heartbeat(config, servoController, motorController, alsa)
-    heartbeat.start()
+    tts = TTSSpeaker(config, alsa, audioManager)
+
+    powerPlant = PowerPlant(config)
+
+    startupController = StartupSequenceController(config, servoController, lightsController, tts)
+
+    heartbeat = Heartbeat(config, servoController, motorController, alsa, lightsController, powerPlant)
+
+    offCharger = OffCharger(config, tts, motorController)
 
     janus = ExternalProcess(videoConfig["JanusStartCommand"], False, False, "janus.log")
     videoStream = ExternalProcess(videoConfig["GStreamerStartCommand"], True, False, "video.log")
-    audioStream = ExternalProcess(audioConfig["GStreamerStartCommand"], True, False, "audio.log")
-    audioSink = ExternalProcess(audioConfig["AudioSinkCommand"], True, True, "audiosink.log")
 
-    janusMonitor = JanusMonitor()
-    janusMonitor.start()
+    janusEventHandler = JanusEventHandler()
 
-    app = web.Application()
-    app.add_routes(routes)
-    app.router.add_static('/js/', path=os.path.join(homePath, 'js'))
+    mainApp = web.Application()
+    mainApp.add_routes(routes)
+    mainApp.router.add_static('/js/', path=os.path.join(homePath, 'js'))
+    loop.create_task(start_site(mainApp, '0.0.0.0', 5000, sslctx))
 
-    web.run_app(app, host='0.0.0.0', port=5000, ssl_context=sslctx)
+    eventListenerApp = web.Application()
+    eventListenerApp.add_routes([web.post('/janusEvent', onJanusEvent)])
+    loop.create_task(start_site(eventListenerApp, 'localhost', 5001))
 
-    alsa.stop()
+    try:
+        loop.run_forever()
+    except:
+        pass
+    finally:
+        servoController.stop()
+        lightsController.stop()
+        gpio.stop()
+        janus.endProcess()
+        videoStream.endProcess()
+        for runner in runners:
+            loop.run_until_complete(runner.cleanup())
+
+    
 

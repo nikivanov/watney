@@ -1,30 +1,30 @@
 # Bill of Materials
-All parts can be found on Amazon, AliExpress, Ebay etc. Make sure the items you're ordering match the pictures. If you want to save money, order from AliExpress - the total should be just under $100 shipped. Amazon will save you time on shipping, but will cost more. The text in [square brackets] is the suggested search term for each item.
+All parts can be found on Amazon, AliExpress, Ebay etc. Make sure the items you're ordering match the pictures. If you want to save money, order from AliExpress. Amazon will save you time on shipping, but will cost more. 
 
-* [Raspberry Pi 3A+](images/bom/raspberrypi.jpg) ($20)
-* Micro SD Card 8GB or more ($5)
-* 2A USB Charger ($4)
-* [4x [Arduino Gear Motor]](images/bom/motors.jpg) ($4)
-* [[L298N]](images/bom/l298n.jpg) Dual H-Bridge ($2)
-* [[Raspberry Pi 160 fish eye] camera](images/bom/camera.jpg) ($15)
-* [[SG90] 9G Servo](images/bom/sg90.jpg) ($2)
-* [[Suntaiho Qi 5W] Wireless Charger](images/bom/wireless_charger.jpg) ($4)
-    * Can be found under several different brand names
-* [[Universal Qi Wireless Charger Receiver]](images/bom/wireless_receiver.jpg) ($3)
-    * Can be found under several different brand names
-* [[Left-Angle 25CM Micro-USB extension] cable](images/bom/charger_extension.jpg) ($3)
-* [[PAM8302] Audio Amplifier](images/bom/amplifier.jpg) ($2)
-* [[SPH0645] I2S MEMS Microphone](images/bom/mic.jpg) ($7)
-* [[Dual 18650 V8] Power Board](images/bom/18650v8.jpg) ($5)
-   * Make sure to double-check the board you are buying! It should have a full sized USB port on one end and a Micro-USB on the other. Other similar boards may not support pass-through charging and will cause Watney to reboot when going on and off the charger. For example, [this board will not work](images/bom/18650v8_bad.jpg)
-* [2.54m pitch [male breakable pin header] connector strip](images/bom/header.jpg) ($2)
-    * You'll only need 14 of them
-* [2x 18650 3000mah recharable batteries](images/bom/18650.jpg) ($6)
-    * There are many 18650 batteries, not all of them are good. I've had good experience with LiitoKala HG2, but YMMV.
-* [[40MM 3W Ultra-thin Speaker] 4ohm](images/bom/speaker.jpg) ($3)
-* [[10cm Female-To-Female Dupont] Jumper Wire x20](images/bom/dupont.jpg) ($1)
-    * Optional, but keeps things neater where 20CM is too long
-* [20cm Female-to-Female Dupont] Jumper Wire x20 ($1)
-* [30cm Male-to-Female Dupont] Jumper Wire x20 ($1)
-* [[M3 Allen Bolt Hex Socket Round Cap] 6mm 8mm 12mm 16mm 20mm](images/bom/m3.jpg) ($6)
+|Part| Reference Photo | Price | Notes |
+|---|---|---|---|
+|Raspberry Pi 3A+|![raspberrypi](/images/bom/raspberrypi.jpg)| $25 |
+| Micro SD Card 8GB+ |![sdcard](/images/bom/sdcard.webp) | $5 |
+| 2A USB charger | ![sdcard](/images/bom/usbcharger.jpg) | $5 | 
+| 4x N20 geared motors, 10mm shaft, 200 rpm, 6V |![n20motor](/images/bom/n20motor.webp) | $14 total | You can choose a lower speed to get more torque, but 200 rpm seems to have the best balance of torque to speed
+| GeeekPi UPS Plus V5 EP-0136  | ![upsv5](/images/bom/upsv5.jpg) | $30 | Product Wiki: https://wiki.52pi.com/index.php/UPS_Plus_SKU:_EP-0136
+| 2x 18650 batteries |![18650](/images/bom/18650s.jpg) | $20 | The price is for 2 Samsung 25R batteries. You can save money by buying cheap 18650s with mixed results
+| MAX98357 I2S amplifier |![amp](/images/bom/amp.jpg) | $4
+| 100k Ohm resistor |![resistor](/images/bom/resistor.jpg) | $3 | Optional. Come in packs of 100 for the price 
+| 40mm full range speaker |![speaker](/images/bom/speaker.jpg) | $5 | Usually come in packs of 2, but you only need one.
+| Sipeed I2S microphone MSM261S4030H0 |![microphone](/images/bom/microphone.jpg) | $4 | Can be found under different names, but as long as it matches the image you should be good
+| SG90 servo |![servo](/images/bom/servo.jpg) | $4 | You may also be able to use the version with metal gears MG90. I haven't tried it but it should be a drop-in replacement
+| Raspberry Pi fish eye camera | ![camera](/images/bom/camera.jpg) | $10
+| DRV8833 motor driver |![motordriver](/images/bom/motordriver.jpg) | $2
+| 2.54mm 4 pin screw terminal |![screwterminal](/images/bom/screwterminal.jpg) | $3 | Usually come in pack of 10 for the price, but you only need 1
+| SK9822 or APA102 144 LED/m strip |![led](/images/bom/led.jpg) | $20 | You only need a strip of 5 LEDs but the shortest strip you can get is 1 meter. You need the non-waterproof version, sometimes referred to as IP30
+| 4x Keystone 209 contacts |![keystone](/images/bom/keystone209.jpg) | $6
+| Micro USB female breakout board |![microusbfemale](/images/bom/microusbfemale.jpg) | $2 | This and the following USB boards usually come in a pack of 5 for the price
+| 2x USB Type-A male breakout board |![usbmale](/images/bom/usbmale.jpg) | $2 | 
+| Micro USB male breakout plug |![microusbmale](/images/bom/microusbmale.jpg) | $2 | 
+| 10cm and 20cm Female-to-Female Dupont jumper wire |![dupont.jpg](/images/bom/dupont.jpg)  | $3
+| M3 Bolt Hex Socket Round Cap 6mm 8mm 12mm 16mm 20mm |![m3](/images/bom/m3.jpg) | $6 
+| 2.54m pitch male breakable pin header |![header](/images/bom/header.jpg) | $2 | You only need a few of these
+| | | **Total**: ~$170 |
 
+You'll also need general purpose hookup wire (in a pinch you can use jumper wire) and basic soldering equipment.

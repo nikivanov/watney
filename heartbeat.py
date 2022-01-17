@@ -3,10 +3,11 @@ import time
 import asyncio
 import sys
 import psutil
+from events import Events
 
 
 class Heartbeat:
-    def __init__(self, config, servoController, motorController, alsa):
+    def __init__(self, config, servoController, motorController, alsa, lightsController, powerPlant):
         driverConfig = config["DRIVER"]
         self.heartbeatInterval = float(driverConfig["MaxHeartbeatInvervalS"])
 
@@ -18,22 +19,29 @@ class Heartbeat:
         self.signalRegex = re.compile(r"Signal level=(.*? dBm)")
         self.lastHeartbeat = time.time()
         self.task = None
+        self.lightsController = lightsController
+        self.powerPlant = powerPlant
 
-    lastHeartbeat = -1
-    heartbeatStop = False
-    lastHeartbeatData = {
-        "SSID": "-",
-        "Quality": "-",
-        "Signal": "-"
-    }
-
-    def start(self):
+        self.resetHeartbeatData()
         loop = asyncio.get_event_loop()
         self.task = loop.create_task(self.heartbeatLoop())
 
-    def stop(self):
-        if self.task:
-            self.task.cancel()
+
+    lastHeartbeat = -1
+    heartbeatStop = False
+
+    def resetHeartbeatData(self):
+        self.lastHeartbeatData = {
+            "SSID": "-",
+            "Quality": "-",
+            "Signal": "-",
+            "Volume": 0,
+            "CPU": "-",
+            "Lights": False,
+            "BatteryPercent": 0,
+            "BatteryCharging": False,
+            "InvalidState": True,
+        }
 
     async def heartbeatLoop(self):
         print("Heartbeat starting...")
@@ -47,7 +55,14 @@ class Heartbeat:
                 else:
                     self.heartbeatStop = False
 
-                self.lastHeartbeatData = await self.collectHeartbeatData()
+                newHeartbeatData = await self.collectHeartbeatData()
+                if newHeartbeatData["BatteryCharging"] != self.lastHeartbeatData["BatteryCharging"]:
+                    if newHeartbeatData["BatteryCharging"]:
+                        Events.getInstance().fireOnCharger()
+                    else:
+                        Events.getInstance().fireOffCharger()
+
+                self.lastHeartbeatData = newHeartbeatData
                 await asyncio.sleep(0.5)
         except asyncio.CancelledError:
             print("Heartbeat stopped")
@@ -77,21 +92,22 @@ class Heartbeat:
 
             cpuIdle = psutil.cpu_percent()
 
+            batteryInfo = self.powerPlant.getBatteryInfo()
+
             return {
                 "SSID": ssid,
                 "Quality": quality,
                 "Signal": signal,
                 "Volume": volume,
-                "CPU": cpuIdle
+                "CPU": cpuIdle,
+                "Lights": self.lightsController.lightsStatus,
+                "BatteryPercent": batteryInfo[0],
+                "BatteryCharging": batteryInfo[1],
             }
         except Exception as ex:
             print(str(ex), file=sys.stderr)
-            return {
-                "SSID": "-",
-                "Quality": "-",
-                "Signal": "-",
-                "Volume": 0
-            }
+            self.resetHeartbeatData()
+            return self.lastHeartbeatData
 
     def onHeartbeatReceived(self):
         self.lastHeartbeat = time.time()
