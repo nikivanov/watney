@@ -51,6 +51,11 @@ Watney has no authentication / security. If you'd like to set it up for remote a
 # Building your own Watney image
 `packer-builder-arm` is used to build the Watney image. You can find the image build definition in [watney-image.json](packer/watney-image.json). [This article](https://linuxhit.com/build-a-raspberry-pi-image-packer-packer-builder-arm/#:~:text=Packer%2Dbuilder%2Darm%20is%20a,server%20or%20other%20x86%20hardware.) may help setting up `packer` and `packer-builder-arm` on your linux system.
 
+# Raspberry Pi Compatibility
+Watney is designed to work with Raspberry Pi 3A+, however other versions may be compatible:
+* [scifiguy000](https://github.com/scifiguy000) confirmed to have successfully used a Raspberry Pi 4B in [this thread](https://github.com/nikivanov/watney/issues/27)
+* Raspberry Pi Zero 2 may work out of the box, but has not been confirmed yet
+
 # Troubleshooting
 * Watney works best with Chrome. Other browsers may not work well, or at all.
 * Feel free to file an issue on GitHub if you have questions!
