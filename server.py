@@ -22,7 +22,8 @@ from startupSequence import StartupSequenceController
 routes = web.RouteTableDef()
 
 motorController = None
-servoController = None
+primaryServoController = None
+secondaryServoController = None
 heartbeat = None
 signalingServer = None
 alsa = None
@@ -44,6 +45,7 @@ async def setCommand(request):
     commandObj = await request.json()
     newBearing = commandObj['bearing']
     newLook = commandObj['look']
+    newAuxLook = commandObj['auxLook']
     newSlow = commandObj['slow']
 
     if newBearing in MotorController.validBearings:
@@ -53,14 +55,25 @@ async def setCommand(request):
         return web.Response(status=400, text="Invalid")
 
     if newLook == 0:
-        await servoController.lookStop()
+        await primaryServoController.lookStop()
     elif newLook == -1:
-        await servoController.forward()
+        await primaryServoController.forward()
     elif newLook == 1:
-        await servoController.backward()
+        await primaryServoController.backward()
     else:
         print("Invalid look at {}".format(newLook))
         return web.Response(status=400, text="Invalid")
+    
+    if newAuxLook == 0:
+        await secondaryServoController.lookStop()
+    elif newAuxLook == -1:
+        await secondaryServoController.forward()
+    elif newAuxLook == 1:
+        await secondaryServoController.backward()
+    else:
+        print("Invalid aux look at {}".format(newAuxLook))
+        return web.Response(status=400, text="Invalid")
+    
 
     return web.Response(text="OK")
 
@@ -176,16 +189,29 @@ if __name__ == "__main__":
 
     alsa = Alsa(gpio, config)
 
-    servoController = ServoController(gpio, config, audioManager)
+    primaryServoConfig = config["SERVO"]
+    psPwmPin = int(primaryServoConfig["PWMPin"])
+    psNeutral = int(primaryServoConfig["Neutral"])
+    psMin = int(primaryServoConfig["Min"])
+    psMax = int(primaryServoConfig["Max"])
+    primaryServoController = ServoController(gpio, psPwmPin, psNeutral, psMin, psMax, audioManager)
+
+    secondaryServoConfig = config["AUXSERVO"]
+    ssPwmPin = int(secondaryServoConfig["PWMPin"])
+    ssNeutral = int(secondaryServoConfig["Neutral"])
+    ssMin = int(secondaryServoConfig["Min"])
+    ssMax = int(secondaryServoConfig["Max"])
+    secondaryServoController = ServoController(gpio, ssPwmPin, ssNeutral, ssMin, ssMax, audioManager)
+
     lightsController = LightsController(gpio, config)
 
     tts = TTSSpeaker(config, alsa, audioManager)
 
     powerPlant = PowerPlant(config)
 
-    startupController = StartupSequenceController(config, servoController, lightsController, tts)
+    startupController = StartupSequenceController(config, primaryServoController, lightsController, tts)
 
-    heartbeat = Heartbeat(config, servoController, motorController, alsa, lightsController, powerPlant)
+    heartbeat = Heartbeat(config, primaryServoController, secondaryServoController, motorController, alsa, lightsController, powerPlant)
 
     offCharger = OffCharger(config, tts, motorController)
 
@@ -208,7 +234,7 @@ if __name__ == "__main__":
     except:
         pass
     finally:
-        servoController.stop()
+        primaryServoController.stop()
         lightsController.stop()
         gpio.stop()
         janus.endProcess()

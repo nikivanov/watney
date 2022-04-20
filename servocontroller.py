@@ -1,17 +1,17 @@
 import asyncio
 import time
+import uuid
 
 class ServoController:
 
-    def __init__(self, gpio, config, audioManager):
-        servoConfig = config["SERVO"]
-        self.pwmPin = int(servoConfig["PWMPin"])
-        self.neutral = int(servoConfig["Neutral"])
-        self.min = int(servoConfig["Min"])
-        self.max = int(servoConfig["Max"])
+    def __init__(self, gpio, pwmPin, neutral, minimum, maximum, audioManager):
+        self.pwmPin = pwmPin
+        self.neutral = neutral
+        self.min = minimum
+        self.max = maximum
 
         self.audioManager = audioManager
-        self.audioToken = "927dff95-b82b-433c-885c-6ac9ac13d8b0"
+        self.audioToken = uuid.uuidv4()
 
         self.gpio = gpio
 

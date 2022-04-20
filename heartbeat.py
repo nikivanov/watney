@@ -7,11 +7,12 @@ from events import Events
 
 
 class Heartbeat:
-    def __init__(self, config, servoController, motorController, alsa, lightsController, powerPlant):
+    def __init__(self, config, primaryServoController, secondaryServoController, motorController, alsa, lightsController, powerPlant):
         driverConfig = config["DRIVER"]
         self.heartbeatInterval = float(driverConfig["MaxHeartbeatInvervalS"])
 
-        self.servoController = servoController
+        self.primaryServoController = primaryServoController
+        self.secondaryServoController = secondaryServoController
         self.motorController = motorController
         self.alsa = alsa
         self.ssidRegex = re.compile(r"ESSID:\"(.+?)\"")
@@ -50,7 +51,8 @@ class Heartbeat:
                 if (time.time() - self.lastHeartbeat) > self.heartbeatInterval:
                     if not self.heartbeatStop:
                         self.motorController.setBearing("0", False)
-                        await self.servoController.lookStop()
+                        await self.primaryServoController.lookStop()
+                        await self.secondaryServoController.lookStop()
                         self.heartbeatStop = True
                 else:
                     self.heartbeatStop = False

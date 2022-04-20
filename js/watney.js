@@ -4,16 +4,20 @@ var left = false;
 var right = false;
 var lookUp = false;
 var lookDown = false;
+var auxLookUp = false;
+var auxLookDown = false;
 var slow = false;
 var lights = false;
 
 var lastBearing = -1;
 var lastLook = 0;
+var lastAuxLook = 0;
 var lastSlow = false;
 
 function sendKeys() {
     var bearing = "0";
     var look = 0;
+    var auxLook = 0;
     
     if (up) {
         if (left) {
@@ -51,13 +55,22 @@ function sendKeys() {
         look = -1;
     }
 
-    if (lastBearing != bearing || lastLook != look || lastSlow != slow) {
+    if (auxLookUp) {
+        auxLook = 1;
+    } else if (auxLookDown) {
+        auxLook = -1;
+    }
+
+    if (lastBearing != bearing || lastLook != look || lastSlow != slow || lastAuxLook != auxLook) {
         lastBearing = bearing;
         lastLook = look;
         lastSlow = slow;
+        lastAuxLook = auxLook;
+
         var commandObj = {
             'bearing': bearing,
             'look': look,
+            'auxLook': auxLook,
             'slow': slow,
         };
 
@@ -69,8 +82,6 @@ function sendKeys() {
             dataType: "json"
         });
     }
-
-
 }
 
 function sendLights() {
@@ -100,6 +111,8 @@ $(document).ready(function () {
                 right = false;
                 lookUp = false;
                 lookDown = false;
+                auxLookUp = false;
+                auxLookDown = false;
                 sendKeys();
                 event.preventDefault();
                 return;
@@ -164,6 +177,13 @@ $(document).ready(function () {
                 slow = true;
                 event.preventDefault();
             }
+            else if (event.keyCode == 68) {
+                auxLookUp = true;
+                event.preventDefault();
+            } else if (event.keyCode == 67) {
+                auxLookDown = true;
+                event.preventDefault();
+            }
 
             sendKeys();
         }
@@ -202,6 +222,13 @@ $(document).ready(function () {
                 event.preventDefault();
             } else if (event.keyCode == 16) {
                 slow = false;
+                event.preventDefault();
+            }
+            else if (event.keyCode == 68) {
+                auxLookUp = false;
+                event.preventDefault();
+            } else if (event.keyCode == 67) {
+                auxLookDown = false;
                 event.preventDefault();
             }
 
