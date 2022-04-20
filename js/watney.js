@@ -178,10 +178,10 @@ $(document).ready(function () {
                 event.preventDefault();
             }
             else if (event.keyCode == 68) {
-                auxLookUp = true;
+                auxLookDown = true;
                 event.preventDefault();
             } else if (event.keyCode == 67) {
-                auxLookDown = true;
+                auxLookUp = true;
                 event.preventDefault();
             }
 
@@ -225,10 +225,10 @@ $(document).ready(function () {
                 event.preventDefault();
             }
             else if (event.keyCode == 68) {
-                auxLookUp = false;
+                auxLookDown = false;
                 event.preventDefault();
             } else if (event.keyCode == 67) {
-                auxLookDown = false;
+                auxLookUp = false;
                 event.preventDefault();
             }
 
