@@ -11,7 +11,7 @@ class ServoController:
         self.max = maximum
 
         self.audioManager = audioManager
-        self.audioToken = uuid.uuidv4()
+        self.audioToken = uuid.uuid4()
 
         self.gpio = gpio
 
