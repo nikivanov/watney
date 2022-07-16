@@ -22,7 +22,7 @@ Print every part with 0.2mm layer height. No supports are needed. The base part 
 # Assembly
 You'll be working with Lithium Ion batteries - please be careful not to puncture or short them, as they can become a fire hazard if used improperly. **You assume all responsibility for damages that may be caused by your Watney, whether it's assembled correctly or otherwise.**
 
-Click on the [Releases](https://github.com/nikivanov/watney/releases) tab and download the [latest Watney SD card image](https://github.com/nikivanov/watney/releases/tag/3.0) - it's the large .zip file found under *Assets*. Use [balenaEtcher](https://www.balena.io/etcher/) or similar to write the .img file onto the SD card.
+Click on the [Releases](https://github.com/nikivanov/watney/releases) tab and download the [latest Watney SD card image](https://github.com/nikivanov/watney/releases/latest) - it's the large .zip file found under *Assets*. Use [balenaEtcher](https://www.balena.io/etcher/) or similar to write the .img file onto the SD card.
 
 After that, follow the detailed assembly video below!
 
