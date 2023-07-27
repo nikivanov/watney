@@ -56,6 +56,10 @@ Watney is designed to work with Raspberry Pi 3A+, however other versions may be 
 * [scifiguy000](https://github.com/scifiguy000) confirmed to have successfully used a Raspberry Pi 4B in [this thread](https://github.com/nikivanov/watney/issues/27)
 * Raspberry Pi Zero 2 may work out of the box, but has not been confirmed yet
 
+# Camera Module Compatibility
+[camrichmond](https://github.com/camrichmond) discovered that the newest Raspberry Pi camera module v3 is not compatible with the current Watney image, since the camera module itself is not compatible with `raspivid`, which is how Watney gets
+its hardware-encoded h264 video stream. New Bullseye RPi images use `libcamera` instead. The fix is to simply change the command in `video.sh` as detailed [in this comment](https://github.com/nikivanov/watney/issues/34#issuecomment-1646009610)
+
 # Troubleshooting
 * Watney works best with Chrome. Other browsers may not work well, or at all.
 * Feel free to file an issue on GitHub if you have questions!
