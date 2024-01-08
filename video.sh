@@ -1,1 +1,1 @@
-raspivid -n -w 1280 -h 720 --bitrate 2500000 --framerate 25 -t 0 -ih --profile baseline --intra 25 --flush -o -| gst-launch-1.0 fdsrc do-timestamp=true ! h264parse ! rtph264pay config-interval=1 pt=96 ! udpsink host=127.0.0.1 port=8004
+libcamera-vid -n --width 1280 --height 720 --bitrate 2500000 --framerate 25 -t 0 --profile baseline --intra 25 --flush -o -| gst-launch-1.0 fdsrc do-timestamp=true ! h264parse ! rtph264pay config-interval=1 pt=96 ! udpsink host=127.0.0.1 port=8004
