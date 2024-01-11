@@ -225,9 +225,9 @@ function publishOwnFeed() {
         const device = devices.find(d => d.deviceId === deviceId);
         let constraints;
         if (device) {
-            constraints = {video: false, audio: {deviceId}};
+            constraints = {video: true, audio: {deviceId}};
         } else {
-            constraints = {video: false, audio: true};
+            constraints = {video: true, audio: true};
         }
         navigator.mediaDevices.getUserMedia(constraints)
         .then(stream => {
@@ -240,7 +240,7 @@ function publishOwnFeed() {
                 success: function(jsep) {
                     Janus.debug("Got publisher SDP!");
                     Janus.debug(jsep);
-                    var publish = { "request": "publish", "audio": true, "video": false, "data": false, "audiocodec": "opus"};
+                    var publish = { "request": "publish", "audio": true, "video": true, "data": false, "audiocodec": "opus"};
                     videoroomPluginHandle.send({"message": publish, "jsep": jsep});
                 },
                 error: function(error) {
