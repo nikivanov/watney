@@ -251,7 +251,13 @@ function publishOwnFeed() {
     navigator.mediaDevices.enumerateDevices().then(devices => {
         const device = devices.find(d => d.deviceId === deviceId);
         const videoDevice = devices.find(d => d.deviceId === videoDeviceId);
-        const constraints = { video: videoDevice || true, audio: device || true};
+        const resConstraint = {
+            width: 800,
+            height: 480,
+        };
+        const constraints = { 
+            video: videoDevice ? {deviceId: videoDeviceId, ...resConstraint} : resConstraint,
+            audio: device ? {deviceId} : true};
         
         navigator.mediaDevices.getUserMedia(constraints)
         .then(stream => {

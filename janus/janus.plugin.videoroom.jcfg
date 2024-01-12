@@ -60,7 +60,7 @@ room-1337: {
         description = "Watney room"
         #secret = "adminpwd"
         publishers = 1
-        bitrate = 128000
+        bitrate = 512000
         fir_freq = 10
         audiocodec = "opus"
         videocodec = "h264"
