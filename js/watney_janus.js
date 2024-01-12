@@ -38,8 +38,35 @@ function listDevices(devices) {
     
 }
 
+function listVideoDevices(devices) {
+    const defaultVideoDeviceId = getCookie("defaultVideoDevice");
+
+    const inputDevices = devices.filter(d => d.kind === 'videoinput');
+    const inputDeviceOptions = inputDevices.map(d => $('<option value="' + d.deviceId + '">' + (d.label || d.deviceId) + '</option>'));
+
+    $("#videoDeviceSelector").find('option').remove().end();
+    inputDeviceOptions.forEach(ido => $("#videoDeviceSelector").append(ido));
+
+    if (defaultVideoDeviceId) {
+        const defaultDevice = inputDevices.find(d => d.deviceId === defaultVideoDeviceId);
+        if(defaultDevice) {
+            $("#videoDeviceSelector").val(defaultVideoDeviceId);
+        }
+    }
+
+    $("#videoDeviceSelector").change(videoDeviceChange);
+    
+}
+
 function audioDeviceChange() {
     setCookie("defaultDevice", $('#deviceSelector').val(), 3650);
+    if (videoroomPluginHandle) {
+        unpublishOwnFeed();
+    }
+}
+
+function videoDeviceChange() {
+    setCookie("defaultVideoDevice", $('#videoDeviceSelector').val(), 3650);
     if (videoroomPluginHandle) {
         unpublishOwnFeed();
     }
@@ -220,17 +247,19 @@ function videoroom_onMessage(msg, jsep) {
 
 function publishOwnFeed() {
     const deviceId = getCookie("defaultDevice");
+    const videoDeviceId = getCookie("defaultVideoDevice");
     navigator.mediaDevices.enumerateDevices().then(devices => {
         const device = devices.find(d => d.deviceId === deviceId);
-        let constraints;
-        if (device) {
-            constraints = {video: true, audio: {deviceId}};
-        } else {
-            constraints = {video: true, audio: true};
-        }
+        const videoDevice = devices.find(d => d.deviceId === videoDeviceId);
+        const constraints = { video: videoDevice || true, audio: device || true};
+        
         navigator.mediaDevices.getUserMedia(constraints)
         .then(stream => {
-            navigator.mediaDevices.enumerateDevices().then(devices => listDevices(devices));
+            navigator.mediaDevices.enumerateDevices().then(devices => 
+                {
+                    listDevices(devices);
+                    listVideoDevices(devices);
+                });
 
             videoroomPluginHandle.createOffer({
                 stream,

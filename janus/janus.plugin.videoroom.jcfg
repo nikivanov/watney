@@ -63,7 +63,8 @@ room-1337: {
         bitrate = 128000
         fir_freq = 10
         audiocodec = "opus"
-        #videocodec = "vp8"
+        videocodec = "h264"
+        h264_profile = "42e01f"
         #transport_wide_cc_ext = true
         record = false
         #rec_dir = "/path/to/recordings-folder"
