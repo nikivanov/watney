@@ -6,7 +6,7 @@ import pigpio
 class MotorController:
     validBearings = ["n", "ne", "e", "se", "s", "sw", "w", "nw", "0"]
 
-    def __init__(self, config, gpio, audioManager):
+    def __init__(self, config, gpio, audioManager, steerController):
         driverConfig = config["DRIVER"]
         leftMotorConfig = config["LEFTMOTOR"]
         rightMotorConfig = config["RIGHTMOTOR"]
@@ -52,10 +52,13 @@ class MotorController:
         self.audioManager = audioManager
         self.audioToken = 'fe7a1846-a0bb-4a44-aa3e-5b080089d37a'
 
-    def getTargetMotorDCs(self, targetBearing, slow):
+        self.steer = steerController
+
+    def getTargetMotorDCsAndSteer(self, targetBearing, slow):
         if targetBearing == "0":
             leftDC = 0
             rightDC = 0
+            steer = 0
         elif targetBearing == "n":
             if not slow:
                 leftDC = 100 * self.straightaway
@@ -63,28 +66,29 @@ class MotorController:
             else:
                 leftDC = 100 * self.straightawaySlow
                 rightDC = 100 * self.straightawaySlow
+            steer = 0
         elif targetBearing == "ne":
+            steer = 1
             if not slow:
-                leftDC = 100
-                rightDC = 100 * self.halfTurnUndersteer
+                leftDC = 100 * self.straightaway
+                rightDC = 100 * self.straightaway
             else:
-                leftDC = 100 * self.halfTurnSlowFactor
-                rightDC = 100 * self.halfTurnUndersteer * self.halfTurnSlowFactor
+                leftDC = 100 * self.straightawaySlow
+                rightDC = 100 * self.straightawaySlow
         elif targetBearing == "e":
-            if not slow:
-                leftDC = 100 * self.tankTurnSpeed
-                rightDC = -100 * self.tankTurnSpeed
-            else:
-                leftDC = 100 * self.tankTurnSpeedSlow
-                rightDC = -100 * self.tankTurnSpeedSlow
+            steer = 1
+            leftDC = 0
+            rightDC = 0
         elif targetBearing == "se":
+            steer = 1
             if not slow:
-                leftDC = -100
-                rightDC = -100 * self.halfTurnUndersteer
+                leftDC = -100 * self.straightaway
+                rightDC = -100 * self.straightaway
             else:
-                leftDC = -100 * self.halfTurnSlowFactor
-                rightDC = -100 * self.halfTurnUndersteer * self.halfTurnSlowFactor
+                leftDC = -100 * self.straightawaySlow
+                rightDC = -100 * self.straightawaySlow
         elif targetBearing == "s":
+            steer = 0
             if not slow:
                 leftDC = -100 * self.straightaway
                 rightDC = -100 * self.straightaway
@@ -92,36 +96,35 @@ class MotorController:
                 leftDC = -100 * self.straightawaySlow
                 rightDC = -100 * self.straightawaySlow
         elif targetBearing == "sw":
+            steer = -1
             if not slow:
-                leftDC = -100 * self.halfTurnUndersteer
-                rightDC = -100  
+                leftDC = -100 * self.straightaway
+                rightDC = -100 * self.straightaway
             else:
-                leftDC = -100 * self.halfTurnUndersteer * self.halfTurnSlowFactor
-                rightDC = -100 * self.halfTurnSlowFactor
+                leftDC = -100 * self.straightawaySlow
+                rightDC = -100 * self.straightawaySlow
         elif targetBearing == "w":
-            if not slow:
-                leftDC = -100 * self.tankTurnSpeed
-                rightDC = 100 * self.tankTurnSpeed
-            else:
-                leftDC = -100 * self.tankTurnSpeedSlow
-                rightDC = 100 * self.tankTurnSpeedSlow
+            steer = -1
+            leftDC = 0
+            rightDC = 0
         elif targetBearing == "nw":
+            steer = -1
             if not slow:
-                leftDC = 100 * self.halfTurnUndersteer
-                rightDC = 100
+                leftDC = 100 * self.straightaway
+                rightDC = 100 * self.straightaway
             else:
-                leftDC = 100 * self.halfTurnUndersteer * self.halfTurnSlowFactor
-                rightDC = 100 * self.halfTurnSlowFactor
+                leftDC = 100 * self.straightawaySlow
+                rightDC = 100 * self.straightawaySlow
         else:
             raise Exception("Bad bearing: " + targetBearing)
 
-        return int(leftDC), int(rightDC)
+        return int(leftDC), int(rightDC), steer
 
     def setBearing(self, bearing, slow):
         if bearing not in self.validBearings:
             raise ValueError("Invalid bearing: {}".format(bearing))
 
-        leftDC, rightDC = self.getTargetMotorDCs(bearing, slow)
+        leftDC, rightDC, steer = self.getTargetMotorDCsAndSteer(bearing, slow)
         leftActive = self.leftMotor.setMotion(leftDC)
         rightActive = self.rightMotor.setMotion(rightDC)
         if leftActive or rightActive:
@@ -132,3 +135,10 @@ class MotorController:
             self.gpio.write(self.enablePin, pigpio.LOW)
             self.audioManager.restoreVolume(self.audioToken)
             Events.getInstance().fireMotionOff()
+
+        if steer < 0:
+            self.steer.left()
+        elif steer > 0:
+            self.steer.right()
+        else:
+            self.steer.center()

@@ -5,6 +5,7 @@ from aiohttp import web
 from motorcontroller import MotorController
 from servocontroller import ServoController
 from lightscontroller import LightsController
+from steercontroller import SteerController
 from heartbeat import Heartbeat
 from subprocess import call
 import os
@@ -23,6 +24,7 @@ routes = web.RouteTableDef()
 
 motorController = None
 servoController = None
+steerController = None
 heartbeat = None
 signalingServer = None
 alsa = None
@@ -172,12 +174,14 @@ if __name__ == "__main__":
 
     audioManager = AudioManager(config)
 
-    motorController = MotorController(config, gpio, audioManager)
+    steerController = SteerController(gpio, config)
+    motorController = MotorController(config, gpio, audioManager, steerController)
 
     alsa = Alsa(gpio, config)
 
     servoController = ServoController(gpio, config, audioManager)
     lightsController = LightsController(gpio, config)
+   
 
     tts = TTSSpeaker(config, alsa, audioManager)
 
@@ -191,6 +195,7 @@ if __name__ == "__main__":
 
     janus = ExternalProcess(videoConfig["JanusStartCommand"], False, False, "janus.log")
     videoStream = ExternalProcess(videoConfig["GStreamerStartCommand"], True, False, "video.log")
+    displayStream = ExternalProcess(videoConfig["DisplayStartCommand"], True, False, "display.log")
 
     janusEventHandler = JanusEventHandler()
 
@@ -213,6 +218,7 @@ if __name__ == "__main__":
         gpio.stop()
         janus.endProcess()
         videoStream.endProcess()
+        displayStream.endProcess()
         for runner in runners:
             loop.run_until_complete(runner.cleanup())
 

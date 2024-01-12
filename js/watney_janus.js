@@ -166,7 +166,6 @@ function attachVideoroomPlugin() {
             Janus.log("Janus " + (on ? "started" : "stopped") + " receiving our " + medium);
         },
         onremotestream: function (stream) {
-            
         },
         onlocalstream: function (stream) {
             mute();
@@ -240,7 +239,7 @@ function publishOwnFeed() {
                 success: function(jsep) {
                     Janus.debug("Got publisher SDP!");
                     Janus.debug(jsep);
-                    var publish = { "request": "publish", "audio": true, "video": true, "data": false, "audiocodec": "opus"};
+                    var publish = { "request": "publish", "audio": true, "video": true, "data": false, "audiocodec": "opus", "videocodec": "h264"};
                     videoroomPluginHandle.send({"message": publish, "jsep": jsep});
                 },
                 error: function(error) {
