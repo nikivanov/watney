@@ -347,11 +347,12 @@ function doHeartbeat() {
         $("#wifi_quality").text(data.Quality);
         $("#wifi_signal").text(data.Signal);
         $("#cpuUsage").text(data.CPU);
-        $("#batteryPercent").text(data.BatteryPercent);
-        if (data.BatteryCharging) {
-            $("#batteryCharging").show();
+        $("#batteryStatus").text(data.Battery);
+        
+        if (data.Charging) {
+            $("#batteryCharging").text(`(${data.Charging})`);
         } else {
-            $("#batteryCharging").hide();
+            $("#batteryCharging").text('');
         }
 
         if (doInitialSet) {

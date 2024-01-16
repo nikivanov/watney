@@ -1,34 +1,27 @@
-import smbus
-DEVICE_BUS = 1
-DEVICE_ADDR = 0x17
+import pigpio
 
 class PowerPlant:
-    def __init__(self, config):
-        # self.bus = smbus.SMBus(DEVICE_BUS)
-        # powerplantConfig = config["POWERPLANT"]
-        # cutoffVoltage = int(powerplantConfig['CutoffVoltage'])
-        # self.bus.write_byte_data(DEVICE_ADDR, 17, cutoffVoltage & 0xFF)
-        # self.bus.write_byte_data(DEVICE_ADDR, 18, (cutoffVoltage >> 8)& 0xFF)
-        # print('Set powerplant cutoff voltage to {} mv'.format(cutoffVoltage))
-        # self.lastIsError = False
-        pass
-        
+    def __init__(self, config, gpio):
+        self.gpio = gpio
+        powerplantConfig = config["POWERPLANT"]
+        self.inputPinVal = int(powerplantConfig["InputPin"])
+        self.chargingPinVal = int(powerplantConfig["ChargingPin"])
+        self.lowBatteryPinVal = int(powerplantConfig["LowBatteryPin"])
+
+        self.gpio.set_mode(self.inputPinVal, pigpio.INPUT)
+        self.gpio.set_pull_up_down(self.inputPinVal, pigpio.PUD_DOWN)
+
+        self.gpio.set_mode(self.chargingPinVal, pigpio.INPUT)
+        self.gpio.set_pull_up_down(self.chargingPinVal, pigpio.PUD_DOWN)
+
+        self.gpio.set_mode(self.lowBatteryPinVal, pigpio.INPUT)
+        self.gpio.set_pull_up_down(self.lowBatteryPinVal, pigpio.PUD_DOWN)
 
     def getBatteryInfo(self):
-        return [95, False]
-        # try:
-        #     aReceiveBuf = []
-        #     aReceiveBuf.append(0x00)   # Placeholder
-        #     for i in range(1,255):
-        #         aReceiveBuf.append(self.bus.read_byte_data(DEVICE_ADDR, i))
-        #     percentage = aReceiveBuf[20] << 8 | aReceiveBuf[19]
-        #     charging = (aReceiveBuf[10] << 8 | aReceiveBuf[9]) > 4000
-        #     if self.lastIsError:
-        #         print('Powerplant communication restored')
-        #         self.lastIsError = False
-        #     return [percentage, charging]
-        # except Exception as e:
-        #     if not self.lastIsError:
-        #         print('Error obtaining powerplant info: ' + str(e))
-        #         self.lastIsError = True
-        #     return [0, False]
+        hasInput = self.gpio.read(self.inputPinVal) == 1
+        charging = self.gpio.read(self.chargingPinVal) == 1
+        lowBattery = self.gpio.read(self.lowBatteryPinVal) == 1
+
+        batteryStr = "OK" if not lowBattery else "Low"
+        chargingString = "Charging" if hasInput and charging else "Charged" if hasInput and not charging else ""
+        return [batteryStr, chargingString]

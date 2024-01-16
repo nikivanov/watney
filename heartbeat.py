@@ -56,11 +56,11 @@ class Heartbeat:
                     self.heartbeatStop = False
 
                 newHeartbeatData = await self.collectHeartbeatData()
-                if newHeartbeatData["BatteryCharging"] != self.lastHeartbeatData["BatteryCharging"]:
-                    if newHeartbeatData["BatteryCharging"]:
-                        Events.getInstance().fireOnCharger()
-                    else:
-                        Events.getInstance().fireOffCharger()
+                # if newHeartbeatData["BatteryCharging"] != self.lastHeartbeatData["BatteryCharging"]:
+                #     if newHeartbeatData["BatteryCharging"]:
+                #         Events.getInstance().fireOnCharger()
+                #     else:
+                #         Events.getInstance().fireOffCharger()
 
                 self.lastHeartbeatData = newHeartbeatData
                 await asyncio.sleep(0.5)
@@ -101,8 +101,8 @@ class Heartbeat:
                 "Volume": volume,
                 "CPU": cpuIdle,
                 "Lights": self.lightsController.lightsStatus,
-                "BatteryPercent": batteryInfo[0],
-                "BatteryCharging": batteryInfo[1],
+                "Battery": batteryInfo[0],
+                "Charging": batteryInfo[1],
             }
         except Exception as ex:
             print(str(ex), file=sys.stderr)
