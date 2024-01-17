@@ -38,8 +38,8 @@ class Heartbeat:
             "Volume": 0,
             "CPU": "-",
             "Lights": False,
-            "BatteryPercent": 0,
-            "BatteryCharging": False,
+            "Battery": "OK",
+            "Charging": False,
             "InvalidState": True,
         }
 
@@ -56,12 +56,15 @@ class Heartbeat:
                     self.heartbeatStop = False
 
                 newHeartbeatData = await self.collectHeartbeatData()
-                # if newHeartbeatData["BatteryCharging"] != self.lastHeartbeatData["BatteryCharging"]:
-                #     if newHeartbeatData["BatteryCharging"]:
-                #         Events.getInstance().fireOnCharger()
-                #     else:
-                #         Events.getInstance().fireOffCharger()
 
+                newCharging = newHeartbeatData["Charging"]
+                lastCharging = self.lastHeartbeatData["Charging"]
+
+                if not lastCharging and newCharging:
+                    Events.getInstance().fireOnCharger()
+                elif lastCharging and not newCharging:
+                    Events.getInstance().fireOffCharger()
+                
                 self.lastHeartbeatData = newHeartbeatData
                 await asyncio.sleep(0.5)
         except asyncio.CancelledError:
